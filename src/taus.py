@@ -8,11 +8,17 @@ from commands.show import show
 from commands.train import train_module
 from commands.detect import detect
 from commands.proliferate import proliferate
-
-from settings import DATA_FILE
+from commands.config import config
 
 if __name__ == '__main__':
   command = sys.argv[1]
+
+  if command == 'config':
+    config(sys.argv[2], sys.argv[3])
+    exit()
+
+
+  from settings import DATA_FILE
   dataset = EventsDataset(datafile_path(DATA_FILE))
 
   if command == 'show':
