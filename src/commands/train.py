@@ -23,13 +23,9 @@ def train_module(dataset, model, output_folder, options={}):
   optimizer = Adam(model.parameters(), lr=0.001, weight_decay=0.0001)
   criterion = nn.MSELoss()
 
-  if torch.cuda.is_available():
+  use_cuda = torch.cuda.is_available()
+  if use_cuda:
     model = model.cuda()
-    train_loader.to(torch.device('cuda'))
-    validation_loader.to(torch.device('cuda'))
-    test_loader.to(torch.device('cuda'))
-    optimizer.to(torch.device('cuda'))
-    criterion.to(torch.device('cuda'))
     print(f'using device {torch.cuda.get_device_name(0)}')
   else:
     print('using device cpu')
@@ -43,8 +39,8 @@ def train_module(dataset, model, output_folder, options={}):
   epoch_start_times = []
   for epoch in range(EPOCHS):
     epoch_start_times.append(time.time())
-    training_loss = train(train_loader, model, criterion, optimizer, epoch)
-    validation_loss = validate(validation_loader, model, criterion, epoch)
+    training_loss = train(train_loader, model, criterion, optimizer, epoch, use_cuda)
+    validation_loss = validate(validation_loader, model, criterion, epoch, use_cuda)
     if validation_loss < best_validation_loss:
       best_validation_loss = validation_loss
       best_model = model.state_dict()
@@ -60,7 +56,7 @@ def train_module(dataset, model, output_folder, options={}):
   test_start_time = time.time()
   if len(test_loader) > 0:
     print('2. Testing')
-    test(test_loader, model, criterion, output_folder)
+    test(test_loader, model, criterion, output_folder, use_cuda)
   else:
     print(' -- skipping testing')
 
@@ -93,13 +89,16 @@ def init_dataloaders (dataset):
   return train_loader, validation_loader, test_loader
 
 # train the model
-def train(train_loader, model, criterion, optimizer, epoch):
+def train(train_loader, model, criterion, optimizer, epoch, use_cuda):
   model.train()
   
   def run (next):
     total_loss = 0
     for batch_idx, (inputs, target) in enumerate(train_loader):
       optimizer.zero_grad()
+      if use_cuda:
+        inputs = inputs.to('cuda')
+        target = target.to('cuda')
       output = model(*inputs)
       loss = criterion(output, target)
       loss.backward()
@@ -112,13 +111,16 @@ def train(train_loader, model, criterion, optimizer, epoch):
   return total_loss / len(train_loader)
 
 # validate the model
-def validate(val_loader, model, criterion, epoch):
+def validate(val_loader, model, criterion, epoch, use_cuda):
   model.eval()
 
   with torch.no_grad():
     def run (next):
       total_loss = 0
       for batch_idx, (inputs, target) in enumerate(val_loader):
+        if use_cuda:
+          inputs = inputs.to('cuda')
+          target = target.to('cuda')
         output = model(*inputs)
         loss = criterion(output, target)
         next(BATCH_SIZE)
@@ -129,7 +131,7 @@ def validate(val_loader, model, criterion, epoch):
   return total_loss / len(val_loader)
 
 # test the model
-def test(test_loader, model, criterion, output_folder):
+def test(test_loader, model, criterion, output_folder, use_cuda):
   model.eval()
   outputs, targets = [], []
   random_indeces = np.random.choice(len(test_loader.dataset), int(TEST_ARROWS_PERCENTAGE * len(test_loader.dataset)), replace=False)
@@ -138,6 +140,9 @@ def test(test_loader, model, criterion, output_folder):
     def run (next):
       total_loss = 0
       for batch_idx, (inputs, target) in enumerate(test_loader):
+        if use_cuda:
+          inputs = inputs.to('cuda')
+          target = target.to('cuda')
         output = model(*inputs)
         loss = criterion(output, target)
         next(BATCH_SIZE)
