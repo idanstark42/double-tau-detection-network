@@ -94,13 +94,9 @@ def train(train_loader, model, criterion, optimizer, epoch, use_cuda):
   
   def run (next):
     total_loss = 0
-    for batch_idx, (inputs, target) in enumerate(train_loader):
+    for batch_idx, (input, target) in enumerate(train_loader):
       optimizer.zero_grad()
-      if use_cuda:
-        inputs = inputs.to('cuda')
-        target = target.to('cuda')
-      output = model(*inputs)
-      loss = criterion(output, target)
+      output, loss = calc(model, input, target, criterion, use_cuda)
       loss.backward()
       optimizer.step()
       next(BATCH_SIZE)
@@ -117,12 +113,8 @@ def validate(val_loader, model, criterion, epoch, use_cuda):
   with torch.no_grad():
     def run (next):
       total_loss = 0
-      for batch_idx, (inputs, target) in enumerate(val_loader):
-        if use_cuda:
-          inputs = inputs.to('cuda')
-          target = target.to('cuda')
-        output = model(*inputs)
-        loss = criterion(output, target)
+      for batch_idx, (input, target) in enumerate(val_loader):
+        output, loss = calc(model, input, target, criterion, use_cuda)
         next(BATCH_SIZE)
         total_loss += loss.item()
       return total_loss
@@ -139,12 +131,8 @@ def test(test_loader, model, criterion, output_folder, use_cuda):
   with torch.no_grad():
     def run (next):
       total_loss = 0
-      for batch_idx, (inputs, target) in enumerate(test_loader):
-        if use_cuda:
-          inputs = inputs.to('cuda')
-          target = target.to('cuda')
-        output = model(*inputs)
-        loss = criterion(output, target)
+      for batch_idx, (input, target) in enumerate(test_loader):
+        output, loss = calc(model, input, target, criterion, use_cuda)
         next(BATCH_SIZE)
         for index, (output, target) in enumerate(zip(output, target)):
           if batch_idx * BATCH_SIZE + index in random_indeces:
@@ -156,3 +144,12 @@ def test(test_loader, model, criterion, output_folder, use_cuda):
     total_loss = long_operation(run, max=len(test_loader) * BATCH_SIZE, message='Testing ')
   print(f'\nTest set average loss: {total_loss / len(test_loader):.4f}\n')
   ModelVisualizer(model).plot_results(outputs, targets, output_folder + '\\testing.png')
+
+
+def calc (model, input, target, criterion, use_cuda):
+  if use_cuda:
+    input = [i.to('cuda') for i in input]
+    target = [t.to('cuda') for t in target]
+  output = model(*input)
+  loss = criterion(output, target)
+  return output, loss
