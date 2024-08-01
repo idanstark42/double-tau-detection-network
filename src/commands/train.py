@@ -5,6 +5,7 @@ import torch.nn as nn
 from torch.utils.data import DataLoader
 from torch.optim import Adam
 from torch.utils.data import random_split
+from torch.utils.data.dataloader import default_collate
 import numpy as np
 
 from utils import long_operation, seconds_to_time
@@ -13,8 +14,6 @@ from settings import EPOCHS, BATCH_SIZE, TRAINING_PERCENTAGE, VALIDATION_PERCENT
 
 def train_module(dataset, model, output_folder, options={}):
   start_time = time.time()
-  train_loader, validation_loader, test_loader = init_dataloaders(dataset)
-  print(f'training over {len(train_loader.dataset)} samples, validating over {len(validation_loader.dataset)} samples, testing over {len(test_loader.dataset)} samples')
 
   if options.get('cache') == 'false':
     dataset.use_cache = False
@@ -30,6 +29,10 @@ def train_module(dataset, model, output_folder, options={}):
   else:
     print('using device cpu')
 
+  device = torch.device('cuda' if use_cuda else 'cpu')
+  train_loader, validation_loader, test_loader = init_dataloaders(dataset, device)
+  print(f'training over {len(train_loader.dataset)} samples, validating over {len(validation_loader.dataset)} samples, testing over {len(test_loader.dataset)} samples')
+
   # Train the model
   print()
   print('1. Training')
@@ -39,8 +42,8 @@ def train_module(dataset, model, output_folder, options={}):
   epoch_start_times = []
   for epoch in range(EPOCHS):
     epoch_start_times.append(time.time())
-    training_loss = train(train_loader, model, criterion, optimizer, epoch, use_cuda)
-    validation_loss = validate(validation_loader, model, criterion, epoch, use_cuda)
+    training_loss = train(train_loader, model, criterion, optimizer, epoch)
+    validation_loss = validate(validation_loader, model, criterion, epoch)
     if validation_loss < best_validation_loss:
       best_validation_loss = validation_loss
       best_model = model.state_dict()
@@ -56,7 +59,7 @@ def train_module(dataset, model, output_folder, options={}):
   test_start_time = time.time()
   if len(test_loader) > 0:
     print('2. Testing')
-    test(test_loader, model, criterion, output_folder, use_cuda)
+    test(test_loader, model, criterion, output_folder)
   else:
     print(' -- skipping testing')
 
@@ -75,28 +78,28 @@ def train_module(dataset, model, output_folder, options={}):
   # Plot the losses as a function of epoch
   ModelVisualizer(model).show_losses(losses, output_folder + '\\losses.png')
 
-def init_dataloaders (dataset):
+def init_dataloaders (dataset, device):
   train_size = int(len(dataset) * TRAINING_PERCENTAGE)
   validation_size = int(len(dataset) * VALIDATION_PERCENTAGE)
   test_size = len(dataset) - train_size - validation_size
 
   train_dataset, validation_dataset, test_dataset = random_split(dataset, [train_size, validation_size, test_size])
   
-  train_loader = DataLoader(train_dataset, batch_size=BATCH_SIZE, shuffle=True)
+  train_loader = DataLoader(train_dataset, batch_size=BATCH_SIZE, shuffle=True, collate_fn=lambda x: tuple(x_.to(device) for x_ in default_collate(x)))
   validation_loader = DataLoader(validation_dataset, batch_size=BATCH_SIZE, shuffle=True)
   test_loader = DataLoader(test_dataset, batch_size=BATCH_SIZE, shuffle=False)
   
   return train_loader, validation_loader, test_loader
 
 # train the model
-def train(train_loader, model, criterion, optimizer, epoch, use_cuda):
+def train(train_loader, model, criterion, optimizer, epoch):
   model.train()
   
   def run (next):
     total_loss = 0
     for batch_idx, (input, target) in enumerate(train_loader):
       optimizer.zero_grad()
-      output, loss = calc(model, input, target, criterion, use_cuda)
+      output, loss = calc(model, input, target, criterion)
       loss.backward()
       optimizer.step()
       next(BATCH_SIZE)
@@ -107,14 +110,14 @@ def train(train_loader, model, criterion, optimizer, epoch, use_cuda):
   return total_loss / len(train_loader)
 
 # validate the model
-def validate(val_loader, model, criterion, epoch, use_cuda):
+def validate(val_loader, model, criterion, epoch):
   model.eval()
 
   with torch.no_grad():
     def run (next):
       total_loss = 0
       for batch_idx, (input, target) in enumerate(val_loader):
-        output, loss = calc(model, input, target, criterion, use_cuda)
+        output, loss = calc(model, input, target, criterion)
         next(BATCH_SIZE)
         total_loss += loss.item()
       return total_loss
@@ -123,7 +126,7 @@ def validate(val_loader, model, criterion, epoch, use_cuda):
   return total_loss / len(val_loader)
 
 # test the model
-def test(test_loader, model, criterion, output_folder, use_cuda):
+def test(test_loader, model, criterion, output_folder):
   model.eval()
   outputs, targets = [], []
   random_indeces = np.random.choice(len(test_loader.dataset), int(TEST_ARROWS_PERCENTAGE * len(test_loader.dataset)), replace=False)
@@ -132,7 +135,7 @@ def test(test_loader, model, criterion, output_folder, use_cuda):
     def run (next):
       total_loss = 0
       for batch_idx, (input, target) in enumerate(test_loader):
-        output, loss = calc(model, input, target, criterion, use_cuda)
+        output, loss = calc(model, input, target, criterion)
         next(BATCH_SIZE)
         for index, (output, target) in enumerate(zip(output, target)):
           if batch_idx * BATCH_SIZE + index in random_indeces:
@@ -146,10 +149,7 @@ def test(test_loader, model, criterion, output_folder, use_cuda):
   ModelVisualizer(model).plot_results(outputs, targets, output_folder + '\\testing.png')
 
 
-def calc (model, input, target, criterion, use_cuda):
-  if use_cuda:
-    input = torch.tensor(input, dtype=torch.float32).to('cuda')
-    target = torch.tensor(target, dtype=torch.float32).to('cuda')
+def calc (model, input, target, criterion):
   output = model(*input)
   loss = criterion(output, target)
   return output, loss
