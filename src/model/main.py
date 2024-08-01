@@ -23,6 +23,7 @@ class MainModel (nn.Module):
       conv_block(16, 32, kernel_size=3, padding=1),
       nn.AvgPool2d(2),
       conv_block(32, 32, kernel_size=3, padding=1),
+      conv_block(32, 32, kernel_size=3, padding=1),
       nn.AvgPool2d(5),
       conv_block(32, 16, kernel_size=3, padding=1),
     ])

@@ -148,8 +148,8 @@ def test(test_loader, model, criterion, output_folder, use_cuda):
 
 def calc (model, input, target, criterion, use_cuda):
   if use_cuda:
-    input = [i.to('cuda') for i in input]
-    target = [t.to('cuda') for t in target]
+    input = torch.tensor(input, dtype=torch.float32).to('cuda')
+    target = torch.tensor(target, dtype=torch.float32).to('cuda')
   output = model(*input)
   loss = criterion(output, target)
   return output, loss
