@@ -150,6 +150,6 @@ def test(test_loader, model, criterion, output_folder):
 
 
 def calc (model, input, target, criterion):
-  output = model(*input)
+  output = model(input)
   loss = criterion(output, target)
   return output, loss
