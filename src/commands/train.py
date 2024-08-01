@@ -86,8 +86,8 @@ def init_dataloaders (dataset, device):
   train_dataset, validation_dataset, test_dataset = random_split(dataset, [train_size, validation_size, test_size])
   
   train_loader = DataLoader(train_dataset, batch_size=BATCH_SIZE, shuffle=True, collate_fn=lambda x: tuple(x_.to(device) for x_ in default_collate(x)))
-  validation_loader = DataLoader(validation_dataset, batch_size=BATCH_SIZE, shuffle=True, collate_fn=lambda x: tuple(x_.to(device) for x_ in default_collate(x))))
-  test_loader = DataLoader(test_dataset, batch_size=BATCH_SIZE, shuffle=False, collate_fn=lambda x: tuple(x_.to(device) for x_ in default_collate(x))))
+  validation_loader = DataLoader(validation_dataset, batch_size=BATCH_SIZE, shuffle=True, collate_fn=lambda x: tuple(x_.to(device) for x_ in default_collate(x)))
+  test_loader = DataLoader(test_dataset, batch_size=BATCH_SIZE, shuffle=False, collate_fn=lambda x: tuple(x_.to(device) for x_ in default_collate(x)))
   
   return train_loader, validation_loader, test_loader
 
