@@ -1,6 +1,7 @@
 import h5py
 from progress.bar import IncrementalBar
 from torch.utils.data import Dataset
+import torch
 import numpy as np
 
 from data.event import Event
@@ -57,6 +58,10 @@ class EventsDataset (Dataset):
     if np.all(target == 0):
       raise ValueError('No tau in the event #{}'.format(index))
 
+    # turn inputs and target into torch tensors
+    inputs = torch.tensor(inputs, dtype=torch.float32)
+    target = torch.tensor(target, dtype=torch.float32)
+    
     return inputs, target
 
   def __len__(self):
