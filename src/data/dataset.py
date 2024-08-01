@@ -48,7 +48,7 @@ class EventsDataset (Dataset):
 
     clusters_map = event.clusters_map(RESOLUTION, cluster_channel_providers)
     tracks_map = event.tracks_map(RESOLUTION, track_channel_providers)
-    inputs = (np.concatenate([clusters_map, tracks_map], axis=0),)
+    input = np.concatenate([clusters_map, tracks_map], axis=0)
     target = np.array([position.to_list() for position in event.true_position()], dtype=np.float32).flatten()[:4]
     
     if len(target) < 4:
@@ -59,10 +59,10 @@ class EventsDataset (Dataset):
       raise ValueError('No tau in the event #{}'.format(index))
       
     # turn inputs and target into torch tensors
-    inputs = torch.tensor(inputs, dtype=torch.float32)
+    input = torch.tensor(input, dtype=torch.float32)
     target = torch.tensor(target, dtype=torch.float32)
     
-    return inputs, target
+    return input, target
 
   def __len__(self):
     return len(self.raw_data['event'])
