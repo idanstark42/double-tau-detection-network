@@ -59,8 +59,8 @@ class EventsDataset (Dataset):
       raise ValueError('No tau in the event #{}'.format(index))
       
     # turn inputs and target into torch tensors
-    inputs = torch.tensor(np.ndarray(inputs, dtype=torch.float32), dtype=torch.float32)
-    target = torch.tensor(np.ndarray(target, dtype=torch.float32), dtype=torch.float32)
+    inputs = torch.tensor(inputs, dtype=torch.float32)
+    target = torch.tensor(target, dtype=torch.float32)
     
     return inputs, target
 
