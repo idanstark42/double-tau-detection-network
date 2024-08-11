@@ -59,7 +59,7 @@ def train_module(dataset, model, output_folder, options={}):
   test_start_time = time.time()
   if len(test_loader) > 0:
     print('2. Testing')
-    test(test_loader, model, criterion, output_folder)
+    test(test_loader, model, criterion, output_folder, use_cuda)
   else:
     print(' -- skipping testing')
 
