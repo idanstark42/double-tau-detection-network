@@ -19,6 +19,8 @@ class ModelVisualizer:
     # draw two plots side by side
     fig, axs = plt.subplots(1, 2, figsize=(10, 5))
     self.arrows_on_eta_phi_plot(outputs, targets, axs[0], color='blue')
+    print('outputs using cuda:', outputs.is_cuda)
+    print('targets using cuda:', targets.is_cuda)
     self.distances_histogram(outputs, targets, axs[1])
     plt.savefig(output_file)
     plt.show()
@@ -30,7 +32,7 @@ class ModelVisualizer:
       ax.arrow(x, y, dx, dy, head_width=0.1, head_length=0.1, fc=color, ec=color, **kwargs)
 
     for start, end in zip(starts, ends):
-      arrow_with_color(start[1], start[0], end[1]-start[1], end[0]-start[0], **kwargs)
+      arrow_with_color(start[1], start[0], end[1]-start[1], end[0] - start[0], **kwargs)
 
     ax.set_xlabel('phi')
     ax.set_ylabel('eta')
