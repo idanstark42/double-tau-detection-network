@@ -126,7 +126,7 @@ def validate(val_loader, model, criterion, epoch):
   return total_loss / len(val_loader)
 
 # test the model
-def test(test_loader, model, criterion, output_folder):
+def test(test_loader, model, criterion, output_folder, use_cuda=False):
   model.eval()
   outputs, targets = [], []
   random_indeces = np.random.choice(len(test_loader.dataset), int(TEST_ARROWS_PERCENTAGE * len(test_loader.dataset)), replace=False)
@@ -143,11 +143,13 @@ def test(test_loader, model, criterion, output_folder):
             targets.append(target)
         total_loss += loss.item()
       return total_loss
-    
     total_loss = long_operation(run, max=len(test_loader) * BATCH_SIZE, message='Testing ')
   print(f'\nTest set average loss: {total_loss / len(test_loader):.4f}\n')
-  ModelVisualizer(model).plot_results(outputs, targets, output_folder + '\\testing.png')
 
+  if use_cuda:
+    outputs = [output.cpu() for output in outputs]
+    targets = [target.cpu() for target in targets]  
+  ModelVisualizer(model).plot_results(outputs, targets, output_folder + '\\testing.png')
 
 def calc (model, input, target, criterion):
   output = model(input)
