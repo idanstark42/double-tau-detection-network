@@ -19,8 +19,8 @@ class ModelVisualizer:
     # draw two plots side by side
     fig, axs = plt.subplots(1, 2, figsize=(10, 5))
     self.arrows_on_eta_phi_plot(outputs, targets, axs[0], color='blue')
-    print('outputs using cuda:', outputs.is_cuda)
-    print('targets using cuda:', targets.is_cuda)
+    print('outputs using cuda:', outputs[0].is_cuda)
+    print('targets using cuda:', targets[0].is_cuda)
     self.distances_histogram(outputs, targets, axs[1])
     plt.savefig(output_file)
     plt.show()
