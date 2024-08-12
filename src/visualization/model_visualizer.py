@@ -16,11 +16,12 @@ class ModelVisualizer:
     plt.show()
 
   def plot_results (self, outputs, targets, output_file):
+    print(f'Number of outputs that are all zeros: {np.sum(np.all(outputs == 0, axis=1))}')
+    print(f'Number of targets that are all zeros: {np.sum(np.all(targets == 0, axis=1))}')
+    
     # draw two plots side by side
     fig, axs = plt.subplots(1, 2, figsize=(10, 5))
     self.arrows_on_eta_phi_plot(outputs, targets, axs[0], color='blue')
-    print('outputs using cuda:', outputs[0].is_cuda)
-    print('targets using cuda:', targets[0].is_cuda)
     self.distances_histogram(outputs, targets, axs[1])
     plt.savefig(output_file)
     plt.show()
