@@ -16,8 +16,8 @@ class ModelVisualizer:
     plt.show()
 
   def plot_results (self, outputs, targets, output_file):
-    print(f'Number of outputs that are all zeros: {np.sum(np.all(outputs == 0, axis=1))}')
-    print(f'Number of targets that are all zeros: {np.sum(np.all(targets == 0, axis=1))}')
+    print(f'Number of outputs that are all zeros: {len([1 for output in outputs if output[0] == 0 and output[1] == 0])}')
+    print(f'Number of targets that are all zeros: {len([1 for target in targets if target[0] == 0 and target[1] == 0])}')
     
     # draw two plots side by side
     fig, axs = plt.subplots(1, 2, figsize=(10, 5))
