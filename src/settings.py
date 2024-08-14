@@ -18,7 +18,7 @@ DATASET_FIELDS = ['event', 'clusters', 'tracks', 'truthTaus']
 DATA_FILE = 'ggXtautau_mX20_run3year1_x10'
 
 # TRAINING
-EPOCHS = 50
+EPOCHS = 100
 BATCH_SIZE = 256
 
 TRAINING_PERCENTAGE = 0.7
