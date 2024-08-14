@@ -144,4 +144,5 @@ class Event:
     return self.calculate_and_cache('true_momentum_map', calculate)
   
   def true_four_momentum (self):
-    return self.calculate_and_cache('true_four_momentum', lambda: [truth.visible_four_momentum() for truth in self.truths])
+    return self.calculate_and_cache('true_four_momentum', lambda: [truth.visible_momentum() for truth in self.truths])
+    

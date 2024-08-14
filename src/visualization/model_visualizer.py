@@ -15,14 +15,12 @@ class ModelVisualizer:
     plt.savefig(output_file)
     plt.show()
 
-  def plot_results (self, outputs, targets, output_file):
-    print(f'Number of outputs that are all zeros: {len([1 for output in outputs if output[0] == 0 and output[1] == 0])}')
-    print(f'Number of targets that are all zeros: {len([1 for target in targets if target[0] == 0 and target[1] == 0])}')
-    
+  def plot_results (self, outputs, targets, events, output_file):
     # draw two plots side by side
-    fig, axs = plt.subplots(1, 2, figsize=(10, 5))
+    fig, axs = plt.subplots(1, 3, figsize=(15, 5))
     self.arrows_on_eta_phi_plot(outputs, targets, axs[0], color='blue')
     self.distances_histogram(outputs, targets, axs[1])
+    self.distances_by_pt_plot(outputs, targets, events, axs[2])
     plt.savefig(output_file)
     plt.show()
 
@@ -51,3 +49,20 @@ class ModelVisualizer:
     ax.hist(distances, bins=100)
     ax.set_xlabel('distance')
     ax.set_ylabel('count')
+
+  def distances_by_pt_plot (self, starts, ends, events, ax):
+    def distance (start, end):
+      if np.sign(end[1]) != np.sign(start[1]):
+        return np.linalg.norm([start[0] - end[0], 2 * np.pi - abs(start[1] - end[1])])
+      else:
+        return np.linalg.norm([start[0] - end[0], start[1] - end[1]])
+
+    def pt (event):
+      # sum of event.true_four_momentum().pt for all taus in the event
+      return sum([momentum.p_t for momentum in event.true_four_momentum()])
+
+    distances = [distance(start, end) for start, end in zip(starts, ends)]
+    pts = [pt(event) for event in events]
+    ax.scatter(pts, distances)
+    ax.set_xlabel('pt')
+    ax.set_ylabel('distance')
