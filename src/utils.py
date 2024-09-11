@@ -39,8 +39,12 @@ def long_operation (operation, **kwargs):
     else:
       bar.suffix = f'{bar.index}/{bar.max} [{percentage * 100:.1f}%%]'
   result = operation(next)
+  bar.suffix = f'{bar.max}/{bar.max} [100.0%%] done.'
   bar.finish()
   return result
+
+def transform_into_range (x, range):
+  return x if range[0] == range[1] else range[0] + (x - range[0]) % (range[1] - range[0])
 
 def seconds_to_time (seconds):
   hours, minutes, seconds = int(seconds // 3600), int(seconds // 60) % 60, int(seconds) % 60

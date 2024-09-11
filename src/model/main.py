@@ -5,10 +5,11 @@ from model.cylinrical_conv import CylindricalConv2d
 from settings import RESOLUTION
 
 class MainModel (nn.Module):
-  def __init__(self, input_channels=10, dropout_probability=0.15):
+  def __init__(self, input_channels=10, dropout_probability=0.15, post_processing=False):
     super(MainModel, self).__init__()
     self.dropout_probability = dropout_probability
     self.input_channels = input_channels
+    self.post_processing = post_processing
 
     def conv_block(input_channels, output_channels, kernel_size, padding):
       return nn.Sequential(
@@ -50,5 +51,13 @@ class MainModel (nn.Module):
     
     for layer in self.linear_layers:
       x = layer(x)
+
+    if self.post_processing != False:
+      # if the tensor has more then one dimensions, it is a batch of tensors, iterate over the batch
+      if len(x.size()) > 1:
+        for i in range(x.size()[0]):
+          x[i] = self.post_processing(x[i])
+      else:
+        x = self.post_processing(x)
     
     return x

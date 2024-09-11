@@ -3,6 +3,7 @@ from math import pi
 # math
 ETA_RANGE = (-2.5, 2.5)
 PHI_RANGE = (-pi, pi)
+JET_SIZE = 0.2
 
 # Visualization
 MAP_2D_TICKS = 5

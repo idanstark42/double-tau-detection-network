@@ -6,7 +6,7 @@ import numpy as np
 
 from data.event import Event
 from utils import *
-from settings import RESOLUTION, DATASET_FIELDS
+from settings import RESOLUTION, DATASET_FIELDS, ETA_RANGE, PHI_RANGE
 
 class EventsDataset (Dataset):
   def __init__(self, source_file):
@@ -66,6 +66,9 @@ class EventsDataset (Dataset):
 
   def __len__(self):
     return len(self.raw_data['event'])
+  
+  def post_processing(self, x):
+    return torch.tensor([transform_into_range(x, ETA_RANGE if i % 2 == 0 else PHI_RANGE) for i, x in enumerate(x)], dtype=torch.float32)
   
   # io operations
 

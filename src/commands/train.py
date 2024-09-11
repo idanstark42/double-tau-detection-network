@@ -84,7 +84,7 @@ def init_dataloaders (dataset, device):
   test_size = len(dataset) - train_size - validation_size
 
   train_dataset, validation_dataset, test_dataset = random_split(dataset, [train_size, validation_size, test_size])
-  
+
   train_loader = DataLoader(train_dataset, batch_size=BATCH_SIZE, shuffle=True, collate_fn=lambda x: tuple(x_.to(device) for x_ in default_collate(x)))
   validation_loader = DataLoader(validation_dataset, batch_size=BATCH_SIZE, shuffle=True, collate_fn=lambda x: tuple(x_.to(device) for x_ in default_collate(x)))
   test_loader = DataLoader(test_dataset, batch_size=BATCH_SIZE, shuffle=False, collate_fn=lambda x: tuple(x_.to(device) for x_ in default_collate(x)))
@@ -146,7 +146,7 @@ def test(test_loader, model, criterion, output_folder, dataset, use_cuda=False):
     total_loss = long_operation(run, max=len(test_loader) * BATCH_SIZE, message='Testing ')
   print(f'\nTest set average loss: {total_loss / len(test_loader):.4f}\n')
 
-  events = [dataset.get_event(index) for index in random_indeces]
+  events = [dataset.get_event(test_loader.dataset.indices[index]) for index in random_indeces]
   if use_cuda:
     outputs = [output.cpu() for output in outputs]
     targets = [target.cpu() for target in targets]  

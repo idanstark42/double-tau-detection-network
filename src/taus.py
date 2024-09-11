@@ -27,7 +27,7 @@ if __name__ == '__main__':
     show(dataset, scope, params)
     exit()
 
-  module = MainModel()
+  module = MainModel(post_processing=dataset.post_processing)
 
   if command == 'train':
     output = modelfolder_path(sys.argv[2]) if len(sys.argv) > 2 else modelfolder_path('model_' + str(round(time.time() * 1000)))
