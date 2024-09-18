@@ -68,7 +68,9 @@ class EventsDataset (Dataset):
     return len(self.raw_data['event'])
   
   def post_processing(self, x):
-    return torch.tensor([transform_into_range(x, ETA_RANGE if i % 2 == 0 else PHI_RANGE) for i, x in enumerate(x)], dtype=torch.float32)
+    x[0::2] = transform_into_range(x[..., 0::2], ETA_RANGE)
+    x[1::2] = transform_into_range(x[..., 1::2], PHI_RANGE)
+    return x
   
   # io operations
 

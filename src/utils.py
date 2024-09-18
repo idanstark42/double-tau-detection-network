@@ -44,7 +44,7 @@ def long_operation (operation, **kwargs):
   return result
 
 def transform_into_range (x, range):
-  return x if range[0] == range[1] else range[0] + (x - range[0]) % (range[1] - range[0])
+  return range[0] + (x - range[0]) % (range[1] - range[0])
 
 def seconds_to_time (seconds):
   hours, minutes, seconds = int(seconds // 3600), int(seconds // 60) % 60, int(seconds) % 60

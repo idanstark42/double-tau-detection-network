@@ -149,7 +149,7 @@ def test(test_loader, model, criterion, output_folder, dataset, use_cuda=False):
   events = [dataset.get_event(test_loader.dataset.indices[index]) for index in random_indeces]
   if use_cuda:
     outputs = [output.cpu() for output in outputs]
-    targets = [target.cpu() for target in targets]  
+    targets = [target.cpu() for target in targets]
   ModelVisualizer(model).plot_results(outputs, targets, events, output_folder + '\\testing.png')
 
 def calc (model, input, target, criterion):
