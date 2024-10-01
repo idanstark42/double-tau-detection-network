@@ -6,6 +6,8 @@ from data.position import Position
 from .event_visualizer import EventVisualizer
 from settings import PHI_RANGE, ETA_RANGE, JET_SIZE, MAP_2D_TICKS
 
+phi_range_size = abs(PHI_RANGE[1] - PHI_RANGE[0])
+
 class ModelVisualizer:
   def __init__(self, model):
     self.model = model
@@ -32,25 +34,26 @@ class ModelVisualizer:
     plt.show()
 
   def arrows_on_eta_phi_plot (self, starts, ends, ax, **kwargs):
-    def arrow_with_color (x, y, dx, dy, **kwargs):
-      distance_normalized = min(1, max(0, 0.5 + 0.5 * np.linalg.norm([dx, dy]) / 2))
+    def arrow_with_color (eta, phi, deta, dphi, **kwargs):
+      distance_normalized = min(1, max(0, 0.5 + 0.5 * np.linalg.norm([deta, dphi]) / 2))
       color = (distance_normalized, 0, 1 - distance_normalized, 0.6)
-      ax.arrow(x, y, dx, dy, head_width=0.1, head_length=0.1, fc=color, ec=color, **kwargs)
+      ax.arrow(eta, phi, deta, dphi, head_width=0.1, head_length=0.1, fc=color, ec=color, **kwargs)
 
     for start, end in zip(starts, ends):
-      if abs(start[1] - end[1]) > abs(PHI_RANGE[1] - PHI_RANGE[0]) / 2:
-        arrow_with_color(end[1], end[0], end[1]-start[1], end[0] - start[0], **kwargs)
-        if start[1] < end[1]:
-          arrow_with_color(start[1], start[0], end[1]-start[1] - 2 * np.pi, end[0] - start[0], **kwargs)
-        else:
-          arrow_with_color(start[1], start[0], end[1]-start[1], end[0] - start[0] - 2 * np.pi, **kwargs)
+      start = Position(start[0], start[1])
+      end = Position(end[0], end[1])
+      if abs(start.phi - end.phi) > phi_range_size / 2:
+        deta = end.eta - start.eta
+        dphi = end.phi - start.phi + (phi_range_size if start.phi > end.phi else -phi_range_size)
+        arrow_with_color(start.eta, start.phi, deta, dphi, **kwargs)
+        arrow_with_color(end.eta - phi_range_size, end.phi, deta, dphi, **kwargs)
       else:
-        arrow_with_color(start[1], start[0], end[1]-start[1], end[0] - start[0], **kwargs)
+        arrow_with_color(start.eta, start.phi, end.eta - start.eta, end.phi - start.phi, **kwargs)
 
-    ax.set_xlabel('phi')
-    ax.set_ylabel('eta')
-    ax.set_xlim(-3.2, 3.2)
-    ax.set_ylim(-2.5, 2.5)
+    ax.set_xlabel('eta')
+    ax.set_ylabel('phi')
+    ax.set_xlim(ETA_RANGE[0], ETA_RANGE[1])
+    ax.set_ylim(PHI_RANGE[0], PHI_RANGE[1])
     ax.set_xticks([round((ETA_RANGE[0] + i * (ETA_RANGE[1] - ETA_RANGE[0]) / MAP_2D_TICKS) * 10) / 10 for i in range(MAP_2D_TICKS + 1)], [round((ETA_RANGE[0] + i * (ETA_RANGE[1] - ETA_RANGE[0]) / MAP_2D_TICKS) * 10) / 10 for i in range(MAP_2D_TICKS + 1)])
     ax.set_yticks([round((PHI_RANGE[0] + i * (PHI_RANGE[1] - PHI_RANGE[0]) / MAP_2D_TICKS) * 10) / 10 for i in range(MAP_2D_TICKS + 1)], [round((PHI_RANGE[0] + i * (PHI_RANGE[1] - PHI_RANGE[0]) / MAP_2D_TICKS) * 10) / 10 for i in range(MAP_2D_TICKS + 1)])
 
@@ -63,6 +66,9 @@ class ModelVisualizer:
       ax.add_patch(patches.Ellipse(Position(target[i], target[i+1]).relative(), circle_width, circle_height, color='red', fill=False))
     for i in range(0, len(output), 2):
       ax.add_patch(patches.Ellipse(Position(output[i], output[i+1]).relative(), circle_width, circle_height, color='blue', fill=False))
+    
+    ax.set_xlim(0, 1)
+    ax.set_ylim(0, 1)
 
   def distances_histogram (self, starts, ends, ax):
     def distance (start, end):
