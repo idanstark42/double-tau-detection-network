@@ -11,14 +11,9 @@ class AttentionLayer(nn.Module):
         self.sigmoid = nn.Sigmoid()
 
     def forward(self, input):
-        # Feature descriptor on the global spatial information
         weights = self.avg_pool(input)
-
-        # Two different branches of ECA module
         weights = self.conv1d(weights.squeeze(-1).transpose(-1, -2))
         weights = weights.transpose(-1, -2).unsqueeze(-1)
-
-        # Multi-scale information fusion
         weights = self.sigmoid(weights)
 
         return input * weights.expand_as(input)
