@@ -12,6 +12,7 @@ class MainModel (nn.Module):
     self.dropout_probability = dropout_probability
     self.input_channels = input_channels
     self.post_processing = post_processing
+    self.model = model
 
     model = self.model(model)
     self.conv_layers = model['conv_layers']
@@ -43,6 +44,9 @@ class MainModel (nn.Module):
     convulational_params = sum(p.numel() for p in self.conv_layers.parameters() if p.requires_grad)
     linear_params = sum(p.numel() for p in self.linear_layers.parameters() if p.requires_grad)
     print(f"Initialized NN.")
+    print(f"Model:                           {self.model}")
+    print(f"Dropout probability:              {self.dropout_probability}")
+    print(f"Post processing:                  {self.post_processing}")
     print(f"Convolutional layers parameters:  {convulational_params}")
     print(f"Linear layers parameters:         {linear_params}")
     print(f"Total parameters:                 {convulational_params + linear_params}")
