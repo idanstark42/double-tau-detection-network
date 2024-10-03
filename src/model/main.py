@@ -3,16 +3,17 @@ from torch import nn
 from dropblock import DropBlock2D
 
 from model.cylinrical_conv import CylindricalConv2d
+from model.attention import AttentionLayer
 from settings import RESOLUTION
 
 class MainModel (nn.Module):
-  def __init__(self, input_channels=2, dropout_probability=0.15, post_processing=False):
+  def __init__(self, input_channels=10, dropout_probability=0.15, post_processing=False):
     super(MainModel, self).__init__()
     self.dropout_probability = dropout_probability
     self.input_channels = input_channels
     self.post_processing = post_processing
 
-    def conv_block(input_channels, output_channels, kernel_size, padding, stride, bias, drop=False):
+    def conv_block(input_channels, output_channels, kernel_size, padding, bias=False, drop=False, stride=1):
       layers = (
         CylindricalConv2d(input_channels, output_channels, kernel_size=kernel_size, padding=padding, stride=stride, bias=bias),
         nn.BatchNorm2d(output_channels),
@@ -24,25 +25,22 @@ class MainModel (nn.Module):
       return nn.Sequential(*layers)
     
     self.conv_layers = nn.ModuleList([
-      conv_block(self.input_channels, 32, kernel_size=3, padding=1, stride=1, bias=False, drop=True),
-      nn.AvgPool2d(kernel_size=2, stride=2, padding=1),
-      conv_block(32, 64, kernel_size=3, padding=1, stride=1, bias=False),
-      conv_block(64, 128, kernel_size=3, padding=1, stride=1, bias=False),
-      conv_block(128, 128, kernel_size=3, padding=1, stride=1, bias=False),
-      nn.AvgPool2d(kernel_size=2, stride=2, padding=1),
-      conv_block(128, 256, kernel_size=3, padding=1, stride=1, bias=False),
-      conv_block(256, 512, kernel_size=3, padding=1, stride=1, bias=False),
-      conv_block(512, 512, kernel_size=3, padding=1, stride=1, bias=False),
-      nn.AvgPool2d(kernel_size=2, stride=2, padding=1),
-      conv_block(512, 512, kernel_size=3, padding=1, stride=1, bias=False),
-      conv_block(512, 512, kernel_size=3, padding=1, stride=1, bias=False),
-      nn.AvgPool2d(kernel_size=2, stride=2, padding=1),
-      conv_block(512, 1024, kernel_size=3, padding=1, stride=1, bias=False),
-      conv_block(1024, 1024, kernel_size=3, padding=1, stride=1, bias=False),
+      conv_block(self.input_channels, 16, kernel_size=3, padding=1, drop=True),
+      nn.AvgPool2d(2),
+      conv_block(16, 32, kernel_size=3, padding=1),
+      nn.AvgPool2d(2),
+      conv_block(32, 32, kernel_size=3, padding=1),
+      conv_block(32, 32, kernel_size=3, padding=1),
+      nn.AvgPool2d(5),
+      conv_block(32, 16, kernel_size=3, padding=1),
+      AttentionLayer()
     ])
 
     self.linear_layers = nn.ModuleList([
-      nn.Linear(1024 * 9 ** 2, 4)
+      nn.Linear(16 * (RESOLUTION // 20) * (RESOLUTION // 20), 64),
+      nn.PReLU(),
+      nn.Dropout(self.dropout_probability),
+      nn.Linear(64, 4)
     ])
 
     # count and print the number of parameters in the network
@@ -57,7 +55,7 @@ class MainModel (nn.Module):
     for layer in self.conv_layers:
       x = layer(x)
     
-    x = x.view(-1, 1024 * 9 ** 2)
+    x = x.view(-1, 16 * (RESOLUTION // 20) * (RESOLUTION // 20))
     
     for layer in self.linear_layers:
       x = layer(x)

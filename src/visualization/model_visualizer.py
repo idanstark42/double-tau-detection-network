@@ -4,7 +4,7 @@ import numpy as np
 
 from data.position import Position
 from .event_visualizer import EventVisualizer
-from settings import PHI_RANGE, ETA_RANGE, JET_SIZE, MAP_2D_TICKS
+from settings import PHI_RANGE, ETA_RANGE, JET_SIZE, MAP_2D_TICKS, ARROWS_PERCENTAGE
 
 phi_range_size = abs(PHI_RANGE[1] - PHI_RANGE[0])
 
@@ -22,11 +22,16 @@ class ModelVisualizer:
     plt.savefig(output_file)
     plt.show()
 
-  def plot_results (self, outputs, targets, events, output_file):
-    # draw two plots side by side
-    fig, axs = plt.subplots(1, 4, figsize=(16, 4))
-    self.arrows_on_eta_phi_plot(outputs, targets, axs[0], color='blue')
+  def plot_results (self, outputs, targets, test_loader, dataset, output_file):
+    events = [dataset.get_event(test_loader.dataset.indices[index]) for index in range(len(test_loader.dataset))]
+    random_indeces = np.random.choice(len(test_loader.dataset), int(ARROWS_PERCENTAGE * len(test_loader.dataset)), replace=False)
+    random_events = [dataset.get_event(test_loader.dataset.indices[index]) for index in random_indeces]
+    random_outputs = [outputs[index] for index in random_indeces]
+    random_targets = [targets[index] for index in random_indeces]
     sample_event_index = np.random.randint(len(events))
+
+    fig, axs = plt.subplots(1, 4, figsize=(16, 4))
+    self.arrows_on_eta_phi_plot(random_outputs, random_targets, axs[0], color='blue')
     self.sample_event_plot(events[sample_event_index], targets[sample_event_index], outputs[sample_event_index], axs[1])
     self.distances_histogram(outputs, targets, axs[2])
     self.distances_by_pt_plot(outputs, targets, events, axs[3])

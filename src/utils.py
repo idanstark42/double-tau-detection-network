@@ -39,7 +39,7 @@ def long_operation (operation, **kwargs):
     else:
       bar.suffix = f'{bar.index}/{bar.max} [{percentage * 100:.1f}%%]'
   result = operation(next)
-  bar.suffix = f'{bar.max}/{bar.max} [100.0%%] done.'
+  next()
   bar.finish()
   return result
 

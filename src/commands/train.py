@@ -10,7 +10,7 @@ import numpy as np
 
 from utils import long_operation, seconds_to_time
 from visualization import ModelVisualizer
-from settings import EPOCHS, BATCH_SIZE, TRAINING_PERCENTAGE, VALIDATION_PERCENTAGE, TEST_ARROWS_PERCENTAGE
+from settings import EPOCHS, BATCH_SIZE, TRAINING_PERCENTAGE, VALIDATION_PERCENTAGE
 
 def train_module(dataset, model, output_folder, options={}):
   start_time = time.time()
@@ -25,13 +25,15 @@ def train_module(dataset, model, output_folder, options={}):
   use_cuda = torch.cuda.is_available()
   if use_cuda:
     model = model.cuda()
-    print(f'using device {torch.cuda.get_device_name(0)}')
+    print(f'Using Device:                     {torch.cuda.get_device_name(0)}')
   else:
-    print('using device cpu')
+    print('Using Device:                     cpu')
 
   device = torch.device('cuda' if use_cuda else 'cpu')
   train_loader, validation_loader, test_loader = init_dataloaders(dataset, device)
-  print(f'training over {len(train_loader.dataset)} samples, validating over {len(validation_loader.dataset)} samples, testing over {len(test_loader.dataset)} samples')
+  print(f'training set size:                {len(train_loader.dataset)}')
+  print(f'validation set size:              {len(validation_loader.dataset)}')
+  print(f'test set size:                    {len(test_loader.dataset)}')
 
   # Train the model
   print()
@@ -129,7 +131,6 @@ def validate(val_loader, model, criterion, epoch):
 def test(test_loader, model, criterion, output_folder, dataset, use_cuda=False):
   model.eval()
   outputs, targets = [], []
-  random_indeces = np.random.choice(len(test_loader.dataset), int(TEST_ARROWS_PERCENTAGE * len(test_loader.dataset)), replace=False)
 
   with torch.no_grad():
     def run (next):
@@ -138,19 +139,17 @@ def test(test_loader, model, criterion, output_folder, dataset, use_cuda=False):
         output, loss = calc(model, input, target, criterion)
         next(BATCH_SIZE)
         for index, (output, target) in enumerate(zip(output, target)):
-          if batch_idx * BATCH_SIZE + index in random_indeces:
-            outputs.append(output)
-            targets.append(target)
+          outputs.append(output)
+          targets.append(target)
         total_loss += loss.item()
       return total_loss
     total_loss = long_operation(run, max=len(test_loader) * BATCH_SIZE, message='Testing ')
   print(f'\nTest set average loss: {total_loss / len(test_loader):.4f}\n')
 
-  events = [dataset.get_event(test_loader.dataset.indices[index]) for index in random_indeces]
   if use_cuda:
     outputs = [output.cpu() for output in outputs]
     targets = [target.cpu() for target in targets]
-  ModelVisualizer(model).plot_results(outputs, targets, events, output_folder + '\\testing.png')
+  ModelVisualizer(model).plot_results(outputs, targets, test_loader, dataset, output_folder + '\\testing.png')
 
 def calc (model, input, target, criterion):
   output = model(input)

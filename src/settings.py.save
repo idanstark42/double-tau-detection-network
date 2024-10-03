@@ -3,7 +3,6 @@ from math import pi
 # math
 ETA_RANGE = (-2.5, 2.5)
 PHI_RANGE = (-pi, pi)
-JET_SIZE = 0.2
 
 # Visualization
 MAP_2D_TICKS = 5
@@ -14,14 +13,15 @@ DATA_DIR = 'data'
 MODELS_DIR = 'models'
 
 # Data
-RESOLUTION = 128
+RESOLUTION = 100
 DATASET_FIELDS = ['event', 'clusters', 'tracks', 'truthTaus']
-DATA_FILE = 'ggXtautau_mX20_run3year1_x10'
+DATA_FILE = 'ggXtautau_mX20_run3year1_x10x
+'
 
 # TRAINING
-EPOCHS = 100
+EPOCHS = 50
 BATCH_SIZE = 256
 
 TRAINING_PERCENTAGE = 0.7
 VALIDATION_PERCENTAGE = 0.2
-ARROWS_PERCENTAGE = 0.1
+TEST_ARROWS_PERCENTAGE = 0.1 

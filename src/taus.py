@@ -2,7 +2,7 @@ import sys
 import time
 from data.dataset import EventsDataset
 from model.main import MainModel
-from utils import datafile_path, modelfolder_path
+from utils import datafile_path, modelfolder_path, long_operation
 
 from commands.show import show
 from commands.train import train_module
@@ -16,7 +16,6 @@ if __name__ == '__main__':
   if command == 'config':
     config(sys.argv[2], sys.argv[3])
     exit()
-
 
   from settings import DATA_FILE
   dataset = EventsDataset(datafile_path(DATA_FILE))
