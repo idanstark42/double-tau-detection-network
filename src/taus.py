@@ -33,8 +33,7 @@ if __name__ == '__main__':
 
   if command == 'train':
     output = modelfolder_path(params.get('output', 'model_' + str(round(time.time() * 1000))))
-    options = { key: value for key, value in [variable.split('=') for variable in sys.argv[3:]] }
-    train_module(dataset, module, output, options)
+    train_module(dataset, module, output, params)
     exit()
 
   if command == 'detect':

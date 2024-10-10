@@ -3,6 +3,7 @@ from progress.bar import IncrementalBar
 from torch.utils.data import Dataset
 import torch
 import numpy as np
+import gc
 
 from data.event import Event
 from utils import *
@@ -60,6 +61,11 @@ class EventsDataset (Dataset):
 
   def __len__(self):
     return len(self.raw_data['event'])
+  
+  def clear_cache (self):
+    # release memorys
+    self.cache = {}
+    gc.collect()
   
   def post_processing(self, x):
     x[0::2] = transform_into_range(x[..., 0::2], ETA_RANGE)

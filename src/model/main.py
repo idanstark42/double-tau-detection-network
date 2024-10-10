@@ -44,7 +44,7 @@ class MainModel (nn.Module):
     convulational_params = sum(p.numel() for p in self.conv_layers.parameters() if p.requires_grad)
     linear_params = sum(p.numel() for p in self.linear_layers.parameters() if p.requires_grad)
     print(f"Initialized NN.")
-    print(f"Model:                           {self.model_name}")
+    print(f"Model:                            {self.model_name}")
     print(f"Dropout probability:              {self.dropout_probability}")
     print(f"Post processing:                  {self.post_processing}")
     print(f"Convolutional layers parameters:  {convulational_params}")
