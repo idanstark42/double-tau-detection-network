@@ -32,10 +32,10 @@ def train_module(dataset, model, output_folder, options={}):
     print('Using Device:                     cpu')
 
   device = torch.device('cuda' if use_cuda else 'cpu')
-  train_loaders, validation_loaders, test_loaders = init_dataloaders(dataset, device, split)
+  train_loaders, validation_loaders, test_loader = init_dataloaders(dataset, device, split)
   print(f'training set size:                {sum([len(loader.dataset) for loader in train_loaders])}')
   print(f'validation set size:              {sum([len(loader.dataset) for loader in validation_loaders])}')
-  print(f'test set size:                    {sum([len(loader.dataset) for loader in test_loaders])}')
+  print(f'test set size:                    {len(test_loader.dataset)}')
   print(f'split:                            {split}')
 
   # Train the model
@@ -45,17 +45,19 @@ def train_module(dataset, model, output_folder, options={}):
   best_model = None
   losses = []
   epoch_start_times = []
-  for epoch in range(EPOCHS):
-    epoch_start_times.append(time.time())
-    for i in range(split):
-      train_loader, validation_loader = train_loaders[i], validation_loaders[i]
-      training_loss = train(train_loader, model, criterion, optimizer, epoch, split, i)
-      validation_loss = validate(validation_loader, model, criterion, epoch, split, i)
+  for i in range(split):
+    train_loader, validation_loader = train_loaders[i], validation_loaders[i]
+    if split > 1:
+      print(f'Split {i + 1}/{split}')
+    for epoch in range(EPOCHS):
+      epoch_start_times.append(time.time())
+      training_loss = train(train_loader, model, criterion, optimizer, epoch)
+      validation_loss = validate(validation_loader, model, criterion, epoch)
       if validation_loss < best_validation_loss:
         best_validation_loss = validation_loss
         best_model = model.state_dict()
       losses.append((training_loss, validation_loss))
-      dataset.clear_cache()
+    dataset.clear_cache()
 
   # Load the best model
   model.load_state_dict(best_model)
@@ -65,12 +67,9 @@ def train_module(dataset, model, output_folder, options={}):
 
   # Test the best model
   test_start_time = time.time()
-  if sum([len(loader.dataset) for loader in test_loaders]) > 0:
+  if len(test_loader.dataset) > 0:
     print('2. Testing')
-    for i in range(split):
-      test_loader = test_loaders[i]
-      test(test_loader, model, criterion, output_folder, dataset, use_cuda)
-      dataset.clear_cache()
+    test(test_loader, model, criterion, output_folder, dataset, use_cuda)
   else:
     print(' -- skipping testing')
 
@@ -93,23 +92,21 @@ def init_dataloaders (dataset, device, split):
   split_dataset_size = int(len(dataset) / split)
   train_size = int(split_dataset_size * TRAINING_PERCENTAGE)
   validation_size = int(split_dataset_size * VALIDATION_PERCENTAGE)
-  test_size = split_dataset_size - train_size - validation_size
+  test_size = len(dataset) - (train_size + validation_size) * split
 
-  split_sizes = [train_size, validation_size, test_size] * split
-  if sum(split_sizes) != len(dataset):
-    split_sizes[0] += len(dataset) - sum(split_sizes)
+  split_sizes = [train_size, validation_size] * split + [test_size]
   datasets = random_split(dataset, split_sizes)
 
-  train_loaders, validation_loaders, test_loaders = [], [], []
+  train_loaders, validation_loaders = [], []
   for i in range(split):
-    train_loaders.append(DataLoader(datasets[i * 3], batch_size=BATCH_SIZE, shuffle=True, collate_fn=lambda x: tuple(x_.to(device) for x_ in default_collate(x))))
-    validation_loaders.append(DataLoader(datasets[i * 3 + 1], batch_size=BATCH_SIZE, shuffle=False, collate_fn=lambda x: tuple(x_.to(device) for x_ in default_collate(x))))
-    test_loaders.append(DataLoader(datasets[i * 3 + 2], batch_size=BATCH_SIZE, shuffle=False, collate_fn=lambda x: tuple(x_.to(device) for x_ in default_collate(x))))
+    train_loaders.append(DataLoader(datasets[i * 2], batch_size=BATCH_SIZE, shuffle=True, collate_fn=lambda x: tuple(x_.to(device) for x_ in default_collate(x))))
+    validation_loaders.append(DataLoader(datasets[i * 2 + 1], batch_size=BATCH_SIZE, shuffle=False, collate_fn=lambda x: tuple(x_.to(device) for x_ in default_collate(x))))
+  test_loader = DataLoader(datasets[-1], batch_size=BATCH_SIZE, shuffle=False, collate_fn=lambda x: tuple(x_.to(device) for x_ in default_collate(x)))
   
-  return train_loaders, validation_loaders, test_loaders
+  return train_loaders, validation_loaders, test_loader
 
 # train the model
-def train(train_loader, model, criterion, optimizer, epoch, split, split_part):
+def train(train_loader, model, criterion, optimizer, epoch):
   model.train()
   
   def run (next):
@@ -123,11 +120,11 @@ def train(train_loader, model, criterion, optimizer, epoch, split, split_part):
       total_loss += loss.item()
     return total_loss
 
-  total_loss = long_operation(run, max=len(train_loader) * BATCH_SIZE, message=f'Epoch {epoch+1} training{(" (" + str(split_part + 1) + "/" + str(split) + ")") if split > 1 else ""}')
+  total_loss = long_operation(run, max=len(train_loader) * BATCH_SIZE, message=f'Epoch {epoch+1} training')
   return total_loss / len(train_loader)
 
 # validate the model
-def validate(val_loader, model, criterion, epoch, split, split_part):
+def validate(val_loader, model, criterion, epoch):
   model.eval()
 
   with torch.no_grad():
@@ -139,7 +136,7 @@ def validate(val_loader, model, criterion, epoch, split, split_part):
         total_loss += loss.item()
       return total_loss
   
-    total_loss = long_operation(run, max=len(val_loader) * BATCH_SIZE, message=f'Epoch {epoch+1} validation{(" (" + str(split_part + 1) + "/" + str(split) + ")") if split > 1 else ""}')
+    total_loss = long_operation(run, max=len(val_loader) * BATCH_SIZE, message=f'Epoch {epoch+1} validation')
   return total_loss / len(val_loader)
 
 # test the model
