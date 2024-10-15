@@ -108,16 +108,14 @@ class MainModel (nn.Module):
         self.conv_block(32, 64, kernel_size=3, padding=1, stride=1, bias=False),
         self.conv_block(64, 128, kernel_size=3, padding=1, stride=1, bias=False),
         nn.AvgPool2d(kernel_size=2, stride=2, padding=1),
+        self.conv_block(128, 128, kernel_size=3, padding=1, stride=1, bias=False),
         self.conv_block(128, 256, kernel_size=3, padding=1, stride=1, bias=False),
-        self.conv_block(256, 512, kernel_size=3, padding=1, stride=1, bias=False),
         nn.AvgPool2d(kernel_size=2, stride=2, padding=1),
-        self.conv_block(512, 512, kernel_size=3, padding=1, stride=1, bias=False),
-        nn.AvgPool2d(kernel_size=2, stride=2, padding=1),
-        self.conv_block(512, 1024, kernel_size=3, padding=1, stride=1, bias=False),
+        self.conv_block(256, 256, kernel_size=3, padding=1, stride=1, bias=False),
       ]),
-      'connection_size': 1024 * 9 ** 2,
+      'connection_size': 256 * 17 ** 2,
       'linear_layers': nn.ModuleList([
-        nn.Linear(1024 * 9 ** 2, 4)
+        nn.Linear(256 * 17 ** 2, 4)
       ])
     }
   
