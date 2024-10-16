@@ -29,7 +29,8 @@ if __name__ == '__main__':
   params = { key: value for key, value in [variable.split('=') for variable in sys.argv[2:]] }
   model = params.get('model', 'small')
   use_post_processing = params.get('post_processing', 'false') == 'true'
-  module = MainModel(post_processing=(dataset.post_processing if use_post_processing else False), input_channels=dataset.input_channels, model=model)
+  dropout_probability = float(params.get('dropout', 0.15))
+  module = MainModel(post_processing=(dataset.post_processing if use_post_processing else False), input_channels=dataset.input_channels, model=model, dropout_probability=dropout_probability)
 
   if command == 'train':
     output = modelfolder_path(params.get('output', 'model_' + str(round(time.time() * 1000))))
