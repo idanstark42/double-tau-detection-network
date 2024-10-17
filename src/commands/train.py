@@ -10,6 +10,7 @@ import numpy as np
 
 from utils import long_operation, seconds_to_time
 from visualization import ModelVisualizer
+from model.cylindrical_loss import CylindricalLoss
 from settings import EPOCHS, BATCH_SIZE, TRAINING_PERCENTAGE, VALIDATION_PERCENTAGE
 
 def train_module(dataset, model, output_folder, options={}):
@@ -22,7 +23,7 @@ def train_module(dataset, model, output_folder, options={}):
   split = int(options.get('split')) if options.get('split') else 1
 
   optimizer = Adam(model.parameters(), lr=0.001, weight_decay=0.0001)
-  criterion = nn.MSELoss()
+  criterion = CylindricalLoss()
 
   use_cuda = torch.cuda.is_available()
   if use_cuda:

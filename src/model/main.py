@@ -2,7 +2,7 @@ import torch
 from torch import nn
 from dropblock import DropBlock2D
 
-from model.cylinrical_conv import CylindricalConv2d
+from model.cylindrical_conv import CylindricalConv2d
 from model.attention import AttentionLayer
 from settings import RESOLUTION
 
