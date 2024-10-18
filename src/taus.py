@@ -6,6 +6,7 @@ from utils import datafile_path, modelfolder_path
 
 from commands.show import show
 from commands.train import train_module
+from commands.eval import evaluate
 from commands.detect import detect
 from commands.proliferate import proliferate
 from commands.config import config
@@ -37,8 +38,13 @@ if __name__ == '__main__':
     train_module(dataset, module, output, params)
     exit()
 
+  if command == 'eval':
+    model_file = modelfolder_path(params.get('weights', 'model_' + str(round(time.time() * 1000)))) + '\\model.pth'
+    evaluate(dataset, module, model_file, params)
+    exit()
+
   if command == 'detect':
-    model_file = modelfolder_path(params.get('output', 'model_' + str(round(time.time() * 1000)))) + '\\model.pth'
+    model_file = modelfolder_path(params.get('weights', 'model_' + str(round(time.time() * 1000)))) + '\\model.pth'
     detect(dataset, module, model_file)
     exit()
 
