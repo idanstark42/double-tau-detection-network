@@ -83,9 +83,10 @@ class ModelVisualizer:
         return np.linalg.norm([start[0] - end[0], start[1] - end[1]])
 
     distances = [distance(start, end) for start, end in zip(starts, ends)]
+    percent_of_distances_unser_0_2 = len([distance for distance in distances if distance < 0.2]) / len(distances)
     ax.hist(distances, bins=100)
     ax.set_xlabel('distance')
-    ax.set_ylabel('count')
+    ax.set_ylabel(f'count ({percent_of_distances_unser_0_2 * 100:.2f}% under 0.2)')
 
   def distances_by_pt_plot (self, starts, ends, events, ax):
     def distance (start, end):
