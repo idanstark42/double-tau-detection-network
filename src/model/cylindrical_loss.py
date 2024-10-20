@@ -8,9 +8,11 @@ class CylindricalLoss (torch.nn.Module):
     output = output.view(-1, 2)
     target = target.view(-1, 2)
 
-    linear_diff = torch.abs(output[:, 0] - target[:, 0])
-    circular_diff = torch.remainder(output[:, 1] - target[:, 1] + torch.pi, 2 * torch.pi) - torch.pi
+    eta_diff = torch.abs(output[:, 0] - target[:, 0])
+    phi_diff = torch.abs(output[:, 1] - target[:, 1])
+    if phi_diff > torch.pi:
+      phi_diff = 2 * torch.pi - phi_diff
 
-    distances = torch.sqrt(circular_diff ** 2 + linear_diff ** 2)
+    distances = torch.sqrt(torch.pow(eta_diff, 2) + torch.pow(phi_diff, 2))
 
     return torch.mean(distances)

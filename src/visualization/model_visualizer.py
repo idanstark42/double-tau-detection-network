@@ -77,10 +77,9 @@ class ModelVisualizer:
 
   def distances_histogram (self, starts, ends, ax):
     def distance (start, end):
-      if np.sign(end[1]) != np.sign(start[1]):
-        return np.linalg.norm([start[0] - end[0], 2 * np.pi - abs(start[1] - end[1])])
-      else:
-        return np.linalg.norm([start[0] - end[0], start[1] - end[1]])
+      start = Position(start[0], start[1])
+      end = Position(end[0], end[1])
+      return start.distance(end)
 
     distances = [distance(start, end) for start, end in zip(starts, ends)]
     percent_of_distances_unser_0_2 = len([distance for distance in distances if distance < 0.2]) / len(distances)
@@ -90,10 +89,9 @@ class ModelVisualizer:
 
   def distances_by_pt_plot (self, starts, ends, events, ax):
     def distance (start, end):
-      if np.sign(end[1]) != np.sign(start[1]):
-        return np.linalg.norm([start[0] - end[0], 2 * np.pi - abs(start[1] - end[1])])
-      else:
-        return np.linalg.norm([start[0] - end[0], start[1] - end[1]])
+      start = Position(start[0], start[1])
+      end = Position(end[0], end[1])
+      return start.distance(end)
 
     def pt (event):
       # sum of event.true_four_momentum().pt for all taus in the event
