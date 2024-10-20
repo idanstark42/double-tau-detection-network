@@ -10,8 +10,7 @@ class CylindricalLoss (torch.nn.Module):
 
     eta_diff = torch.abs(output[:, 0] - target[:, 0])
     phi_diff = torch.abs(output[:, 1] - target[:, 1])
-    if phi_diff > torch.pi:
-      phi_diff = 2 * torch.pi - phi_diff
+    phi_diff = torch.min(phi_diff, 2 * torch.pi - phi_diff)
 
     distances = torch.sqrt(torch.pow(eta_diff, 2) + torch.pow(phi_diff, 2))
 
