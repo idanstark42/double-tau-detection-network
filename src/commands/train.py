@@ -36,10 +36,15 @@ def train_module(dataset, model, output_folder, options={}):
 
   device = torch.device('cuda' if use_cuda else 'cpu')
   train_loaders, validation_loaders, test_loader = init_dataloaders(dataset, device, split, options)
+  
+  using_multiprocessing = int(options.get('num_workers', 0)) > 0
   print(f'training set size:                {sum([len(loader.dataset) for loader in train_loaders])}')
   print(f'validation set size:              {sum([len(loader.dataset) for loader in validation_loaders])}')
   print(f'test set size:                    {len(test_loader.dataset)}')
   print(f'split:                            {split}')
+  print('Using Multiprocessing:            ' + ('yes' if using_multiprocessing else 'no'))
+  print(f'Batch Size:                       {BATCH_SIZE}')
+  print(f'Epochs:                           {EPOCHS}')
 
   # Train the model
   print()

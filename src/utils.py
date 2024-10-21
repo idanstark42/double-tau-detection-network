@@ -1,8 +1,6 @@
-import numpy as np
-import matplotlib.pyplot as plt
 import os
-from progress.bar import IncrementalBar
 from time import time
+from progress.bar import IncrementalBar
 
 from settings import DATA_DIR
 
