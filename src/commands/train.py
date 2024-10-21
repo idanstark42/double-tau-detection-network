@@ -111,13 +111,15 @@ def init_dataloaders (dataset, device, split):
   return train_loaders, validation_loaders, test_loader
 
 def generate_dataloader (dataset, device):
-  return DataLoader(dataset, batch_size=BATCH_SIZE, shuffle=True, collate_fn=lambda x: tuple(x_.to(device) for x_ in default_collate(x)), num_workers=24)
+  return DataLoader(dataset, batch_size=BATCH_SIZE, shuffle=True, collate_fn=lambda x: tuple(x_.to(device) for x_ in default_collate(x)), num_workers=24, pin_memory=True)
 
 def preload (loader):
+  dataset = loader.dataset
   def run (next):
-    for _, _1 in loader:
-      next(BATCH_SIZE)
-  long_operation(run, max=len(loader) * BATCH_SIZE, message='Preloading')
+    for index in range(len(dataset)):
+      dataset[index]
+      next(1)
+  long_operation(run, max=len(dataset), message='Preloading')
 
 # train the model
 def train(train_loader, model, criterion, optimizer, epoch):
