@@ -50,6 +50,8 @@ def train_module(dataset, model, output_folder, options={}):
   epoch_start_times = []
   for i in range(split):
     train_loader, validation_loader = train_loaders[i], validation_loaders[i]
+    preload(train_loader)
+    preload(validation_loader)
     if split > 1:
       print(f'Split {i + 1}/{split}')
     for epoch in range(EPOCHS):
@@ -110,6 +112,12 @@ def init_dataloaders (dataset, device, split):
 
 def generate_dataloader (dataset, device):
   return DataLoader(dataset, batch_size=BATCH_SIZE, shuffle=True, collate_fn=lambda x: tuple(x_.to(device) for x_ in default_collate(x)), num_workers=24)
+
+def preload (loader):
+  def run (next):
+    for _, _1 in loader:
+      next(BATCH_SIZE)
+  long_operation(run, max=len(loader) * BATCH_SIZE, message='Preloading')
 
 # train the model
 def train(train_loader, model, criterion, optimizer, epoch):
