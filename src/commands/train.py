@@ -107,7 +107,7 @@ def init_dataloaders (dataset, device, split):
   return train_loaders, validation_loaders, test_loader
 
 def generate_dataloader (dataset, device):
-  return DataLoader(dataset, batch_size=BATCH_SIZE, shuffle=True, collate_fn=lambda x: tuple(x_.to(device) for x_ in default_collate(x)), num_worker=24)
+  return DataLoader(dataset, batch_size=BATCH_SIZE, shuffle=True, collate_fn=lambda x: tuple(x_.to(device) for x_ in default_collate(x)), num_workers=24)
 
 # train the model
 def train(train_loader, model, criterion, optimizer, epoch):
