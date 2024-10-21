@@ -100,11 +100,14 @@ def init_dataloaders (dataset, device, split):
 
   train_loaders, validation_loaders = [], []
   for i in range(split):
-    train_loaders.append(DataLoader(datasets[i * 2], batch_size=BATCH_SIZE, shuffle=True, collate_fn=lambda x: tuple(x_.to(device) for x_ in default_collate(x))), num_worker=24)
-    validation_loaders.append(DataLoader(datasets[i * 2 + 1], batch_size=BATCH_SIZE, shuffle=False, collate_fn=lambda x: tuple(x_.to(device) for x_ in default_collate(x))), num_worker=24)
-  test_loader = DataLoader(datasets[-1], batch_size=BATCH_SIZE, shuffle=False, collate_fn=lambda x: tuple(x_.to(device) for x_ in default_collate(x)), num_worker=24)
+    train_loaders.append(generate_dataloader(datasets[i * 2], device))
+    validation_loaders.append(generate_dataloader(datasets[i * 2 + 1], device))
+  test_loader = generate_dataloader(datasets[-1], device)
   
   return train_loaders, validation_loaders, test_loader
+
+def generate_dataloader (dataset, device):
+  return DataLoader(dataset, batch_size=BATCH_SIZE, shuffle=True, collate_fn=lambda x: tuple(x_.to(device) for x_ in default_collate(x)), num_worker=24)
 
 # train the model
 def train(train_loader, model, criterion, optimizer, epoch):
