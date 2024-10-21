@@ -27,6 +27,8 @@ def train_module(dataset, model, output_folder, options={}):
 
   use_cuda = torch.cuda.is_available()
   if use_cuda:
+    # init multiprocessing
+    torch.multiprocessing.set_start_method('spawn')
     model = model.cuda()
     print(f'Using Device:                     {torch.cuda.get_device_name(0)}')
   else:
