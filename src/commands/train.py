@@ -35,7 +35,7 @@ def train_module(dataset, model, output_folder, options={}):
     print('Using Device:                     cpu')
 
   device = torch.device('cuda' if use_cuda else 'cpu')
-  train_loaders, validation_loaders, test_loader = init_dataloaders(dataset, device, split)
+  train_loaders, validation_loaders, test_loader = init_dataloaders(dataset, device, split, options)
   print(f'training set size:                {sum([len(loader.dataset) for loader in train_loaders])}')
   print(f'validation set size:              {sum([len(loader.dataset) for loader in validation_loaders])}')
   print(f'test set size:                    {len(test_loader.dataset)}')
@@ -50,10 +50,10 @@ def train_module(dataset, model, output_folder, options={}):
   epoch_start_times = []
   for i in range(split):
     train_loader, validation_loader = train_loaders[i], validation_loaders[i]
-    preload(train_loader)
-    preload(validation_loader)
     if split > 1:
       print(f'Split {i + 1}/{split}')
+    preload(train_loader)
+    preload(validation_loader)
     for epoch in range(EPOCHS):
       epoch_start_times.append(time.time())
       training_loss = train(train_loader, model, criterion, optimizer, epoch)
@@ -93,7 +93,7 @@ def train_module(dataset, model, output_folder, options={}):
   # Plot the losses as a function of epoch
   ModelVisualizer(model).show_losses(losses, output_folder + '\\losses.png')
 
-def init_dataloaders (dataset, device, split):
+def init_dataloaders (dataset, device, split, options):
   split_dataset_size = int(len(dataset) / split)
   train_size = int(split_dataset_size * TRAINING_PERCENTAGE)
   validation_size = int(split_dataset_size * VALIDATION_PERCENTAGE)
@@ -104,14 +104,17 @@ def init_dataloaders (dataset, device, split):
 
   train_loaders, validation_loaders = [], []
   for i in range(split):
-    train_loaders.append(generate_dataloader(datasets[i * 2], device))
-    validation_loaders.append(generate_dataloader(datasets[i * 2 + 1], device))
-  test_loader = generate_dataloader(datasets[-1], device)
+    train_loaders.append(generate_dataloader(datasets[i * 2], device, options))
+    validation_loaders.append(generate_dataloader(datasets[i * 2 + 1], device, options))
+  test_loader = generate_dataloader(datasets[-1], device, options)
   
   return train_loaders, validation_loaders, test_loader
 
-def generate_dataloader (dataset, device):
-  return DataLoader(dataset, batch_size=BATCH_SIZE, shuffle=True, collate_fn=lambda x: tuple(x_.to(device) for x_ in default_collate(x)), num_workers=12, pin_memory=True)
+def generate_dataloader (dataset, device, options):
+  num_workers = int(options.get('num_workers', 0))
+  pin_memory = num_workers > 0
+  batch_size = int(options.get('batch_size', BATCH_SIZE))
+  return DataLoader(dataset, batch_size=batch_size, shuffle=True, collate_fn=lambda x: tuple(x_.to(device) for x_ in default_collate(x)), num_workers=num_workers, pin_memory=pin_memory)
 
 def preload (loader):
   dataset = loader.dataset
