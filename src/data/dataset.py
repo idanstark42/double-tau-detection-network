@@ -4,6 +4,7 @@ from torch.utils.data import Dataset
 import torch
 import numpy as np
 import gc
+import math
 
 from data.event import Event
 from utils import *
@@ -61,6 +62,18 @@ class EventsDataset (Dataset):
 
   def __len__(self):
     return len(self.raw_data['event'])
+  
+  def __iter__(self):
+    worker_info = torch.utils.data.get_worker_info()
+    if worker_info is None:
+      iter_start = 0
+      iter_end = len(self)
+    else:
+      per_worker = int(math.ceil(len(self) / float(worker_info.num_workers)))
+      worker_id = worker_info.id
+      iter_start = worker_id * per_worker
+      iter_end = min(iter_start + per_worker, len(self))
+    return iter(range(iter_start, iter_end))
   
   def clear_cache (self):
     # release memorys
