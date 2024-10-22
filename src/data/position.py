@@ -35,10 +35,8 @@ class Position (Iterable):
   def distance (self, other):
     eta_distance = abs(self.eta - other.eta)
     phi_distance = abs(self.phi - other.phi)
-    # if the distance is more then half the circle, it is shorter to go the other way
-    if eta_distance > 0.5 * (ETA_RANGE[1] - ETA_RANGE[0]):
-      eta_distance = (ETA_RANGE[1] - ETA_RANGE[0]) - eta_distance
-    
+    phi_distance = phi_distance % (PHI_RANGE[1] - PHI_RANGE[0])
+    phi_distance = min(phi_distance, 2 * np.pi - phi_distance)
     return np.sqrt(eta_distance ** 2 + phi_distance ** 2)
   
   @staticmethod

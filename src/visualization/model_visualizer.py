@@ -68,8 +68,10 @@ class ModelVisualizer:
     circle_width = JET_SIZE / (ETA_RANGE[1] - ETA_RANGE[0])
     circle_height = JET_SIZE / (PHI_RANGE[1] - PHI_RANGE[0])
     for i in range(0, len(target), 2):
+      print(f'target {i}: {target[i]}, {target[i+1]}')
       ax.add_patch(patches.Ellipse(Position(target[i], target[i+1]).relative(), circle_width, circle_height, color='red', fill=False))
     for i in range(0, len(output), 2):
+      print(f'output {i}: {output[i]}, {output[i+1]}')
       ax.add_patch(patches.Ellipse(Position(output[i], output[i+1]).relative(), circle_width, circle_height, color='blue', fill=False))
     
     ax.set_xlim(0, 1)
