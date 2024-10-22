@@ -128,7 +128,7 @@ class MainModel (nn.Module):
       nn.BatchNorm2d(output_channels),
     )
     if drop:
-      layers = layers + (DropBlock2D(block_size=3, drop_prob=0.1),)
+      layers = layers + (DropBlock2D(block_size=3, drop_prob=self.dropout_probability),)
     layers = layers + (nn.PReLU(),)
 
     return nn.Sequential(*layers)
