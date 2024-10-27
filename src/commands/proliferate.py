@@ -1,7 +1,7 @@
 import numpy as np
 from concurrent.futures import ThreadPoolExecutor, as_completed
 
-from settings import PHI_RANGE
+from settings import PHI_RANGE, THREADS
 from utils import long_operation, transform_into_range
 from visualization import DatasetVisualizer
 
@@ -14,7 +14,6 @@ def proliferate (dataset, factor):
   flip_flags = np.random.rand(copied_count) > 0.5
   rotations = np.random.rand(copied_count) * (PHI_RANGE[1] - PHI_RANGE[0])
 
-  print('inverting')
   keys = dataset.raw_data.keys()
   values = zip(*dataset.raw_data.values())
   events = [None] * len(dataset)
@@ -23,12 +22,11 @@ def proliferate (dataset, factor):
       events[index] = dict(zip(keys, value))
       next()
     
-    with ThreadPoolExecutor() as executor:
+    with ThreadPoolExecutor(max_workers=THREADS) as executor:
       [executor.submit(build_event_dict, value, index) for index, value in enumerate(values)]
       executor.shutdown(wait=True)
     return events
   original_events = long_operation(load_events, max=len(dataset), message='Loading events')
-  print('inverted')
 
   def generate_copies (next):
     def copies_for_event (event_index):
@@ -41,7 +39,7 @@ def proliferate (dataset, factor):
       next()
       return copies
     
-    with ThreadPoolExecutor() as executor:
+    with ThreadPoolExecutor(max_workers=THREADS) as executor:
       copies = [executor.submit(copies_for_event, i) for i in range(initial_count)]
       return [copy for copy in as_completed(copies)]
 
@@ -62,7 +60,7 @@ def proliferate (dataset, factor):
         new_data[key][index*factor+1:(index+1)*factor] = [copy[key] for copy in copied_events[index]]
         next()
 
-    with ThreadPoolExecutor() as executor:
+    with ThreadPoolExecutor(max_workers=THREADS) as executor:
       [executor.submit(set_events, i) for i in range(len(dataset))]
       # wait for all events to be set
       executor.shutdown(wait=True)
