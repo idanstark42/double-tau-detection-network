@@ -121,6 +121,31 @@ class MainModel (nn.Module):
         nn.Linear(256 * 17 ** 2, 4)
       ])
     }
+
+  def jet_ssd_min_long_model(self):
+    return {
+      'conv_layers': nn.ModuleList([
+        self.conv_block(self.input_channels, 32, kernel_size=3, padding=1, stride=1, bias=False, drop=True),
+        nn.AvgPool2d(kernel_size=2, stride=2, padding=1),
+        self.conv_block(32, 64, kernel_size=3, padding=1, stride=1, bias=False),
+        self.conv_block(64, 64, kernel_size=3, padding=1, stride=1, bias=False),
+        self.conv_block(64, 128, kernel_size=3, padding=1, stride=1, bias=False),
+        AttentionLayer(),
+        nn.AvgPool2d(kernel_size=2, stride=2, padding=1),
+        self.conv_block(128, 128, kernel_size=3, padding=1, stride=1, bias=False),
+        self.conv_block(128, 128, kernel_size=3, padding=1, stride=1, bias=False),
+        self.conv_block(128, 256, kernel_size=3, padding=1, stride=1, bias=False),
+        AttentionLayer(),
+        nn.AvgPool2d(kernel_size=2, stride=2, padding=1),
+        self.conv_block(256, 256, kernel_size=3, padding=1, stride=1, bias=False),
+        self.conv_block(256, 512, kernel_size=3, padding=1, stride=1, bias=False),
+        AttentionLayer()
+      ]),
+      'connection_size': 512 * 17 ** 2,
+      'linear_layers': nn.ModuleList([
+        nn.Linear(512 * 17 ** 2, 4)
+      ])
+    }
   
   def conv_block(self, input_channels, output_channels, kernel_size, padding, bias=False, drop=False, stride=1):
     layers = (
@@ -137,5 +162,6 @@ class MainModel (nn.Module):
     return {
       'small': self.mini_model,
       'jet_ssd': self.jet_ssd_model,
-      'jet_ssd_min': self.jet_ssd_min_model
+      'jet_ssd_min': self.jet_ssd_min_model,
+      'jet_ssd_min_long': self.jet_ssd_min_long_model
     }[name]()
