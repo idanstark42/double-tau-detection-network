@@ -12,6 +12,7 @@ HISTOGRAM_BINS = 50
 # IO
 DATA_DIR = 'data'
 MODELS_DIR = 'models'
+THREADS = 8
 
 # Data
 RESOLUTION = 128

@@ -4,7 +4,7 @@ from progress.bar import IncrementalBar
 from concurrent.futures import ThreadPoolExecutor, as_completed
 from threading import Lock
 
-from settings import DATA_DIR
+from settings import DATA_DIR, THREADS
 
 def python_names_from_dtype(dtype):
   return [python_name_from_dtype_name(name) for name in dtype.names]
@@ -42,7 +42,7 @@ def long_operation (operation, concurrent=False, **kwargs):
       else:
         bar.suffix = f'{bar.index}/{bar.max} [{percentage * 100:.1f}%%]'
   if concurrent:
-    with ThreadPoolExecutor() as executor:
+    with ThreadPoolExecutor(max_workers=THREADS) as executor:
       futures = [executor.submit(operation, next) for _ in range(bar.max)]
       result = [future.result() for future in as_completed(futures)]
   else:
