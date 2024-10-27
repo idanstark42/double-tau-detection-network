@@ -27,12 +27,13 @@ if __name__ == '__main__':
     show(dataset, scope, params)
     exit()
 
+  params = { key: value for key, value in [variable.split('=') for variable in sys.argv[2:]] }
+
   if command == 'proliferate':
     factor = int(params.get('factor', 10))
     proliferate(dataset, factor)
     exit()
 
-  params = { key: value for key, value in [variable.split('=') for variable in sys.argv[2:]] }
   model = params.get('model', 'small')
   use_post_processing = params.get('post_processing', 'false') == 'true'
   dropout_probability = float(params.get('dropout', 0.15))
