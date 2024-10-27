@@ -9,10 +9,17 @@ def proliferate (dataset, factor):
 
   def run (next):
     new_data = { 'event': [], 'clusters': [], 'tracks': [], 'truthTaus': [] }
+
     flips = 0
     rotations = []
-    get = lambda index: { key: dataset.raw_data[key][index] for key in dataset.raw_data }
-    add = lambda event: [new_data[key].append(event[key]) for key in new_data]
+
+    def get (index):
+      return { key: dataset.raw_data[key][index] for key in dataset.raw_data }
+    
+    def add (event):
+      for key in new_data:
+        new_data[key].append(event[key])
+
     for index in range(len(dataset)):
       original = get(index)
       add(original)
@@ -25,6 +32,7 @@ def proliferate (dataset, factor):
           copy['clusters']['Clusters.calEta'] = -copy['clusters']['Clusters.calEta']
           copy['tracks']['Tracks.eta'] = -copy['tracks']['Tracks.eta']
           copy['truthTaus']['TruthTaus.eta_vis'] = -copy['truthTaus']['TruthTaus.eta_vis']
+
         # rotate phi by a random angle
         random_angle = np.random.rand() * (PHI_RANGE[1] - PHI_RANGE[0])
         rotations.append(random_angle)
@@ -47,10 +55,4 @@ def proliferate (dataset, factor):
   DatasetVisualizer(dataset).show_proliferation(flips, rotations)
 
 def rotate(angles, by):
-  new_angles = (angles + by) % (PHI_RANGE[1] - PHI_RANGE[0]) + PHI_RANGE[0]
-  for new_angle in new_angles:
-    while (new_angle > PHI_RANGE[1]):
-      new_angle -= PHI_RANGE[1] - PHI_RANGE[0]
-    while (new_angle < PHI_RANGE[0]):
-      new_angle += PHI_RANGE[1] - PHI_RANGE[0]
-  return new_angles
+  return (angles + by) % (PHI_RANGE[1] - PHI_RANGE[0]) + PHI_RANGE[0]
