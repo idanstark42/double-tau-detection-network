@@ -1,10 +1,9 @@
 import os
 from time import time
 from progress.bar import IncrementalBar
-from concurrent.futures import ThreadPoolExecutor, as_completed
 from threading import Lock
 
-from settings import DATA_DIR, THREADS
+from settings import DATA_DIR
 
 def python_names_from_dtype(dtype):
   return [python_name_from_dtype_name(name) for name in dtype.names]
@@ -26,7 +25,7 @@ def print_map (map):
     print('#')
   print('#' * map.shape[0] + '##')
 
-def long_operation (operation, concurrent=False, **kwargs):
+def long_operation (operation, **kwargs):
   bar = IncrementalBar(**kwargs)
   start = time()
   lock = Lock()
@@ -41,13 +40,7 @@ def long_operation (operation, concurrent=False, **kwargs):
         bar.suffix = f'{bar.index}/{bar.max} [{percentage * 100:.1f}%%] {seconds_to_time(remaining)}'
       else:
         bar.suffix = f'{bar.index}/{bar.max} [{percentage * 100:.1f}%%]'
-  if concurrent:
-    with ThreadPoolExecutor(max_workers=THREADS) as executor:
-      futures = [executor.submit(operation, next) for _ in range(bar.max)]
-      result = [future.result() for future in as_completed(futures)]
-  else:
-    result = operation(next)
-  
+  result = operation(next)
   next()
   bar.finish()
   return result
