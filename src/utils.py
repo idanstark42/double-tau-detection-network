@@ -1,6 +1,8 @@
 import os
 from time import time
 from progress.bar import IncrementalBar
+from concurrent.futures import ThreadPoolExecutor, as_completed
+from threading import Lock
 
 from settings import DATA_DIR
 
@@ -24,19 +26,28 @@ def print_map (map):
     print('#')
   print('#' * map.shape[0] + '##')
 
-def long_operation (operation, **kwargs):
+def long_operation (operation, concurrent=False, **kwargs):
   bar = IncrementalBar(**kwargs)
   start = time()
+  lock = Lock()
+
   def next (step=1):
-    bar.next(step)
-    percentage = bar.index / bar.max
-    elapsed = time() - start
-    if elapsed > 5:
-      remaining = (1 - percentage) * elapsed / percentage
-      bar.suffix = f'{bar.index}/{bar.max} [{percentage * 100:.1f}%%] {seconds_to_time(remaining)}'
-    else:
-      bar.suffix = f'{bar.index}/{bar.max} [{percentage * 100:.1f}%%]'
-  result = operation(next)
+    with lock:
+      bar.next(step)
+      percentage = bar.index / bar.max
+      elapsed = time() - start
+      if elapsed > 5:
+        remaining = (1 - percentage) * elapsed / percentage
+        bar.suffix = f'{bar.index}/{bar.max} [{percentage * 100:.1f}%%] {seconds_to_time(remaining)}'
+      else:
+        bar.suffix = f'{bar.index}/{bar.max} [{percentage * 100:.1f}%%]'
+  if concurrent:
+    with ThreadPoolExecutor() as executor:
+      futures = [executor.submit(operation, next) for _ in range(bar.max)]
+      result = [future.result() for future in as_completed(futures)]
+  else:
+    result = operation(next)
+  
   next()
   bar.finish()
   return result
