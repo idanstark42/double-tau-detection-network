@@ -1,7 +1,8 @@
 import os
 from time import time
 from progress.bar import IncrementalBar
-from threading import Lock
+from threading import Lock as ThreadingLock
+from multiprocessing import Lock as MultiprocessingLock
 
 from settings import DATA_DIR
 
@@ -25,10 +26,10 @@ def print_map (map):
     print('#')
   print('#' * map.shape[0] + '##')
 
-def long_operation (operation, **kwargs):
+def long_operation (operation, multiprocessing=False, **kwargs):
   bar = IncrementalBar(**kwargs)
   start = time()
-  lock = Lock()
+  lock = MultiprocessingLock() if multiprocessing else ThreadingLock()
 
   def next (step=1):
     with lock:
@@ -40,6 +41,8 @@ def long_operation (operation, **kwargs):
         bar.suffix = f'{bar.index}/{bar.max} [{percentage * 100:.1f}%%] {seconds_to_time(remaining)}'
       else:
         bar.suffix = f'{bar.index}/{bar.max} [{percentage * 100:.1f}%%]'
+
+  bar.start()
   result = operation(next)
   next()
   bar.finish()
