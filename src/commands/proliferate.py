@@ -17,15 +17,16 @@ def proliferate (dataset, factor):
   print('inverting')
   keys = dataset.raw_data.keys()
   values = zip(*dataset.raw_data.values())
+  events = [None] * len(dataset)
   def load_events (next):
-    def build_event_dict (v):
-      event_dict = dict(zip(keys, v))
+    def build_event_dict (value, index):
+      events[index] = dict(zip(keys, value))
       next()
-      return event_dict
     
     with ThreadPoolExecutor() as executor:
-      events = [executor.submit(build_event_dict, v) for v in values]
-      return [event for event in as_completed(events)]
+      [executor.submit(build_event_dict, value, index) for index, value in enumerate(values)]
+      executor.shutdown(wait=True)
+    return events
   original_events = long_operation(load_events, max=len(dataset), message='Loading events')
   print('inverted')
 
