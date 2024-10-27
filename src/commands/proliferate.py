@@ -8,6 +8,7 @@ from utils import long_operation, transform_into_range
 from visualization import DatasetVisualizer
 
 def proliferate (dataset, factor):
+  print('Proliferating.')
   output_file = dataset.source_file.replace('.h5', f'_x{factor}.h5')
   initial_count = len(dataset)
 
@@ -19,7 +20,7 @@ def proliferate (dataset, factor):
     print('Initializing output file')
     for key in dataset.raw_data:
       print(f'Creating dataset for {key}')
-      output.create_dataset(key, data=dataset.raw_data[key], compression='gzip', chunks=True)
+      output.create_dataset(key, data=dataset.raw_data[key], compression='gzip', chunks=True, maxshape=(None, *dataset.raw_data[key].shape[1:]))
       output[key].resize((output[key].shape[0] * factor), axis=0)
     
     print('Generating copies')

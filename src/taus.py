@@ -27,6 +27,11 @@ if __name__ == '__main__':
     show(dataset, scope, params)
     exit()
 
+  if command == 'proliferate':
+    factor = int(params.get('factor', 10))
+    proliferate(dataset, factor)
+    exit()
+
   params = { key: value for key, value in [variable.split('=') for variable in sys.argv[2:]] }
   model = params.get('model', 'small')
   use_post_processing = params.get('post_processing', 'false') == 'true'
@@ -46,11 +51,6 @@ if __name__ == '__main__':
   if command == 'detect':
     model_file = modelfolder_path(params.get('weights', 'model_' + str(round(time.time() * 1000)))) + '\\model.pth'
     detect(dataset, module, model_file)
-    exit()
-
-  if command == 'proliferate':
-    factor = int(params.get('factor', 10))
-    proliferate(dataset, factor)
     exit()
 
   print(f'Unknown command: {command}')

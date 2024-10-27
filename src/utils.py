@@ -26,7 +26,7 @@ def print_map (map):
     print('#')
   print('#' * map.shape[0] + '##')
 
-def long_operation (operation, multiprocessing=False, **kwargs):
+def long_operation (operation, multiprocessing=False, ending_message=False, **kwargs):
   bar = IncrementalBar(**kwargs)
   start = time()
   lock = MultiprocessingLock() if multiprocessing else ThreadingLock()
@@ -45,6 +45,8 @@ def long_operation (operation, multiprocessing=False, **kwargs):
   bar.start()
   result = operation(next)
   next()
+  if ending_message:
+    bar.suffix = ending_message()
   bar.finish()
   return result
 
