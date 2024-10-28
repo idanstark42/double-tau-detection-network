@@ -28,26 +28,26 @@ def proliferate (dataset, factor):
       print(f'Created dataset for {key} in {seconds_to_time(time.time() - dataset_creation_start_time)}')
     output_file_time = time.time()
     print(f'Initialized output file in {seconds_to_time(output_file_time - start)}')
-    
+    chunk_size = 1000
+    print('creating chunks')
+    chunks = [range(index, min(index + chunk_size, len(dataset))) for index in range(0, len(dataset), chunk_size)]
+    print('chunks created')
+
     print('Generating copies')
     copy_start_time = time.time()
     def run (next):
       manager = Manager()
       shared_data = manager.dict({ key: list(dataset.raw_data[key]) for key in keys })
       shared_keys = manager.list(keys)
-      def sharable_list_from_indices (list, indices):
-        return manager.list([[list[index] + len(dataset) * copy_index for index in indices] for copy_index in range(factor - 1)].flatten())
+      sharable_flips = manager.list(flips)
+      sharable_rotations = manager.list(rotations)
       with ProcessPoolExecutor() as executor:
-          # split the dataset into chunks and process them in parallel
-          chunk_size = 1000
-          chunks = [range(index, min(index + chunk_size, len(dataset))) for index in range(0, len(dataset), chunk_size)]
-          futures = [run_with_next(lambda: executor.submit(transform_multiple, indices, factor, shared_data, shared_keys, sharable_list_from_indices(flips, indices), sharable_list_from_indices(rotations, indices)), next) for indices in chunks]
-          copy_chunks = [future.result() for future in as_completed(futures)]
-          for key in keys:
-            for copy_cunk_index, copy_chunk in enumerate(copy_chunks):
-              start_index = len(dataset) + copy_cunk_index * chunk_size * factor
-              end_index = start_index + len(copy_chunk[key])
-              output[key][start_index:end_index] = copy_chunk[key]
+        futures = [run_with_next(lambda: executor.submit(transform_multiple, indices, factor, len(dataset), shared_data, shared_keys, sharable_flips, sharable_rotations), next) for indices in chunks]
+        copy_chunks = [future.result() for future in as_completed(futures)]
+        for key in keys:
+          for copy_cunk_index, copy_chunk in enumerate(copy_chunks):
+            start_index = len(dataset) + copy_cunk_index * chunk_size * (factor - 1)
+            output[key][start_index:start_index + chunk_size * (factor - 1)] = copy_chunk[key]
 
     long_operation(run, max=len(dataset), message=f'Proliferating', multiprocessing=True)
     print(f'Generated copies in {seconds_to_time(time.time() - copy_start_time)}')
@@ -62,9 +62,19 @@ def run_with_next (operation, next):
   future.add_done_callback(lambda _: next())
   return future
 
-def transform_multiple (indices, shared_data, shared_keys, flips, rotations):
-  events = [transform(index, shared_data, shared_keys, flips[index], rotations[index]) for index in indices]
-  return { key: np.concatenate([event[key] for event in events], axis=0) for key in shared_keys }
+def transform_multiple (indices, factor, dataset_length, data, keys, flips, rotations):
+  flips = extended_list_from_indices(flips, factor, dataset_length, indices)
+  rotations = extended_list_from_indices(rotations, factor, dataset_length, indices)
+  result = { key: [None] * len(indices) * (factor - 1) for key in keys }
+  for index in indices:
+    for copy_index in range(factor - 1):
+      copy = transform(index, data, keys, flips[index + copy_index], rotations[index + copy_index])
+      for key in keys:
+        result[key][index * (factor - 1) + copy_index] = copy[key]
+  return result
+
+def extended_list_from_indices (list, factor, dataset_length, indices):
+  return [[list[index] + dataset_length * copy_index for index in indices] for copy_index in range(factor - 1)].flatten()
 
 def transform (event_index, original_data, keys, flipping, rotation):
   copy = { key: np.copy(original_data[key][event_index]) for key in keys }
