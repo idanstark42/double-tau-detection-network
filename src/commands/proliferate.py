@@ -19,7 +19,6 @@ def proliferate (dataset, factor):
   keys = list(dataset.raw_data.keys())
 
   with h5py.File(output_file, 'w') as output:
-    breakpoint()
     print('Initializing output file')
     for key in dataset.raw_data:
       if output.get(key) and output[key].shape[0] == len(dataset) * factor:
@@ -31,7 +30,9 @@ def proliferate (dataset, factor):
         output[key].resize((output[key].shape[0] * factor), axis=0)
         print(f'Created dataset for {key} in {seconds_to_time(time.time() - dataset_creation_start_time)}')
     output_file_time = time.time()
+    output.flush()
     print(f'Initialized output file in {seconds_to_time(output_file_time - start)}')
+
     chunk_size = 1000
     print('creating chunks')
     chunks = [range(index, min(index + chunk_size, len(dataset))) for index in range(0, len(dataset), chunk_size)]
