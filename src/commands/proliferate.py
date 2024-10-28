@@ -46,6 +46,7 @@ def proliferate (dataset, factor):
       shared_keys = manager.list(keys)
       sharable_flips = manager.list(flips)
       sharable_rotations = manager.list(rotations)
+      print('starting multiprocessing')
       with ProcessPoolExecutor() as executor:
         futures = [run_with_next(lambda: executor.submit(transform_multiple, indices, factor, len(dataset), shared_data, shared_keys, sharable_flips, sharable_rotations), next) for indices in chunks]
         copy_chunks = [future.result() for future in as_completed(futures)]
