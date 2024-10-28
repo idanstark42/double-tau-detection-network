@@ -19,9 +19,9 @@ def proliferate (dataset, factor):
   keys = list(dataset.raw_data.keys())
 
   with h5py.File(output_file, 'w') as output:
+    breakpoint()
     print('Initializing output file')
     for key in dataset.raw_data:
-      print(output[key].shape[0])
       if output.get(key) and output[key].shape[0] == len(dataset) * factor:
         print(f'Dataset for {key} already exists in output file')
       else:
