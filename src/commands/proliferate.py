@@ -85,7 +85,7 @@ def transform_multiple (indices, factor, dataset_length, source_file, sourcce_fi
   return result
 
 def extended_list_from_indices (list, factor, dataset_length, indices):
-  return [[list[index] + dataset_length * copy_index for index in indices] for copy_index in range(factor - 1)].flatten()
+  return [list[index] + dataset_length * copy_index for index in indices for copy_index in range(factor - 1)]
 
 def transform (event_index, source_file, sourcce_file_access_lock, keys, flipping, rotation):
   with sourcce_file_access_lock:
