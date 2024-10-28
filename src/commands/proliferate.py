@@ -26,11 +26,11 @@ def proliferate (dataset, factor):
       else:
         print(f'Creating dataset for {key}')
         dataset_creation_start_time = time.time()
-        output.create_dataset(key, data=dataset.raw_data[key], compression='gzip', chunks=True, maxshape=(None, *dataset.raw_data[key].shape[1:]))
+        output.create_dataset(key, data=dataset.raw_data[key][:], compression='gzip', chunks=True, maxshape=(None, *dataset.raw_data[key].shape[1:]))
         output[key].resize((output[key].shape[0] * factor), axis=0)
         print(f'Created dataset for {key} in {seconds_to_time(time.time() - dataset_creation_start_time)}')
-    output_file_time = time.time()
     output.flush()
+    output_file_time = time.time()
     print(f'Initialized output file in {seconds_to_time(output_file_time - start)}')
 
     chunk_size = 1000
@@ -38,15 +38,18 @@ def proliferate (dataset, factor):
     chunks = [range(index, min(index + chunk_size, len(dataset))) for index in range(0, len(dataset), chunk_size)]
     print('chunks created')
 
+    manager = Manager()
+    print('Creating shared data')
+    shared_data = manager.dict({ key: list(dataset.raw_data[key]) for key in keys })
+    print('Creating shared keys')
+    shared_keys = manager.list(keys)
+    print('Creating shared flips and rotations')
+    sharable_flips = manager.list(flips)
+    sharable_rotations = manager.list(rotations)
+
     print('Generating copies')
     copy_start_time = time.time()
     def run (next):
-      manager = Manager()
-      shared_data = manager.dict({ key: list(dataset.raw_data[key]) for key in keys })
-      shared_keys = manager.list(keys)
-      sharable_flips = manager.list(flips)
-      sharable_rotations = manager.list(rotations)
-      print('starting multiprocessing')
       with ProcessPoolExecutor() as executor:
         futures = [run_with_next(lambda: executor.submit(transform_multiple, indices, factor, len(dataset), shared_data, shared_keys, sharable_flips, sharable_rotations), next) for indices in chunks]
         copy_chunks = [future.result() for future in as_completed(futures)]
