@@ -1,3 +1,4 @@
+import os
 import numpy as np
 from concurrent.futures import ProcessPoolExecutor, as_completed
 from multiprocessing import Manager
@@ -49,7 +50,7 @@ def proliferate (dataset, factor):
   sharable_rotations = manager.list(rotations)
 
   def create_copies (next):
-    with ProcessPoolExecutor() as executor:
+    with ProcessPoolExecutor(max_workers=os.cpu_count() / 2) as executor:
       futures = [run_with_next(lambda: executor.submit(transform_chunk, indices, factor, len(dataset), file, file_access_lock, shared_keys, sharable_flips, sharable_rotations), next) for indices in chunks]
       return [future.result() for future in as_completed(futures)]
     
