@@ -5,7 +5,7 @@ import h5py
 import time
 
 from settings import PHI_RANGE
-from utils import long_operation, transform_into_range
+from utils import long_operation, transform_into_range, seconds_to_time
 from visualization import DatasetVisualizer
 
 def proliferate (dataset, factor):
@@ -25,36 +25,46 @@ def proliferate (dataset, factor):
       dataset_creation_start_time = time.time()
       output.create_dataset(key, data=dataset.raw_data[key], compression='gzip', chunks=True, maxshape=(None, *dataset.raw_data[key].shape[1:]))
       output[key].resize((output[key].shape[0] * factor), axis=0)
-      print(f'Created dataset for {key} in {time.time() - dataset_creation_start_time:.2f}s')
-    output_file_time = time.time() - start
-    print(f'Initialized output file in {output_file_time:.2f}s')
+      print(f'Created dataset for {key} in {seconds_to_time(time.time() - dataset_creation_start_time)}')
+    output_file_time = time.time()
+    print(f'Initialized output file in {seconds_to_time(output_file_time - start)}')
     
     print('Generating copies')
-    for copy_index in range(factor - 1):
-      copy_start_time = time.time()
-      def run (next):
-        manager = Manager()
-        shared_data = manager.dict({ key: list(dataset.raw_data[key]) for key in keys })
-        shared_keys = manager.list(keys)
-        with ProcessPoolExecutor() as executor:
-            futures = [run_with_next(lambda: executor.submit(transform, index, shared_data, shared_keys, flips[copy_index * len(dataset) + index], rotations[copy_index * len(dataset) + index]), next) for index in range(len(dataset))]
-            copies = [future.result() for future in as_completed(futures)]
-            for key in keys:
-              dataset.raw_data[key][copy_index * len(dataset):(copy_index + 1) * len(dataset)] = copies[key]
+    copy_start_time = time.time()
+    def run (next):
+      manager = Manager()
+      shared_data = manager.dict({ key: list(dataset.raw_data[key]) for key in keys })
+      shared_keys = manager.list(keys)
+      def sharable_list_from_indices (list, indices):
+        return manager.list([[list[index] + len(dataset) * copy_index for index in indices] for copy_index in range(factor - 1)].flatten())
+      with ProcessPoolExecutor() as executor:
+          # split the dataset into chunks and process them in parallel
+          chunk_size = 1000
+          chunks = [range(index, min(index + chunk_size, len(dataset))) for index in range(0, len(dataset), chunk_size)]
+          futures = [run_with_next(lambda: executor.submit(transform_multiple, indices, factor, shared_data, shared_keys, sharable_list_from_indices(flips, indices), sharable_list_from_indices(rotations, indices)), next) for indices in chunks]
+          copy_chunks = [future.result() for future in as_completed(futures)]
+          for key in keys:
+            for copy_cunk_index, copy_chunk in enumerate(copy_chunks):
+              start_index = len(dataset) + copy_cunk_index * chunk_size * factor
+              end_index = start_index + len(copy_chunk[key])
+              output[key][start_index:end_index] = copy_chunk[key]
 
-      long_operation(run, max=len(dataset), message=f'Proliferating ({copy_index + 1}/{factor - 1})', multiprocessing=True)
-      print(f'Generated copies {copy_index + 1}/{factor - 1} in {time.time() - copy_start_time:.2f}s')
+    long_operation(run, max=len(dataset), message=f'Proliferating', multiprocessing=True)
+    print(f'Generated copies in {seconds_to_time(time.time() - copy_start_time)}')
 
   print()
-  print(f'Done in {time.time() - start:.2f}s')
+  print(f'Done in {seconds_to_time(time.time() - start)}')
   print(f'Proliferated {initial_count} events by a factor of {factor} to {len(dataset)}')
-  dataset.save(dataset.source_file.replace('.h5', f'_x{factor}.h5'))
   DatasetVisualizer(dataset).show_proliferation(len([flipping for flipping in flips if flipping]), rotations)
 
 def run_with_next (operation, next):
   future = operation()
   future.add_done_callback(lambda _: next())
   return future
+
+def transform_multiple (indices, shared_data, shared_keys, flips, rotations):
+  events = [transform(index, shared_data, shared_keys, flips[index], rotations[index]) for index in indices]
+  return { key: np.concatenate([event[key] for event in events], axis=0) for key in shared_keys }
 
 def transform (event_index, original_data, keys, flipping, rotation):
   copy = { key: np.copy(original_data[key][event_index]) for key in keys }
