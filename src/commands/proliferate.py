@@ -40,8 +40,6 @@ def proliferate (dataset, factor):
 
   manager = Manager()
   file_access_lock = manager.Lock()
-  # print('Creating shared data')
-  # shared_data = manager.dict({ key: list(dataset.raw_data[key]) for key in keys })
   file = dataset.source_file
   print('Creating shared keys')
   shared_keys = manager.list(keys)
@@ -50,7 +48,7 @@ def proliferate (dataset, factor):
   sharable_rotations = manager.list(rotations)
 
   def create_copies (next):
-    with ProcessPoolExecutor(max_workers=int(os.cpu_count() / 2)) as executor:
+    with ProcessPoolExecutor() as executor:
       futures = [run_with_next(lambda: executor.submit(transform_chunk, indices, factor, len(dataset), file, file_access_lock, shared_keys, sharable_flips, sharable_rotations), next) for indices in chunks]
       return [future.result() for future in as_completed(futures)]
     
@@ -77,24 +75,25 @@ def run_with_next (operation, next):
   future.add_done_callback(lambda _: next())
   return future
 
-def transform_chunk (indices, factor, dataset_length, source_file, sourcce_file_access_lock, keys, flips, rotations):
+def transform_chunk (indices, factor, dataset_length, source_file, source_file_access_lock, keys, flips, rotations):
   flips = extended_list_from_indices(flips, factor, dataset_length, indices)
   rotations = extended_list_from_indices(rotations, factor, dataset_length, indices)
   result = { key: [None] * len(indices) * (factor - 1) for key in keys }
-  for lists_index, data_index in enumerate(indices):
+  with source_file_access_lock:
+    with h5py.File(source_file, 'r') as original_data:
+      originals = [{ key: original_data[key][index] for key in keys } for index in indices]
+  for index in range(len(indices)):
     for copy_index in range(factor - 1):
-      copy = transform(data_index, source_file, sourcce_file_access_lock, keys, flips[lists_index * (factor - 1) + copy_index], rotations[lists_index * (factor - 1) + copy_index])
+      copy = transform(originals[index], keys, flips[index * (factor - 1) + copy_index], rotations[index * (factor - 1) + copy_index])
       for key in keys:
-        result[key][lists_index * (factor - 1) + copy_index] = copy[key]
+        result[key][index * (factor - 1) + copy_index] = copy[key]
   return result
 
 def extended_list_from_indices (list, factor, dataset_length, indices):
   return [list[index] + dataset_length * copy_index for index in indices for copy_index in range(factor - 1)]
 
-def transform (event_index, source_file, sourcce_file_access_lock, keys, flipping, rotation):
-  with sourcce_file_access_lock:
-    with h5py.File(source_file, 'r') as original_data:
-      copy = { key: np.copy(original_data[key][event_index]) for key in keys }
+def transform (original, keys, flipping, rotation):
+  copy = { key: np.copy(original[key]) for key in keys }
   flip(copy, flipping)
   rotate(copy, rotation)
   return copy
