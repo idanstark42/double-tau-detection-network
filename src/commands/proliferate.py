@@ -27,7 +27,7 @@ def proliferate (dataset, factor):
     for copy_index in range(factor - 1):
       def run (next):
         manager = Manager()
-        shared_data = manager.dict({ key: dataset.raw_data[key] for key in keys })
+        shared_data = manager.dict({ key: list(dataset.raw_data[key]) for key in keys })
         shared_keys = manager.list(keys)
         with ProcessPoolExecutor() as executor:
             futures = [run_with_next(lambda: executor.submit(transform, index, shared_data, shared_keys, flips[copy_index * len(dataset) + index], rotations[copy_index * len(dataset) + index]), next) for index in range(len(dataset))]
