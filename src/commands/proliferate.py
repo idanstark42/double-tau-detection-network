@@ -29,39 +29,40 @@ def proliferate (dataset, factor):
         output.create_dataset(key, data=dataset.raw_data[key][:], compression='gzip', chunks=True, maxshape=(None, *dataset.raw_data[key].shape[1:]))
         output[key].resize((output[key].shape[0] * factor), axis=0)
         print(f'Created dataset for {key} in {seconds_to_time(time.time() - dataset_creation_start_time)}')
-    output.flush()
     output_file_time = time.time()
     print(f'Initialized output file in {seconds_to_time(output_file_time - start)}')
 
-    chunk_size = 1000
-    print('creating chunks')
-    chunks = [range(index, min(index + chunk_size, len(dataset))) for index in range(0, len(dataset), chunk_size)]
-    print('chunks created')
+  chunk_size = 1000
+  print('creating chunks')
+  chunks = [range(index, min(index + chunk_size, len(dataset))) for index in range(0, len(dataset), chunk_size)]
+  print('chunks created')
 
-    manager = Manager()
-    file_access_lock = manager.Lock()
-    # print('Creating shared data')
-    # shared_data = manager.dict({ key: list(dataset.raw_data[key]) for key in keys })
-    file = dataset.source_file
-    print('Creating shared keys')
-    shared_keys = manager.list(keys)
-    print('Creating shared flips and rotations')
-    sharable_flips = manager.list(flips)
-    sharable_rotations = manager.list(rotations)
+  manager = Manager()
+  file_access_lock = manager.Lock()
+  # print('Creating shared data')
+  # shared_data = manager.dict({ key: list(dataset.raw_data[key]) for key in keys })
+  file = dataset.source_file
+  print('Creating shared keys')
+  shared_keys = manager.list(keys)
+  print('Creating shared flips and rotations')
+  sharable_flips = manager.list(flips)
+  sharable_rotations = manager.list(rotations)
 
-    print('Generating copies')
-    copy_start_time = time.time()
-    def run (next):
-      with ProcessPoolExecutor() as executor:
-        futures = [run_with_next(lambda: executor.submit(transform_multiple, indices, factor, len(dataset), file, file_access_lock, shared_keys, sharable_flips, sharable_rotations), next) for indices in chunks]
-        copy_chunks = [future.result() for future in as_completed(futures)]
-        for key in keys:
-          for copy_cunk_index, copy_chunk in enumerate(copy_chunks):
-            start_index = len(dataset) + copy_cunk_index * chunk_size * (factor - 1)
-            output[key][start_index:start_index + chunk_size * (factor - 1)] = copy_chunk[key]
+  print('Generating copies')
+  copy_start_time = time.time()
+  def create_copies (next):
+    with ProcessPoolExecutor() as executor:
+      futures = [run_with_next(lambda: executor.submit(transform_multiple, indices, factor, len(dataset), file, file_access_lock, shared_keys, sharable_flips, sharable_rotations), next) for indices in chunks]
+      return [future.result() for future in as_completed(futures)]
 
-    long_operation(run, max=len(dataset), message=f'Proliferating', multiprocessing=True)
-    print(f'Generated copies in {seconds_to_time(time.time() - copy_start_time)}')
+  copy_chunks = long_operation(create_copies, max=len(chunks), message=f'Proliferating', multiprocessing=True)
+
+  def add_copies (next):
+    with ProcessPoolExecutor() as executor:
+      futures = [run_with_next(lambda: executor.submit(add_chunk, manager.dict(copy_chunks[index]), index, len(dataset), chunk_size, factor, output_file, file_access_lock, keys), next) for index in range(len(copy_chunks))]
+      [future.result() for future in as_completed(futures)]
+
+  long_operation(add_copies, max=len(copy_chunks), message='Saving copies', multiprocessing=True)
 
   print()
   print(f'Done in {seconds_to_time(time.time() - start)}')
@@ -77,11 +78,11 @@ def transform_multiple (indices, factor, dataset_length, source_file, sourcce_fi
   flips = extended_list_from_indices(flips, factor, dataset_length, indices)
   rotations = extended_list_from_indices(rotations, factor, dataset_length, indices)
   result = { key: [None] * len(indices) * (factor - 1) for key in keys }
-  for index in indices:
+  for lists_index, data_index in enumerate(indices):
     for copy_index in range(factor - 1):
-      copy = transform(index, source_file, sourcce_file_access_lock, keys, flips[index + copy_index], rotations[index + copy_index])
+      copy = transform(data_index, source_file, sourcce_file_access_lock, keys, flips[lists_index * (factor - 1) + copy_index], rotations[lists_index * (factor - 1) + copy_index])
       for key in keys:
-        result[key][index * (factor - 1) + copy_index] = copy[key]
+        result[key][lists_index * (factor - 1) + copy_index] = copy[key]
   return result
 
 def extended_list_from_indices (list, factor, dataset_length, indices):
@@ -109,3 +110,10 @@ def rotate (event, by):
 
 def rotate_angles(angles, by):
   return transform_into_range(angles + by, PHI_RANGE)
+
+def add_chunk (chunk, index, dataset_length, chunk_size, factor, output_file, file_access_lock, keys):
+  with file_access_lock:
+    with h5py.File(output_file, 'a') as output:
+      for key in keys:
+        start_index = dataset_length + index * chunk_size * (factor - 1)
+        output[key][start_index:start_index + chunk_size * (factor - 1)] = chunk[key]
