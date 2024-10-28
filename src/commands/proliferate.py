@@ -2,6 +2,7 @@ import numpy as np
 from concurrent.futures import ProcessPoolExecutor, as_completed
 from multiprocessing import Manager
 import h5py
+import time
 
 from settings import PHI_RANGE
 from utils import long_operation, transform_into_range
@@ -9,6 +10,7 @@ from visualization import DatasetVisualizer
 
 def proliferate (dataset, factor):
   print('Proliferating.')
+  start = time.time()
   output_file = dataset.source_file.replace('.h5', f'_x{factor}.h5')
   initial_count = len(dataset)
 
@@ -20,11 +22,16 @@ def proliferate (dataset, factor):
     print('Initializing output file')
     for key in dataset.raw_data:
       print(f'Creating dataset for {key}')
+      dataset_creation_start_time = time.time()
       output.create_dataset(key, data=dataset.raw_data[key], compression='gzip', chunks=True, maxshape=(None, *dataset.raw_data[key].shape[1:]))
       output[key].resize((output[key].shape[0] * factor), axis=0)
+      print(f'Created dataset for {key} in {time.time() - dataset_creation_start_time:.2f}s')
+    output_file_time = time.time() - start
+    print(f'Initialized output file in {output_file_time:.2f}s')
     
     print('Generating copies')
     for copy_index in range(factor - 1):
+      copy_start_time = time.time()
       def run (next):
         manager = Manager()
         shared_data = manager.dict({ key: list(dataset.raw_data[key]) for key in keys })
@@ -36,8 +43,10 @@ def proliferate (dataset, factor):
               dataset.raw_data[key][copy_index * len(dataset):(copy_index + 1) * len(dataset)] = copies[key]
 
       long_operation(run, max=len(dataset), message=f'Proliferating ({copy_index + 1}/{factor - 1})', multiprocessing=True)
+      print(f'Generated copies {copy_index + 1}/{factor - 1} in {time.time() - copy_start_time:.2f}s')
 
-  print('Done.')
+  print()
+  print(f'Done in {time.time() - start:.2f}s')
   print(f'Proliferated {initial_count} events by a factor of {factor} to {len(dataset)}')
   dataset.save(dataset.source_file.replace('.h5', f'_x{factor}.h5'))
   DatasetVisualizer(dataset).show_proliferation(len([flipping for flipping in flips if flipping]), rotations)
