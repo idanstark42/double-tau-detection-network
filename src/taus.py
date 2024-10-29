@@ -19,19 +19,20 @@ if __name__ == '__main__':
     exit()
 
   from settings import DATA_FILE
-  dataset = EventsDataset(datafile_path(DATA_FILE))
+  params = { key: value for key, value in [variable.split('=') for variable in sys.argv[2:]] }
+  dataset_file = datafile_path(params.get('src', DATA_FILE))
+
+  if command == 'proliferate':
+    factor = int(params.get('factor', 10))
+    proliferate(dataset_file, factor)
+    exit()
+  
+  dataset = EventsDataset(dataset_file)
 
   if command == 'show':
     scope = sys.argv[2]
     params = sys.argv[3:]
     show(dataset, scope, params)
-    exit()
-
-  params = { key: value for key, value in [variable.split('=') for variable in sys.argv[2:]] }
-
-  if command == 'proliferate':
-    factor = int(params.get('factor', 10))
-    proliferate(dataset, factor)
     exit()
 
   model = params.get('model', 'small')
