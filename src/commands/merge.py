@@ -22,21 +22,21 @@ def create_output_file (output_file, input_file):
         "tracks",
         data=tracks,
         compression="gzip",
-        chunks=(1, tracks.shape[0]),
+        chunks=(1, tracks.shape[1]),
         maxshape=(None, tracks.shape[1]),
       )
       output.create_dataset(
         "clusters",
         data=clusters,
         compression="gzip",
-        chunks=(1, clusters.shape[0]),
+        chunks=(1, clusters.shape[1]),
         maxshape=(None, clusters.shape[1]),
       )
       output.create_dataset(
         "truthTaus",
         data=truthTaus,
         compression="gzip",
-        chunks=(1, truthTaus.shape[0]),
+        chunks=(1, truthTaus.shape[1]),
         maxshape=(None, clusters.shape[1]),
       )
 
