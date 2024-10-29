@@ -4,6 +4,7 @@ import torch
 import numpy as np
 import gc
 import math
+from time import time
 
 from data.event import Event
 from utils import *
@@ -15,6 +16,7 @@ class EventsDataset (Dataset):
     self.dataset_fields = DATASET_FIELDS
     self.use_cache = True
     self.cache = {}
+    self.preloaded = False
     self.load(source_file)
 
     self.cluster_channel_providers = [
@@ -31,7 +33,7 @@ class EventsDataset (Dataset):
     if self.use_cache and index in self.cache:
       return self.cache[index]
     
-    fields = [self.raw_data[field][index] for field in self.dataset_fields]
+    fields = [(self.data if self.preloaded else self.raw_data)[field][index] for field in self.dataset_fields]
 
     item = Event(*fields, **self._fields)
     if self.use_cache:
@@ -56,11 +58,11 @@ class EventsDataset (Dataset):
     # turn inputs and target into torch tensors
     input = torch.tensor(input, dtype=torch.float32)
     target = torch.tensor(target, dtype=torch.float32)
-    
+
     return input, target
 
   def __len__(self):
-    return len(self.raw_data['event'])
+    return len(self.data['event']) if self.preloaded else len(self.raw_data['event'])
   
   def __iter__(self):
     worker_info = torch.utils.data.get_worker_info()
@@ -96,3 +98,12 @@ class EventsDataset (Dataset):
     self.raw_data = h5py.File(source_file, 'r')
 
     self._fields = { f'{field}_fields': [(name, python_name_from_dtype_name(name)) for name in self.raw_data[field].dtype.names] for field in self.dataset_fields }
+
+  def full_preload (self):
+    self.preloaded = True
+    self.data = {}
+    def preload (next):
+      for field in self.dataset_fields:
+        self.data[field] = self.raw_data[field][:]
+        next()
+    long_operation(preload, max=len(self.dataset_fields), message='Preloading')

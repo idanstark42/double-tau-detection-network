@@ -11,7 +11,7 @@ FIELDS_TO_NORMALIZE = {
 }
 
 class Event:
-  def __init__ (self, event, clusters, tracks, truth, event_fields, clusters_fields, tracks_fields, truthTaus_fields):
+  def __init__ (self, event, clusters, tracks, truth, event_fields, clusters_fields, tracks_fields, truthTaus_fields, normalize_fields=False):
     self.average_interactions_per_crossing = event[0]
     self.clusters = [Cluster(cluster, clusters_fields) for cluster in clusters if cluster['valid']]
     self.tracks = [Track(track, tracks_fields) for track in tracks if track['valid']]
@@ -21,6 +21,8 @@ class Event:
     self.tracks = [track for track in self.tracks if track.position().in_range()]
     self.truths = [truth for truth in self.truths if truth.visible_position().in_range()]
 
+    self.normalize_fields = normalize_fields
+
     self._calculateion_cache = {}
     self.clusters_scaler = StandardScaler()
     self.tracks_scaler = StandardScaler()
@@ -29,22 +31,26 @@ class Event:
 
   def normalize (self):
     # normalize clusters
-    normalizable_clusters_fields_values = np.array([[getattr(cluster, field) for cluster in self.clusters] for field in FIELDS_TO_NORMALIZE['clusters']]).T
-    normalized_cluster_fields_values = self.clusters_scaler.fit_transform(normalizable_clusters_fields_values)
+    if self.normalize_fields:
+      normalizable_clusters_fields_values = np.array([[getattr(cluster, field) for cluster in self.clusters] for field in FIELDS_TO_NORMALIZE['clusters']]).T
+      normalized_cluster_fields_values = self.clusters_scaler.fit_transform(normalizable_clusters_fields_values)
     max_energy = max([cluster.cal_e for cluster in self.clusters])
     for index, cluster in enumerate(self.clusters):
       cluster.cal_e /= max_energy
-      for field in FIELDS_TO_NORMALIZE['clusters']:
-        setattr(cluster, field, normalized_cluster_fields_values[index][FIELDS_TO_NORMALIZE['clusters'].index(field)])
+      if self.normalize_fields:
+        for field in FIELDS_TO_NORMALIZE['clusters']:
+          setattr(cluster, field, normalized_cluster_fields_values[index][FIELDS_TO_NORMALIZE['clusters'].index(field)])
     
     # normalize tracks
-    normalizable_tracks_fields_values = np.array([[getattr(track, field) for track in self.tracks] for field in FIELDS_TO_NORMALIZE['tracks']]).T
-    normalized_track_fields_values = self.tracks_scaler.fit_transform(normalizable_tracks_fields_values)
+    if self.normalize_fields:
+      normalizable_tracks_fields_values = np.array([[getattr(track, field) for track in self.tracks] for field in FIELDS_TO_NORMALIZE['tracks']]).T
+      normalized_track_fields_values = self.tracks_scaler.fit_transform(normalizable_tracks_fields_values)
     max_pt = max([track.pt for track in self.tracks])
     for index, track in enumerate(self.tracks):
       track.pt /= max_pt
-      for field in FIELDS_TO_NORMALIZE['tracks']:
-        setattr(track, field, normalized_track_fields_values[index][FIELDS_TO_NORMALIZE['tracks'].index(field)])
+      if self.normalize_fields:
+        for field in FIELDS_TO_NORMALIZE['tracks']:
+          setattr(track, field, normalized_track_fields_values[index][FIELDS_TO_NORMALIZE['tracks'].index(field)])
 
   def calculate_and_cache (self, key, calculation):
     if key not in self._calculateion_cache:

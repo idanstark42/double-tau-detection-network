@@ -9,6 +9,7 @@ from commands.train import train_module
 from commands.eval import evaluate
 from commands.detect import detect
 from commands.proliferate import proliferate
+from commands.merge import merge
 from commands.config import config
 
 if __name__ == '__main__':
@@ -20,11 +21,26 @@ if __name__ == '__main__':
 
   from settings import DATA_FILE
   params = { key: value for key, value in [variable.split('=') for variable in sys.argv[2:]] }
-  dataset_file = datafile_path(params.get('src', DATA_FILE))
+  dataset_file = params.get('ext-src', datafile_path(params.get('src', DATA_FILE)))
 
   if command == 'proliferate':
     factor = int(params.get('factor', 10))
     proliferate(dataset_file, factor)
+    exit()
+
+  if command == 'merge':
+    src = params.get('src', '')
+    ext_src = params.get('ext-src', '')
+    if src:
+      input_files = [datafile_path(file) for file in params.get('src', '').split(',')]
+    elif ext_src:
+      input_files = [file for file in params.get('ext-src', '').split(',')]
+    else:
+      print('No input files specified')
+      exit()
+    output_file = datafile_path(params.get('output', 'merge_' + str(round(time.time() * 1000))))
+
+    merge(input_files, output_file)
     exit()
   
   dataset = EventsDataset(dataset_file)
