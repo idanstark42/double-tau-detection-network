@@ -26,6 +26,7 @@ def train_module(dataset, model, output_folder, options={}):
   criterion = CylindricalLoss()
   
   epochs = int(options.get('epochs', EPOCHS))
+  batch_size = int(options.get('batch_size', BATCH_SIZE))
 
   use_cuda = torch.cuda.is_available()
   if use_cuda:
@@ -45,7 +46,7 @@ def train_module(dataset, model, output_folder, options={}):
   print(f'test set size:                    {len(test_loader.dataset)}')
   print(f'split:                            {split}')
   print('Using Multiprocessing:            ' + ('yes' if using_multiprocessing else 'no'))
-  print(f'Batch Size:                       {BATCH_SIZE}')
+  print(f'Batch Size:                       {batch_size}')
   print(f'Epochs:                           {epochs}')
 
   if preload_type == 'full':
@@ -68,9 +69,9 @@ def train_module(dataset, model, output_folder, options={}):
     for epoch in range(epochs):
       epoch_start_times.append(time.time())
       traintime_start = time.time()
-      training_loss = train(train_loader, model, criterion, optimizer, epoch)
+      training_loss = train(train_loader, model, criterion, optimizer, epoch, batch_size)
       valtime_start = time.time()
-      validation_loss = validate(validation_loader, model, criterion, epoch)
+      validation_loss = validate(validation_loader, model, criterion, epoch, batch_size)
       print("Training time: {:.2f}s, Validation time: {:.2f}s".format(valtime_start - traintime_start, time.time() - valtime_start))
       print("Training Loss: {:.6f}, Validation Loss: {:.6f}".format(training_loss, validation_loss))
       if validation_loss < best_validation_loss:
@@ -89,7 +90,7 @@ def train_module(dataset, model, output_folder, options={}):
   test_start_time = time.time()
   if len(test_loader.dataset) > 0:
     print('2. Testing')
-    test(test_loader, model, criterion, output_folder, dataset, use_cuda)
+    test(test_loader, model, criterion, output_folder, dataset, batch_size, use_cuda)
   else:
     print(' -- skipping testing')
 
@@ -140,7 +141,7 @@ def preload (loader):
   long_operation(run, max=len(dataset), message='Preloading')
 
 # train the model
-def train(train_loader, model, criterion, optimizer, epoch):
+def train(train_loader, model, criterion, optimizer, epoch, batch_size):
   model.train()
   def run (next):
     total_loss = 0
@@ -149,15 +150,15 @@ def train(train_loader, model, criterion, optimizer, epoch):
       output, loss = calc(model, input, target, criterion)
       loss.backward()
       optimizer.step()
-      next(BATCH_SIZE)
+      next(batch_size)
       total_loss += loss.item()
     return total_loss
 
-  total_loss = long_operation(run, max=len(train_loader) * BATCH_SIZE, message=f'Epoch {epoch+1} training', ending_message=lambda l: f'loss: {l / len(train_loader):.4f}')
+  total_loss = long_operation(run, max=len(train_loader) * batch_size, message=f'Epoch {epoch+1} training', ending_message=lambda l: f'loss: {l / len(train_loader):.4f}')
   return total_loss / len(train_loader)
 
 # validate the model
-def validate(val_loader, model, criterion, epoch):
+def validate(val_loader, model, criterion, epoch, batch_size):
   model.eval()
 
   with torch.no_grad():
@@ -165,15 +166,15 @@ def validate(val_loader, model, criterion, epoch):
       total_loss = 0
       for batch_idx, (input, target) in enumerate(val_loader):
         output, loss = calc(model, input, target, criterion)
-        next(BATCH_SIZE)
+        next(batch_size)
         total_loss += loss.item()
       return total_loss
   
-    total_loss = long_operation(run, max=len(val_loader) * BATCH_SIZE, message=f'Epoch {epoch+1} validation', ending_message=lambda l: f'loss: {l / len(val_loader):.4f}')
+    total_loss = long_operation(run, max=len(val_loader) * batch_size, message=f'Epoch {epoch+1} validation', ending_message=lambda l: f'loss: {l / len(val_loader):.4f}')
   return total_loss / len(val_loader)
 
 # test the model
-def test(test_loader, model, criterion, output_folder, dataset, use_cuda=False):
+def test(test_loader, model, criterion, output_folder, dataset, batch_size, use_cuda=False):
   model.eval()
   outputs, targets = [], []
 
@@ -182,13 +183,13 @@ def test(test_loader, model, criterion, output_folder, dataset, use_cuda=False):
       total_loss = 0
       for batch_idx, (input, target) in enumerate(test_loader):
         output, loss = calc(model, input, target, criterion)
-        next(BATCH_SIZE)
+        next(batch_size)
         for index, (output, target) in enumerate(zip(output, target)):
           outputs.append(output)
           targets.append(target)
         total_loss += loss.item()
       return total_loss
-    total_loss = long_operation(run, max=len(test_loader) * BATCH_SIZE, message='Testing ')
+    total_loss = long_operation(run, max=len(test_loader) * batch_size, message='Testing ')
   print(f'\nTest set average loss: {total_loss / len(test_loader):.4f}\n')
 
   if use_cuda:
