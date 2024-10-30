@@ -45,7 +45,7 @@ def long_operation (operation, multiprocessing=False, ending_message=False, **kw
   bar.start()
   result = operation(next)
   if ending_message:
-    bar.suffix = ending_message()
+    bar.suffix = ending_message(result)
   bar.finish()
   return result
 

@@ -4,26 +4,17 @@ import h5py
 import numpy as np
 from utils import long_operation
 
+from settings import ETA_RANGE
+
 def create_output_file (output_file, input_file):
   with h5py.File(input_file, 'r') as input:
     event = input['event'][:]
     tracks = input['tracks'][:]
     clusters = input['clusters'][:]
     truthTaus = input['truthTaus'][:]
-    
-    #Find invalid events (based on ==2 truthTaus with |eta| < 2.5)
-    truthTaus_expanded = np.array(truthTaus.tolist())
-    num_truthtaus = np.sum(~np.isnan(truthTaus_expanded[:,:,0:6]), axis=1)
-    not_two_truthtaus = np.unique(np.where(num_truthtaus != 2)[0])
-    not_two_barrel_Taus = np.unique(np.where(np.abs(truthTaus_expanded[:, :2, 1]) > 2.5)[0])
-    invalid_indices = np.unique(np.concatenate((not_two_truthtaus, not_two_barrel_Taus)))
-    print("Found", len(invalid_indices),"("+str(100*len(invalid_indices)/truthTaus.shape[0])+"%) invalid events, dropping...")
-    #Drop invalid events
-    event = np.delete(event, invalid_indices, axis=0)
-    tracks = np.delete(tracks, invalid_indices, axis=0)
-    clusters = np.delete(clusters, invalid_indices, axis=0)
-    truthTaus = np.delete(truthTaus, invalid_indices, axis=0)
-    
+
+    event, tracks, clusters, truthTaus = clean(event, tracks, clusters, truthTaus)
+  
     with h5py.File(output_file, 'w') as output:
       output.create_dataset(
         "event",
@@ -60,20 +51,9 @@ def append_to_output_file (output_file, input_file):
     tracks = input['tracks'][:]
     clusters = input['clusters'][:]
     truthTaus = input['truthTaus'][:]
-    
-    #Find invalid events (based on ==2 truthTaus with |eta| < 2.5)
-    truthTaus_expanded = np.array(truthTaus.tolist())
-    num_truthtaus = np.sum(~np.isnan(truthTaus_expanded[:,:,0:6]), axis=1)
-    not_two_truthtaus = np.unique(np.where(num_truthtaus != 2)[0])
-    not_two_barrel_Taus = np.unique(np.where(np.abs(truthTaus_expanded[:, :2, 1]) > 2.5)[0])
-    invalid_indices = np.unique(np.concatenate((not_two_truthtaus, not_two_barrel_Taus)))
-    print("Found", len(invalid_indices),"("+100*len(invalid_indices)/truthTaus.shape[0]+"%) invalid events, dropping...")
-    #Drop invalid events
-    event = np.delete(event, invalid_indices, axis=0)
-    tracks = np.delete(tracks, invalid_indices, axis=0)
-    clusters = np.delete(clusters, invalid_indices, axis=0)
-    truthTaus = np.delete(truthTaus, invalid_indices, axis=0)
-    
+
+    event, tracks, clusters, truthTaus = clean(event, tracks, clusters, truthTaus)
+
     with h5py.File(output_file, 'a') as output:
       output['event'].resize((output['event'].shape[0] + event.shape[0]), axis=0)
       output['event'][-event.shape[0]:] = event
@@ -83,6 +63,20 @@ def append_to_output_file (output_file, input_file):
       output['clusters'][-clusters.shape[0]:] = clusters
       output['truthTaus'].resize((output['truthTaus'].shape[0] + truthTaus.shape[0]), axis=0)
       output['truthTaus'][-truthTaus.shape[0]:] = truthTaus
+
+def clean(event, tracks, clusters, truthTaus):
+  #Find invalid events (based on ==2 truthTaus with |eta| < 2.5)
+  truthTaus_expanded = np.array(truthTaus.tolist())
+  num_truthtaus = np.sum(~np.isnan(truthTaus_expanded[:,:,0:truthTaus.shape[1]]), axis=1)
+  not_two_truthtaus = np.unique(np.where(num_truthtaus != 2)[0])
+  not_two_barrel_Taus = np.unique(np.where(np.abs(truthTaus_expanded[:, :2, 1]) > ETA_RANGE[1])[0])
+  invalid_indices = np.unique(np.concatenate((not_two_truthtaus, not_two_barrel_Taus)))
+  #Drop invalid events
+  event = np.delete(event, invalid_indices, axis=0)
+  tracks = np.delete(tracks, invalid_indices, axis=0)
+  clusters = np.delete(clusters, invalid_indices, axis=0)
+  truthTaus = np.delete(truthTaus, invalid_indices, axis=0)
+  return event, tracks, clusters, truthTaus
 
 def merge (input_files, output_file):
   print(f'Merging {len(input_files)} into {output_file}')

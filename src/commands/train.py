@@ -6,7 +6,6 @@ from torch.utils.data import DataLoader
 from torch.optim import Adam
 from torch.utils.data import random_split
 from torch.utils.data.dataloader import default_collate
-from tqdm import tqdm
 
 from utils import long_operation, seconds_to_time
 from visualization import ModelVisualizer
@@ -134,13 +133,11 @@ def generate_dataloader (dataset, device, options):
 
 def preload (loader):
   dataset = loader.dataset
-  for index in tqdm(range(len(dataset))):
-    dataset[index]
-  # def run (next):
-  #   for index in range(len(dataset)):
-  #     dataset[index]
-  #     next(1)
-  # long_operation(run, max=len(dataset), message='Preloading')
+  def run (next):
+    for index in range(len(dataset)):
+      dataset[index]
+      next(1)
+  long_operation(run, max=len(dataset), message='Preloading')
 
 # train the model
 def train(train_loader, model, criterion, optimizer, epoch):
@@ -156,7 +153,7 @@ def train(train_loader, model, criterion, optimizer, epoch):
       total_loss += loss.item()
     return total_loss
 
-  total_loss = long_operation(run, max=len(train_loader) * BATCH_SIZE, message=f'Epoch {epoch+1} training')
+  total_loss = long_operation(run, max=len(train_loader) * BATCH_SIZE, message=f'Epoch {epoch+1} training', ending_message=lambda l: f'loss: {l / len(train_loader):.4f}')
   return total_loss / len(train_loader)
 
 # validate the model
@@ -172,7 +169,7 @@ def validate(val_loader, model, criterion, epoch):
         total_loss += loss.item()
       return total_loss
   
-    total_loss = long_operation(run, max=len(val_loader) * BATCH_SIZE, message=f'Epoch {epoch+1} validation')
+    total_loss = long_operation(run, max=len(val_loader) * BATCH_SIZE, message=f'Epoch {epoch+1} validation', ending_message=lambda l: f'loss: {l / len(val_loader):.4f}')
   return total_loss / len(val_loader)
 
 # test the model

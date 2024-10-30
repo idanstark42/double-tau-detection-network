@@ -33,16 +33,11 @@ class EventsDataset (Dataset):
     if self.use_cache and index in self.cache:
       return self.cache[index]
     
-    #start = time()
     fields = [(self.data if self.preloaded else self.raw_data)[field][index] for field in self.dataset_fields]
-    #fields = [self.arrays[field][index] for field in self.dataset_fields]
-    #load_time = time()
+
     item = Event(*fields, **self._fields)
-    #item_time = time()
     if self.use_cache:
       self.cache[index] = item
-    #cache_time = time()
-    #print(f'Load: {load_time - start:.4f}s, Item: {item_time - load_time:.4f}s, Cache: {cache_time - item_time:.4f}s')
     return item
 
   def __getitem__(self, index):
@@ -102,11 +97,7 @@ class EventsDataset (Dataset):
     self.source_file = source_file
     self.raw_data = h5py.File(source_file, 'r')
 
-    self.nevts = self.raw_data['event'].shape[0]
     self._fields = { f'{field}_fields': [(name, python_name_from_dtype_name(name)) for name in self.raw_data[field].dtype.names] for field in self.dataset_fields }
-    self.featuredims = {f'{field}':(len(self.raw_data[field][0][0]) if field != 'event' else len(self.raw_data[field][0])) for field in self.dataset_fields}
-    self.constitdims = {f'{field}':(self.raw_data[field].shape[1] if field != 'event' else 1) for field in self.dataset_fields}
-    #self.arrays = {f'{field}':np.array(self.raw_data[field][:].tolist()).reshape(self.nevts, self.constitdims[field], self.featuredims[field]) for field in self.dataset_fields}
   
   def full_preload (self):
     self.preloaded = True
