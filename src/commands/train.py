@@ -6,7 +6,7 @@ from torch.utils.data import DataLoader
 from torch.optim import Adam
 from torch.utils.data import random_split
 from torch.utils.data.dataloader import default_collate
-import numpy as np
+from tqdm import tqdm
 
 from utils import long_operation, seconds_to_time
 from visualization import ModelVisualizer
@@ -25,6 +25,8 @@ def train_module(dataset, model, output_folder, options={}):
 
   optimizer = Adam(model.parameters(), lr=0.001, weight_decay=0.0001)
   criterion = CylindricalLoss()
+  
+  epochs = int(options.get('epochs', EPOCHS))
 
   use_cuda = torch.cuda.is_available()
   if use_cuda:
@@ -45,7 +47,7 @@ def train_module(dataset, model, output_folder, options={}):
   print(f'split:                            {split}')
   print('Using Multiprocessing:            ' + ('yes' if using_multiprocessing else 'no'))
   print(f'Batch Size:                       {BATCH_SIZE}')
-  print(f'Epochs:                           {EPOCHS}')
+  print(f'Epochs:                           {epochs}')
 
   if full_preload:
     dataset.full_preload()
@@ -64,10 +66,14 @@ def train_module(dataset, model, output_folder, options={}):
     if not full_preload:
       preload(train_loader)
       preload(validation_loader)
-    for epoch in range(EPOCHS):
+    for epoch in range(epochs):
       epoch_start_times.append(time.time())
+      traintime_start = time.time()
       training_loss = train(train_loader, model, criterion, optimizer, epoch)
+      valtime_start = time.time()
       validation_loss = validate(validation_loader, model, criterion, epoch)
+      print("Training time: {:.2f}s, Validation time: {:.2f}s".format(valtime_start - traintime_start, time.time() - valtime_start))
+      print("Training Loss: {:.6f}, Validation Loss: {:.6f}".format(training_loss, validation_loss))
       if validation_loss < best_validation_loss:
         best_validation_loss = validation_loss
         best_model = model.state_dict()
@@ -128,16 +134,17 @@ def generate_dataloader (dataset, device, options):
 
 def preload (loader):
   dataset = loader.dataset
-  def run (next):
-    for index in range(len(dataset)):
-      dataset[index]
-      next(1)
-  long_operation(run, max=len(dataset), message='Preloading')
+  for index in tqdm(range(len(dataset))):
+    dataset[index]
+  # def run (next):
+  #   for index in range(len(dataset)):
+  #     dataset[index]
+  #     next(1)
+  # long_operation(run, max=len(dataset), message='Preloading')
 
 # train the model
 def train(train_loader, model, criterion, optimizer, epoch):
   model.train()
-  
   def run (next):
     total_loss = 0
     for batch_idx, (input, target) in enumerate(train_loader):
@@ -149,7 +156,7 @@ def train(train_loader, model, criterion, optimizer, epoch):
       total_loss += loss.item()
     return total_loss
 
-  total_loss = long_operation(run, max=len(train_loader) * BATCH_SIZE, message=f'Epoch {epoch+1} training', ending_message=lambda: f'loss: {total_loss / len(train_loader):.4f}')
+  total_loss = long_operation(run, max=len(train_loader) * BATCH_SIZE, message=f'Epoch {epoch+1} training')
   return total_loss / len(train_loader)
 
 # validate the model
@@ -165,7 +172,7 @@ def validate(val_loader, model, criterion, epoch):
         total_loss += loss.item()
       return total_loss
   
-    total_loss = long_operation(run, max=len(val_loader) * BATCH_SIZE, message=f'Epoch {epoch+1} validation', ending_message=lambda: f'loss: {total_loss / len(val_loader):.4f}')
+    total_loss = long_operation(run, max=len(val_loader) * BATCH_SIZE, message=f'Epoch {epoch+1} validation')
   return total_loss / len(val_loader)
 
 # test the model
