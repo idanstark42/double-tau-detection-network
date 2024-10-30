@@ -19,7 +19,7 @@ def train_module(dataset, model, output_folder, options={}):
     dataset.use_cache = False
     print(' -- cache disabled')
   
-  full_preload = options.get('full_preload', 'false') == 'true'
+  preload_type = options.get('preload', 'none')
   split = int(options.get('split')) if options.get('split') else 1
 
   optimizer = Adam(model.parameters(), lr=0.001, weight_decay=0.0001)
@@ -48,7 +48,7 @@ def train_module(dataset, model, output_folder, options={}):
   print(f'Batch Size:                       {BATCH_SIZE}')
   print(f'Epochs:                           {epochs}')
 
-  if full_preload:
+  if preload_type == 'full':
     dataset.full_preload()
 
   # Train the model
@@ -62,7 +62,7 @@ def train_module(dataset, model, output_folder, options={}):
     train_loader, validation_loader = train_loaders[i], validation_loaders[i]
     if split > 1:
       print(f'Split {i + 1}/{split}')
-    if not full_preload:
+    if preload_type == 'partial':
       preload(train_loader)
       preload(validation_loader)
     for epoch in range(epochs):
