@@ -31,6 +31,7 @@ if __name__ == '__main__':
   if command == 'merge':
     src = params.get('src', '')
     ext_src = params.get('ext-src', '')
+    create_output = params.get('create', 'true') == 'true'
     if src:
       input_files = [datafile_path(file) for file in params.get('src', '').split(',')]
     elif ext_src:
@@ -40,7 +41,7 @@ if __name__ == '__main__':
       exit()
     output_file = datafile_path(params.get('output', 'merge_' + str(round(time.time() * 1000))))
 
-    merge(input_files, output_file)
+    merge(input_files, output_file, create_output)
     exit()
   
   dataset = EventsDataset(dataset_file)

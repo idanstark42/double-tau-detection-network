@@ -78,15 +78,17 @@ def clean(event, tracks, clusters, truthTaus):
   truthTaus = np.delete(truthTaus, invalid_indices, axis=0)
   return event, tracks, clusters, truthTaus
 
-def merge (input_files, output_file):
+def merge (input_files, output_file, create_output=True):
   print(f'Merging {len(input_files)} into {output_file}')
 
   def merge_h5_files(next):
-    create_output_file(output_file, input_files[0])
+    if create_output:
+      create_output_file(output_file, input_files[0])
     next()
     if len(input_files) == 1:
       return
-    for input_file in input_files[1:]:
+    files_to_add = input_files[1:] if create_output else input_files
+    for input_file in files_to_add:
       append_to_output_file(output_file, input_file)
       next()
 
