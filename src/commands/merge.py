@@ -84,12 +84,12 @@ def merge (input_files, output_file, create_output=True):
   if create_output:
     print(f'Creating output file from {input_files[0]}')
     create_output_file(output_file, input_files[0])
-    if len(input_files) == 1:
-      return
   
   files_to_add = input_files[1:] if create_output else input_files
-  for input_file in files_to_add:
-    print(f'Appending {input_file}')
-    append_to_output_file(output_file, input_file)
+
+  if len(files_to_add) > 0:
+    for input_file in files_to_add:
+      print(f'Appending {input_file}')
+      append_to_output_file(output_file, input_file)
 
   print('Merging complete')
