@@ -79,7 +79,7 @@ def clean(event, tracks, clusters, truthTaus):
   return event, tracks, clusters, truthTaus
 
 def merge (input_files, output_file, create_output=True):
-  print(f'Merging {len(input_files)} into {output_file}')
+  print(f'Merging {len(input_files)} files into {output_file}')
 
   def merge_h5_files(next):
     if create_output:
