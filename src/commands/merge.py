@@ -2,7 +2,6 @@
 
 import h5py
 import numpy as np
-from utils import long_operation
 
 from settings import ETA_RANGE
 
@@ -71,6 +70,7 @@ def clean(event, tracks, clusters, truthTaus):
   not_two_truthtaus = np.unique(np.where(num_truthtaus != 2)[0])
   not_two_barrel_Taus = np.unique(np.where(np.abs(truthTaus_expanded[:, :2, 1]) > ETA_RANGE[1])[0])
   invalid_indices = np.unique(np.concatenate((not_two_truthtaus, not_two_barrel_Taus)))
+  print(f'Dropping {len(invalid_indices)} invalid events ({len(invalid_indices)/len(event)*100:.2f}%)')
   #Drop invalid events
   event = np.delete(event, invalid_indices, axis=0)
   tracks = np.delete(tracks, invalid_indices, axis=0)
@@ -81,16 +81,15 @@ def clean(event, tracks, clusters, truthTaus):
 def merge (input_files, output_file, create_output=True):
   print(f'Merging {len(input_files)} files into {output_file}')
 
-  def merge_h5_files(next):
-    if create_output:
-      create_output_file(output_file, input_files[0])
-    next()
+  if create_output:
+    print(f'Creating output file from {input_files[0]}')
+    create_output_file(output_file, input_files[0])
     if len(input_files) == 1:
       return
-    files_to_add = input_files[1:] if create_output else input_files
-    for input_file in files_to_add:
-      append_to_output_file(output_file, input_file)
-      next()
+  
+  files_to_add = input_files[1:] if create_output else input_files
+  for input_file in files_to_add:
+    print(f'Appending {input_file}')
+    append_to_output_file(output_file, input_file)
 
-  long_operation(merge_h5_files, max=len(input_files))
   print('Merging complete')
