@@ -45,6 +45,7 @@ def train_module(dataset, model, output_folder, options={}):
   print(f'validation set size:              {sum([len(loader.dataset) for loader in validation_loaders])}')
   print(f'test set size:                    {len(test_loader.dataset)}')
   print(f'split:                            {split}')
+  print(f'limit:                            {limit if limit else "none"}')
   print('Using Multiprocessing:            ' + ('yes' if using_multiprocessing else 'no'))
   print(f'Batch Size:                       {batch_size}')
   print(f'Epochs:                           {epochs}')
