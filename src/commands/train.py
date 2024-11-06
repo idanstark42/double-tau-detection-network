@@ -1,8 +1,6 @@
 import os
 import time
 import torch
-import torch_xla
-import torch_xla.core.xla_model as xm
 import torch.nn as nn
 from torch.utils.data import DataLoader
 from torch.optim import Adam
@@ -32,19 +30,14 @@ def train_module(dataset, model, output_folder, options={}):
   midsave = int(options.get('midsave', 0))
   batch_size = int(options.get('batch_size', BATCH_SIZE))
 
-  use_xla = options.get('xla', 'false') == 'true'
   use_cuda = torch.cuda.is_available()
-  if use_xla:
-    xla_device = xm.xla_device()
-    model = model.to(xla_device)
-    print('Using Device:                     TPU')
-  elif use_cuda:
+  if use_cuda:
     model = model.cuda()
     print(f'Using Device:                     {torch.cuda.get_device_name(0)}')
   else:
     print('Using Device:                     CPU')
 
-  device = xla_device if use_xla else torch.device('cuda' if use_cuda else 'cpu')
+  device = torch.device('cuda' if use_cuda else 'cpu')
   train_loaders, validation_loaders, test_loader = init_dataloaders(dataset, device, split, options)
   
   using_multiprocessing = int(options.get('num_workers', 0)) > 0
@@ -101,7 +94,7 @@ def train_module(dataset, model, output_folder, options={}):
   test_start_time = time.time()
   if len(test_loader.dataset) > 0:
     print('2. Testing')
-    test(test_loader, model, criterion, output_folder, dataset, batch_size, use_xla, use_cuda)
+    test(test_loader, model, criterion, output_folder, dataset, batch_size, use_xla=False, use_cuda=use_cuda)
   else:
     print(' -- skipping testing')
 
