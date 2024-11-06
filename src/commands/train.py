@@ -1,6 +1,8 @@
 import os
 import time
 import torch
+import torch_xla
+import torch_xla.core.xla_model as xm
 import torch.nn as nn
 from torch.utils.data import DataLoader
 from torch.optim import Adam
@@ -28,16 +30,19 @@ def train_module(dataset, model, output_folder, options={}):
   epochs = int(options.get('epochs', EPOCHS))
   batch_size = int(options.get('batch_size', BATCH_SIZE))
 
+  use_xla = options.get('xla', 'false') == 'true'
   use_cuda = torch.cuda.is_available()
-  if use_cuda:
-    # init multiprocessing
-    torch.multiprocessing.set_start_method('spawn')
+  if use_xla:
+    xla_device = xm.xla_device()
+    model = model.to(xla_device)
+    print('Using Device:                     TPU')
+  elif use_cuda:
     model = model.cuda()
     print(f'Using Device:                     {torch.cuda.get_device_name(0)}')
   else:
-    print('Using Device:                     cpu')
+    print('Using Device:                     CPU')
 
-  device = torch.device('cuda' if use_cuda else 'cpu')
+  device = xla_device if use_xla else torch.device('cuda' if use_cuda else 'cpu')
   train_loaders, validation_loaders, test_loader = init_dataloaders(dataset, device, split, options)
   
   using_multiprocessing = int(options.get('num_workers', 0)) > 0
@@ -90,7 +95,7 @@ def train_module(dataset, model, output_folder, options={}):
   test_start_time = time.time()
   if len(test_loader.dataset) > 0:
     print('2. Testing')
-    test(test_loader, model, criterion, output_folder, dataset, batch_size, use_cuda)
+    test(test_loader, model, criterion, output_folder, dataset, batch_size, use_xla, use_cuda)
   else:
     print(' -- skipping testing')
 
@@ -174,7 +179,7 @@ def validate(val_loader, model, criterion, epoch, batch_size):
   return total_loss / len(val_loader)
 
 # test the model
-def test(test_loader, model, criterion, output_folder, dataset, batch_size, use_cuda=False):
+def test(test_loader, model, criterion, output_folder, dataset, batch_size, use_xla=False, use_cuda=False):
   model.eval()
   outputs, targets = [], []
 
@@ -192,7 +197,7 @@ def test(test_loader, model, criterion, output_folder, dataset, batch_size, use_
     total_loss = long_operation(run, max=len(test_loader) * batch_size, message='Testing ')
   print(f'\nTest set average loss: {total_loss / len(test_loader):.4f}\n')
 
-  if use_cuda:
+  if use_xla or use_cuda:
     outputs = [output.cpu() for output in outputs]
     targets = [target.cpu() for target in targets]
   ModelVisualizer(model).plot_results(outputs, targets, test_loader, dataset, output_folder + '\\testing.png')
