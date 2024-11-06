@@ -23,11 +23,13 @@ def train_module(dataset, model, output_folder, options={}):
   
   preload_type = options.get('preload', 'none')
   split = int(options.get('split')) if options.get('split') else 1
+  limit = int(options.get('limit')) if options.get('limit') else None
 
   optimizer = Adam(model.parameters(), lr=0.001, weight_decay=0.0001)
   criterion = CylindricalLoss()
   
   epochs = int(options.get('epochs', EPOCHS))
+  midsave = int(options.get('midsave', 0))
   batch_size = int(options.get('batch_size', BATCH_SIZE))
 
   use_xla = options.get('xla', 'false') == 'true'
@@ -83,7 +85,11 @@ def train_module(dataset, model, output_folder, options={}):
         best_validation_loss = validation_loss
         best_model = model.state_dict()
       losses.append((training_loss, validation_loss))
+      if midsave != 0 and (epoch + 1) % midsave == 0:
+        torch.save(model.state_dict(), output_folder + f'\\model_{i}_{epoch}.pth')
     dataset.clear_cache()
+    if limit and i == limit - 1:
+      break
 
   # Load the best model
   model.load_state_dict(best_model)
