@@ -38,7 +38,7 @@ class Trainer:
   def train_module(self):
     start_time = time.time()
 
-    optimizer = Adam(self.model.parameters(), lr=0.001, weight_decay=0.0001)
+    self.optimizer = Adam(self.model.parameters(), lr=0.001, weight_decay=0.0001)
     self.criterion = CylindricalLoss()
 
     self.use_cuda = torch.cuda.is_available()
@@ -92,7 +92,7 @@ class Trainer:
       for epoch in range(self.epochs):
         traintime_start = time.time()
         epoch_start_times.append(traintime_start)
-        training_loss = self.train(train_loader, optimizer, epoch)
+        training_loss = self.train(train_loader, epoch)
         valtime_start = time.time()
         validation_loss = self.validate(validation_loader, epoch)
         print(f'Training time: {seconds_to_time(valtime_start - traintime_start)}, Validation time: {seconds_to_time(time.time() - valtime_start)}')
