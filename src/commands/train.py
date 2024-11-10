@@ -34,6 +34,7 @@ class Trainer:
     self.midsave = self.options.get('midsave', 'false') == 'true'
     self.batch_size = int(self.options.get('batch_size', BATCH_SIZE))
     self.use_xla = self.options.get('use_xla', 'false') == 'true'
+    self.persistent_workers = self.options.get('persistent_workers', 'false') == 'true'
 
   def train_module(self):
     start_time = time.time()
@@ -158,7 +159,7 @@ class Trainer:
     pin_memory = num_workers > 0 and self.device.type == 'cpu'
     batch_size = int(self.options.get('batch_size', BATCH_SIZE))
 
-    return DataLoader(dataset, batch_size=batch_size, shuffle=True, collate_fn=self.collate_fn, num_workers=num_workers, pin_memory=pin_memory)
+    return DataLoader(dataset, batch_size=batch_size, shuffle=True, collate_fn=self.collate_fn, num_workers=num_workers, pin_memory=pin_memory, persistent_workers=self.persistent_workers)
 
   def collate_fn (self, x):
     return tuple(x_.to  (self.device, non_blocking=True) for x_ in default_collate(x))
