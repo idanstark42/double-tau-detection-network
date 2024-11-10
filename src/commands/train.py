@@ -147,9 +147,9 @@ class Trainer:
 
     train_loaders, validation_loaders = [], []
     for i in range(split):
-      train_loaders.append(self.generate_dataloader(datasets[i * 2], device, options))
-      validation_loaders.append(self.generate_dataloader(datasets[i * 2 + 1], device, options))
-    test_loader = self.generate_dataloader(datasets[-1], device, options)
+      train_loaders.append(self.generate_dataloader(datasets[i * 2], options))
+      validation_loaders.append(self.generate_dataloader(datasets[i * 2 + 1], options))
+    test_loader = self.generate_dataloader(datasets[-1], options)
     
     return train_loaders, validation_loaders, test_loader
 
