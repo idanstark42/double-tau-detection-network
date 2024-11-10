@@ -14,8 +14,9 @@ class EventsDataset (Dataset):
   def __init__(self, source_file):
     super().__init__()
     self.dataset_fields = DATASET_FIELDS
-    self.use_cache = True
+    self.cache_type = 'events'
     self.cache = {}
+    self.items_cache = {}
     self.preloaded = False
     self.load(source_file)
 
@@ -30,17 +31,19 @@ class EventsDataset (Dataset):
     self.input_channels = len(self.cluster_channel_providers) + len(self.track_channel_providers)
 
   def get_event(self, index):
-    if self.use_cache and index in self.cache:
+    if self.cache_type == 'events' and index in self.cache:
       return self.cache[index]
     
     fields = [(self.data if self.preloaded else self.raw_data)[field][index] for field in self.dataset_fields]
 
     item = Event(*fields, **self._fields)
-    if self.use_cache:
+    if self.cache_type == 'events':
       self.cache[index] = item
     return item
 
   def __getitem__(self, index):
+    if self.cache_type == 'items' and index in self.items_cache:
+      return self.items_cache[index]
     event = self.get_event(index)
 
     clusters_map = event.clusters_map(RESOLUTION, self.cluster_channel_providers)
@@ -58,6 +61,9 @@ class EventsDataset (Dataset):
     # turn inputs and target into torch tensors
     input = torch.tensor(input, dtype=torch.float32)
     target = torch.tensor(target, dtype=torch.float32)
+
+    if self.cache_type == 'items':
+      self.items_cache[index] = (input, target)
 
     return input, target
 

@@ -15,9 +15,8 @@ from settings import EPOCHS, BATCH_SIZE, TRAINING_PERCENTAGE, VALIDATION_PERCENT
 def train_module(dataset, model, output_folder, options={}):
   start_time = time.time()
 
-  if options.get('cache') == 'false':
-    dataset.use_cache = False
-    print(' -- cache disabled')
+  cache_type = options.get('cache', 'events')
+  dataset.cache_type = cache_type
   
   preload_type = options.get('preload', 'none')
   split = int(options.get('split')) if options.get('split') else 1
@@ -27,7 +26,7 @@ def train_module(dataset, model, output_folder, options={}):
   criterion = CylindricalLoss()
   
   epochs = int(options.get('epochs', EPOCHS))
-  midsave = int(options.get('midsave', 0))
+  midsave = options.get('midsave', 'false') == 'true'
   batch_size = int(options.get('batch_size', BATCH_SIZE))
 
   use_cuda = torch.cuda.is_available()
@@ -79,11 +78,11 @@ def train_module(dataset, model, output_folder, options={}):
         best_validation_loss = validation_loss
         best_model = model.state_dict()
       losses.append((training_loss, validation_loss))
-      if midsave != 0 and (epoch + 1) % midsave == 0:
-        torch.save(model.state_dict(), output_folder + f'\\model_{i}_{epoch}.pth')
     dataset.clear_cache()
     if limit and i == limit - 1:
       break
+    if midsave:
+      torch.save(model.state_dict(), output_folder + f'\\model_{i}_{epoch}.pth')
 
   # Load the best model
   model.load_state_dict(best_model)
