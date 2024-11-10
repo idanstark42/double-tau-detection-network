@@ -145,10 +145,11 @@ def generate_dataloader (dataset, device, options):
   num_workers = int(options.get('num_workers', 0))
   pin_memory = num_workers > 0
   batch_size = int(options.get('batch_size', BATCH_SIZE))
-  return DataLoader(dataset, batch_size=batch_size, shuffle=True, collate_fn=collate_fn, num_workers=num_workers, pin_memory=pin_memory)
 
-def collate_fn (x):
-  return tuple(x_.to(device, non_blocking=True) for x_ in default_collate(x))
+  def collate_fn (x):
+    return tuple(x_.to(device, non_blocking=True) for x_ in default_collate(x))
+
+  return DataLoader(dataset, batch_size=batch_size, shuffle=True, collate_fn=collate_fn, num_workers=num_workers, pin_memory=pin_memory)
 
 
 def partial_preload (loader, message='Preloading'):
