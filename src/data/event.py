@@ -116,7 +116,7 @@ class Event:
       for track in self.tracks:
         x, y = track.position().relative()
         if (x > 0 and x < 1 and y > 0 and y < 1):
-          for index, provider in enumerate(channels_provider):
+          for index, provider in enumerate(channels_provider(track)):
             map[index, int(x * resulotion), int(y * resulotion)] += provider(track)
       return map
     
