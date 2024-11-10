@@ -92,6 +92,7 @@ class EventsDataset (Dataset):
   def clear_cache (self):
     # release memorys
     self.cache = {}
+    self.items_cache = {}
     gc.collect()
   
   def post_processing(self, x):
