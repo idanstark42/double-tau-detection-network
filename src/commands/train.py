@@ -46,7 +46,7 @@ def train_module(dataset, model, output_folder, options={}):
   print(f'validation set size:              {sum([len(loader.dataset) for loader in validation_loaders])}')
   print(f'test set size:                    {len(test_loader.dataset)}')
   print(f'split:                            {split}')
-  print(f'limit:                            {limit if limit else "none"}')
+  print(f'limit:                            {limit if limit else 'none'}')
   print('Using Multiprocessing:            ' + ('yes' if using_multiprocessing else 'no'))
   print(f'Batch Size:                       {batch_size}')
   print(f'Epochs:                           {epochs}')
@@ -71,16 +71,20 @@ def train_module(dataset, model, output_folder, options={}):
     if split > 1:
       print(f'Split {i + 1}/{split}')
     if preload_type == 'partial':
-      preload(train_loader)
-      preload(validation_loader)
+      preload_start_time = time.time()
+      dataset.preloading = True
+      partial_preload(train_loader, 'Preloading Training')
+      partial_preload(validation_loader, 'Preloading Validation')
+      dataset.preloading = False
+      print(f'Preloading time: {seconds_to_time(time.time() - preload_start_time)}')
     for epoch in range(epochs):
-      epoch_start_times.append(time.time())
       traintime_start = time.time()
+      epoch_start_times.append(traintime_start)
       training_loss = train(train_loader, model, criterion, optimizer, epoch, batch_size)
       valtime_start = time.time()
       validation_loss = validate(validation_loader, model, criterion, epoch, batch_size)
-      print("Training time: {:.2f}s, Validation time: {:.2f}s".format(valtime_start - traintime_start, time.time() - valtime_start))
-      print("Training Loss: {:.6f}, Validation Loss: {:.6f}".format(training_loss, validation_loss))
+      print(f'Training time: {seconds_to_time(valtime_start - traintime_start)}, Validation time: {seconds_to_time(time.time() - valtime_start)}')
+      print('Training Loss: {:.6f}, Validation Loss: {:.6f}'.format(training_loss, validation_loss))
       if validation_loss < best_validation_loss:
         best_validation_loss = validation_loss
         best_model = model.state_dict()
@@ -141,15 +145,15 @@ def generate_dataloader (dataset, device, options):
   num_workers = int(options.get('num_workers', 0))
   pin_memory = num_workers > 0
   batch_size = int(options.get('batch_size', BATCH_SIZE))
-  return DataLoader(dataset, batch_size=batch_size, shuffle=True, collate_fn=lambda x: tuple(x_.to(device) for x_ in default_collate(x)), num_workers=num_workers, pin_memory=pin_memory)
+  return DataLoader(dataset, batch_size=batch_size, shuffle=True, collate_fn=lambda x: tuple(x_.to(device, non_blocking=True) for x_ in default_collate(x)), num_workers=num_workers, pin_memory=pin_memory)
 
-def preload (loader):
+def partial_preload (loader, message='Preloading'):
   dataset = loader.dataset
   def run (next):
     for index in range(len(dataset)):
       dataset[index]
       next(1)
-  long_operation(run, max=len(dataset), message='Preloading')
+  long_operation(run, max=len(dataset), message=message)
 
 # train the model
 def train(train_loader, model, criterion, optimizer, epoch, batch_size):
