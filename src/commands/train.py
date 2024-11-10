@@ -48,6 +48,11 @@ def train_module(dataset, model, output_folder, options={}):
   print('Using Multiprocessing:            ' + ('yes' if using_multiprocessing else 'no'))
   print(f'Batch Size:                       {batch_size}')
   print(f'Epochs:                           {epochs}')
+  print(f'Preload Type:                     {preload_type}')
+  print(f'Midsave:                          {midsave}')
+  print(f'Cache:                            {cache_type}')
+  print(f'Output Folder:                    {output_folder}')
+  print()
 
   if preload_type == 'full':
     dataset.full_preload()
