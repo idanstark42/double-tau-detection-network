@@ -35,11 +35,13 @@ class Trainer:
     self.batch_size = int(self.options.get('batch_size', BATCH_SIZE))
     self.use_xla = self.options.get('use_xla', 'false') == 'true'
     self.persistent_workers = self.options.get('persistent_workers', 'false') == 'true'
+    self.learning_rate = float(self.options.get('learning_rate', 0.001))
+    self.weight_decay = float(self.options.get('weight_decay', 0.0001))
 
   def train_module(self):
     start_time = time.time()
 
-    self.optimizer = Adam(self.model.parameters(), lr=0.001, weight_decay=0.0001)
+    self.optimizer = Adam(self.model.parameters(), lr=self.learning_rate, weight_decay=self.weight_decay)
     self.criterion = CylindricalLoss()
 
     self.use_cuda = torch.cuda.is_available()
@@ -70,6 +72,8 @@ class Trainer:
     print(f'Midsave:                          {self.midsave}')
     print(f'Cache:                            {self.cache_type}')
     print(f'Output Folder:                    {self.output_folder}')
+    print(f'Learning Rate:                    {self.learning_rate}')
+    print(f'Weight Decay:                     {self.weight_decay}')
     print()
 
     if self.preload_type == 'full':
