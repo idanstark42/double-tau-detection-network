@@ -158,10 +158,10 @@ class Trainer:
     pin_memory = num_workers > 0
     batch_size = int(options.get('batch_size', BATCH_SIZE))
 
-    return DataLoader(dataset, batch_size=batch_size, shuffle=True, collate_fn=self.collate_fn(), num_workers=num_workers, pin_memory=pin_memory)
+    return DataLoader(dataset, batch_size=batch_size, shuffle=True, collate_fn=self.collate_fn, num_workers=num_workers, pin_memory=pin_memory)
 
-  def collate_fn (self):
-    return lambda x: tuple(x_.to  (self.device, non_blocking=True) for x_ in default_collate(x))
+  def collate_fn (self, x):
+    return tuple(x_.to  (self.device, non_blocking=True) for x_ in default_collate(x))
 
   def partial_preload (self, loader, message='Preloading'):
     dataset = loader.dataset
