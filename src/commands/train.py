@@ -23,25 +23,26 @@ class Trainer:
     self.output_folder = output_folder
     self.options = options
 
+    self.cache_type = self.options.get('cache', 'events')
+    self.dataset.cache_type = self.cache_type
+    
+    self.preload_type = self.options.get('preload', 'none')
+    self.split = int(self.options.get('split')) if self.options.get('split') else 1
+    self.limit = int(self.options.get('limit')) if self.options.get('limit') else None
+    
+    self.epochs = int(self.options.get('epochs', EPOCHS))
+    self.midsave = self.options.get('midsave', 'false') == 'true'
+    self.batch_size = int(self.options.get('batch_size', BATCH_SIZE))
+    self.use_xla = self.options.get('use_xla', 'false') == 'true'
+
   def train_module(self):
     start_time = time.time()
 
-    cache_type = self.options.get('cache', 'events')
-    self.dataset.cache_type = cache_type
-    
-    preload_type = self.options.get('preload', 'none')
-    split = int(self.options.get('split')) if self.options.get('split') else 1
-    limit = int(self.options.get('limit')) if self.options.get('limit') else None
-
     optimizer = Adam(self.model.parameters(), lr=0.001, weight_decay=0.0001)
-    criterion = CylindricalLoss()
-    
-    epochs = int(self.options.get('epochs', EPOCHS))
-    midsave = self.options.get('midsave', 'false') == 'true'
-    batch_size = int(self.options.get('batch_size', BATCH_SIZE))
+    self.criterion = CylindricalLoss()
 
-    use_cuda = torch.cuda.is_available()
-    if use_cuda:
+    self.use_cuda = torch.cuda.is_available()
+    if self.use_cuda:
       # spawen start method to avoid error
       torch.multiprocessing.set_start_method('spawn')
       self.model = self.model.cuda()
@@ -49,26 +50,25 @@ class Trainer:
     else:
       print('Using Device:                     CPU')
 
-    device = torch.device('cuda' if use_cuda else 'cpu')
-    self.device = device
-    train_loaders, validation_loaders, test_loader = self.init_dataloaders(self.dataset, device, split, self.options)
+    self.device = torch.device('cuda' if self.use_cuda else 'cpu')
+    self.init_dataloaders()
     
     using_multiprocessing = int(self.options.get('num_workers', 0)) > 0
-    print(f'training set size:                {sum([len(loader.dataset) for loader in train_loaders])}')
-    print(f'validation set size:              {sum([len(loader.dataset) for loader in validation_loaders])}')
-    print(f'test set size:                    {len(test_loader.dataset)}')
-    print(f'split:                            {split}')
-    print(f'limit:                            {limit if limit else "none"}')
+    print(f'training set size:                {sum([len(loader.dataset) for loader in self.train_loaders])}')
+    print(f'validation set size:              {sum([len(loader.dataset) for loader in self.validation_loaders])}')
+    print(f'test set size:                    {len(self.test_loader.dataset)}')
+    print(f'split:                            {self.split}')
+    print(f'limit:                            {self.limit if self.limit else "none"}')
     print('Using Multiprocessing:            ' + ('yes' if using_multiprocessing else 'no'))
-    print(f'Batch Size:                       {batch_size}')
-    print(f'Epochs:                           {epochs}')
-    print(f'Preload Type:                     {preload_type}')
-    print(f'Midsave:                          {midsave}')
-    print(f'Cache:                            {cache_type}')
+    print(f'Batch Size:                       {self.batch_size}')
+    print(f'Epochs:                           {self.epochs}')
+    print(f'Preload Type:                     {self.preload_type}')
+    print(f'Midsave:                          {self.midsave}')
+    print(f'Cache:                            {self.cache_type}')
     print(f'Output Folder:                    {self.output_folder}')
     print()
 
-    if preload_type == 'full':
+    if self.preload_type == 'full':
       self.dataset.full_preload()
 
     # Train the model
@@ -78,23 +78,23 @@ class Trainer:
     best_model = None
     losses = []
     epoch_start_times = []
-    for i in range(split):
-      train_loader, validation_loader = train_loaders[i], validation_loaders[i]
-      if split > 1:
-        print(f'Split {i + 1}/{split}')
-      if preload_type == 'partial':
+    for i in range(self.split):
+      train_loader, validation_loader = self.train_loaders[i], self.validation_loaders[i]
+      if self.split > 1:
+        print(f'Split {i + 1}/{self.split}')
+      if self.preload_type == 'partial':
         preload_start_time = time.time()
         self.dataset.start_partial_preloading()
         self.partial_preload(train_loader, 'Preloading Training')
         self.partial_preload(validation_loader, 'Preloading Validation')
         self.dataset.finish_partial_preloading()
         print(f'Preloading time: {seconds_to_time(time.time() - preload_start_time)}')
-      for epoch in range(epochs):
+      for epoch in range(self.epochs):
         traintime_start = time.time()
         epoch_start_times.append(traintime_start)
-        training_loss = self.train(train_loader, self.model, criterion, optimizer, epoch, batch_size)
+        training_loss = self.train(train_loader, optimizer, epoch)
         valtime_start = time.time()
-        validation_loss = self.validate(validation_loader, self.model, criterion, epoch, batch_size)
+        validation_loss = self.validate(validation_loader, epoch)
         print(f'Training time: {seconds_to_time(valtime_start - traintime_start)}, Validation time: {seconds_to_time(time.time() - valtime_start)}')
         print('Training Loss: {:.6f}, Validation Loss: {:.6f}'.format(training_loss, validation_loss))
         if validation_loss < best_validation_loss:
@@ -102,9 +102,9 @@ class Trainer:
           best_model = self.model.state_dict()
         losses.append((training_loss, validation_loss))
       self.dataset.clear_cache()
-      if limit and i == limit - 1:
+      if self.limit and i == self.limit - 1:
         break
-      if midsave:
+      if self.midsave:
         torch.save(self.model.state_dict(), self.output_folder + f'\\model_{i}_{epoch}.pth')
 
     # Load the best model
@@ -115,9 +115,9 @@ class Trainer:
 
     # Test the best model
     test_start_time = time.time()
-    if len(test_loader.dataset) > 0:
+    if len(self.test_loader.dataset) > 0:
       print('2. Testing')
-      self.test(test_loader, self.model, criterion, self.output_folder, self.dataset, batch_size, use_xla=False, use_cuda=use_cuda)
+      self.test(self.test_loader, use_xla=False)
     else:
       print(' -- skipping testing')
 
@@ -136,32 +136,34 @@ class Trainer:
     # Plot the losses as a function of epoch
     ModelVisualizer(self.model).show_losses(losses, self.output_folder + '\\losses.png')
 
-  def init_dataloaders (self, dataset, device, split, options):
-    split_dataset_size = int(len(dataset) / split)
+    # data loaders initialization
+
+  def init_dataloaders (self):
+    split_dataset_size = int(len(self.dataset) / self.split)
     train_size = int(split_dataset_size * TRAINING_PERCENTAGE)
     validation_size = int(split_dataset_size * VALIDATION_PERCENTAGE)
-    test_size = len(dataset) - (train_size + validation_size) * split
+    test_size = len(self.dataset) - (train_size + validation_size) * self.split
 
-    split_sizes = [train_size, validation_size] * split + [test_size]
-    datasets = random_split(dataset, split_sizes)
+    split_sizes = [train_size, validation_size] * self.split + [test_size]
+    datasets = random_split(self.dataset, split_sizes)
 
-    train_loaders, validation_loaders = [], []
-    for i in range(split):
-      train_loaders.append(self.generate_dataloader(datasets[i * 2], options))
-      validation_loaders.append(self.generate_dataloader(datasets[i * 2 + 1], options))
-    test_loader = self.generate_dataloader(datasets[-1], options)
-    
-    return train_loaders, validation_loaders, test_loader
+    self.train_loaders, self.validation_loaders = [], []
+    for i in range(self.split):
+      self.train_loaders.append(self.generate_dataloader(datasets[i * 2]))
+      self.validation_loaders.append(self.generate_dataloader(datasets[i * 2 + 1]))
+    self.test_loader = self.generate_dataloader(datasets[-1])
 
-  def generate_dataloader (self, dataset, options):
-    num_workers = int(options.get('num_workers', 0))
-    pin_memory = num_workers > 0
-    batch_size = int(options.get('batch_size', BATCH_SIZE))
+  def generate_dataloader (self, dataset):
+    num_workers = int(self.options.get('num_workers', 0))
+    pin_memory = num_workers > 0 and self.device.type == 'cpu'
+    batch_size = int(self.options.get('batch_size', BATCH_SIZE))
 
     return DataLoader(dataset, batch_size=batch_size, shuffle=True, collate_fn=self.collate_fn, num_workers=num_workers, pin_memory=pin_memory)
 
   def collate_fn (self, x):
     return tuple(x_.to  (self.device, non_blocking=True) for x_ in default_collate(x))
+  
+  # preloading
 
   def partial_preload (self, loader, message='Preloading'):
     dataset = loader.dataset
@@ -171,64 +173,64 @@ class Trainer:
         next(1)
     long_operation(run, max=len(dataset), message=message)
 
-  # train the model
-  def train(self, train_loader, model, criterion, optimizer, epoch, batch_size):
-    model.train()
+  # preocedures
+
+  def train(self,training_loader, epoch):
+    self.model.train()
+
     def run (next):
       total_loss = 0
-      for batch_idx, (input, target) in enumerate(train_loader):
-        optimizer.zero_grad()
-        output, loss = self.calc(model, input, target, criterion)
+      for batch_idx, (input, target) in enumerate(training_loader):
+        self.optimizer.zero_grad()
+        output, loss = self.calc(input, target)
         loss.backward()
-        optimizer.step()
-        next(batch_size)
+        self.optimizer.step()
+        next(self.batch_size)
         total_loss += loss.item()
       return total_loss
 
-    total_loss = long_operation(run, max=len(train_loader) * batch_size, message=f'Epoch {epoch+1} training', ending_message=lambda l: f'loss: {l / len(train_loader):.4f}')
-    return total_loss / len(train_loader)
+    total_loss = long_operation(run, max=len(training_loader) * self.batch_size, message=f'Epoch {epoch+1} training', ending_message=lambda l: f'loss: {l / len(training_loader):.4f}')
+    return total_loss / len(training_loader)
 
-  # validate the model
-  def validate(self, val_loader, model, criterion, epoch, batch_size):
-    model.eval()
+  def validate(self, validation_loader, epoch):
+    self.model.eval()
 
     with torch.no_grad():
       def run (next):
         total_loss = 0
-        for batch_idx, (input, target) in enumerate(val_loader):
-          output, loss = self.calc(model, input, target, criterion)
-          next(batch_size)
+        for batch_idx, (input, target) in enumerate(validation_loader):
+          output, loss = self.calc(input, target)
+          next(self.batch_size)
           total_loss += loss.item()
         return total_loss
     
-      total_loss = long_operation(run, max=len(val_loader) * batch_size, message=f'Epoch {epoch+1} validation', ending_message=lambda l: f'loss: {l / len(val_loader):.4f}')
-    return total_loss / len(val_loader)
+      total_loss = long_operation(run, max=len(validation_loader) * self.batch_size, message=f'Epoch {epoch+1} validation', ending_message=lambda l: f'loss: {l / len(validation_loader):.4f}')
+    return total_loss / len(validation_loader)
 
-  # test the model
-  def test(self, test_loader, model, criterion, output_folder, dataset, batch_size, use_xla=False, use_cuda=False):
-    model.eval()
+  def test(self):
+    self.model.eval()
     outputs, targets = [], []
 
     with torch.no_grad():
       def run (next):
         total_loss = 0
-        for batch_idx, (input, target) in enumerate(test_loader):
-          output, loss = self.calc(model, input, target, criterion)
-          next(batch_size)
+        for batch_idx, (input, target) in enumerate(self.test_loader):
+          output, loss = self.calc(input, target)
+          next(self.batch_size)
           for index, (output, target) in enumerate(zip(output, target)):
             outputs.append(output)
             targets.append(target)
           total_loss += loss.item()
         return total_loss
-      total_loss = long_operation(run, max=len(test_loader) * batch_size, message='Testing ')
-    print(f'\nTest set average loss: {total_loss / len(test_loader):.4f}\n')
+      total_loss = long_operation(run, max=len(self.test_loader) * self.batch_size, message='Testing ')
+    print(f'\nTest set average loss: {total_loss / len(self.test_loader):.4f}\n')
 
-    if use_xla or use_cuda:
+    if self.use_xla or self.use_cuda:
       outputs = [output.cpu() for output in outputs]
       targets = [target.cpu() for target in targets]
-    ModelVisualizer(model).plot_results(outputs, targets, test_loader, dataset, output_folder + '\\testing.png')
+    ModelVisualizer(self.model).plot_results(outputs, targets, self.test_loader, self.dataset, self.output_folder + '\\testing.png')
 
-  def calc (self, model, input, target, criterion):
-    output = model(input)
-    loss = criterion(output, target)
+  def calc (self, input, target, ):
+    output = self.model(input)
+    loss = self.criterion(output, target)
     return output, loss
