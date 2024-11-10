@@ -61,6 +61,9 @@ class Trainer:
     print(f'split:                            {self.split}')
     print(f'limit:                            {self.limit if self.limit else "none"}')
     print('Using Multiprocessing:            ' + ('yes' if using_multiprocessing else 'no'))
+    if using_multiprocessing:
+      print(f'Number of Workers:                {int(self.options.get("num_workers", 0))}')
+      print(f'Persistent Workers:               {'yes' if self.persistent_workers else 'no'}')
     print(f'Batch Size:                       {self.batch_size}')
     print(f'Epochs:                           {self.epochs}')
     print(f'Preload Type:                     {self.preload_type}')
