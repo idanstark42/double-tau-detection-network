@@ -22,7 +22,9 @@ class EventsDataset (Dataset):
     self.loading_type = loading_type
     self.preloading = False
     self.load()
-    self.input_channels = 2
+    self.cluster_channels_count = 1
+    self.track_channels_count = 1
+    self.input_channels = self.cluster_channels_count + self.track_channels_count
 
   def cluster_channels (self, cluster):
     return [cluster.momentum().p_t]
@@ -51,8 +53,8 @@ class EventsDataset (Dataset):
       return self.items_cache[index]
     event = self.get_event(index)
 
-    clusters_map = event.clusters_map(RESOLUTION, lambda cluster: self.cluster_channels(cluster))
-    tracks_map = event.tracks_map(RESOLUTION, lambda track: self.track_channels(track))
+    clusters_map = event.clusters_map(RESOLUTION, lambda cluster: self.cluster_channels(cluster), self.cluster_channels_count)
+    tracks_map = event.tracks_map(RESOLUTION, lambda track: self.track_channels(track), self.track_channels_count)
     input = np.concatenate([clusters_map, tracks_map], axis=0)
     target = np.array([position.to_list() for position in event.true_position()], dtype=np.float32).flatten()[:4]
     
