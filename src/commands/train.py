@@ -72,10 +72,10 @@ def train_module(dataset, model, output_folder, options={}):
       print(f'Split {i + 1}/{split}')
     if preload_type == 'partial':
       preload_start_time = time.time()
-      dataset.preloading = True
+      dataset.start_partial_preloading()
       partial_preload(train_loader, 'Preloading Training')
       partial_preload(validation_loader, 'Preloading Validation')
-      dataset.preloading = False
+      dataset.finish_partial_preloading()
       print(f'Preloading time: {seconds_to_time(time.time() - preload_start_time)}')
     for epoch in range(epochs):
       traintime_start = time.time()
