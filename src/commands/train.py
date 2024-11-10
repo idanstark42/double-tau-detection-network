@@ -105,6 +105,7 @@ class Trainer:
           best_validation_loss = validation_loss
           best_model = self.model.state_dict()
         losses.append((training_loss, validation_loss))
+        torch.cuda.empty_cache()
       self.dataset.clear_cache()
       if self.limit and i == self.limit - 1:
         break
@@ -162,11 +163,8 @@ class Trainer:
     pin_memory = num_workers > 0 and self.device.type == 'cpu'
     batch_size = int(self.options.get('batch_size', BATCH_SIZE))
 
-    return DataLoader(dataset, batch_size=batch_size, shuffle=True, collate_fn=self.collate_fn, num_workers=num_workers, pin_memory=pin_memory, persistent_workers=self.persistent_workers)
+    return DataLoader(dataset, batch_size=batch_size, shuffle=True, num_workers=num_workers, pin_memory=pin_memory, persistent_workers=self.persistent_workers)
 
-  def collate_fn (self, x):
-    return tuple(x_.to  (self.device, non_blocking=True) for x_ in default_collate(x))
-  
   # preloading
 
   def partial_preload (self, loader, message='Preloading'):
@@ -234,7 +232,9 @@ class Trainer:
       targets = [target.cpu() for target in targets]
     ModelVisualizer(self.model).plot_results(outputs, targets, self.test_loader, self.dataset, self.output_folder + '\\testing.png')
 
-  def calc (self, input, target, ):
+  def calc (self, input, target):
+    input = input.to(self.device, non_blocking=True)
+    target = target.to(self.device, non_blocking=True)
     output = self.model(input)
     loss = self.criterion(output, target)
     return output, loss
