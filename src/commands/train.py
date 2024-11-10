@@ -33,7 +33,7 @@ class Trainer:
     split = int(self.options.get('split')) if self.options.get('split') else 1
     limit = int(self.options.get('limit')) if self.options.get('limit') else None
 
-    optimizer = Adam(model.parameters(), lr=0.001, weight_decay=0.0001)
+    optimizer = Adam(self.model.parameters(), lr=0.001, weight_decay=0.0001)
     criterion = CylindricalLoss()
     
     epochs = int(self.options.get('epochs', EPOCHS))
@@ -44,7 +44,7 @@ class Trainer:
     if use_cuda:
       # spawen start method to avoid error
       torch.multiprocessing.set_start_method('spawn')
-      model = model.cuda()
+      self.model = self.model.cuda()
       print(f'Using Device:                     {torch.cuda.get_device_name(0)}')
     else:
       print('Using Device:                     CPU')
@@ -92,23 +92,23 @@ class Trainer:
       for epoch in range(epochs):
         traintime_start = time.time()
         epoch_start_times.append(traintime_start)
-        training_loss = self.train(train_loader, model, criterion, optimizer, epoch, batch_size)
+        training_loss = self.train(train_loader, self.model, criterion, optimizer, epoch, batch_size)
         valtime_start = time.time()
-        validation_loss = self.validate(validation_loader, model, criterion, epoch, batch_size)
+        validation_loss = self.validate(validation_loader, self.model, criterion, epoch, batch_size)
         print(f'Training time: {seconds_to_time(valtime_start - traintime_start)}, Validation time: {seconds_to_time(time.time() - valtime_start)}')
         print('Training Loss: {:.6f}, Validation Loss: {:.6f}'.format(training_loss, validation_loss))
         if validation_loss < best_validation_loss:
           best_validation_loss = validation_loss
-          best_model = model.state_dict()
+          best_model = self.model.state_dict()
         losses.append((training_loss, validation_loss))
       self.dataset.clear_cache()
       if limit and i == limit - 1:
         break
       if midsave:
-        torch.save(model.state_dict(), self.output_folder + f'\\model_{i}_{epoch}.pth')
+        torch.save(self.model.state_dict(), self.output_folder + f'\\model_{i}_{epoch}.pth')
 
     # Load the best model
-    model.load_state_dict(best_model)
+    self.model.load_state_dict(best_model)
 
     # make a directory for the model if it doesn't exist
     os.makedirs(self.output_folder, exist_ok=True)
@@ -117,12 +117,12 @@ class Trainer:
     test_start_time = time.time()
     if len(test_loader.dataset) > 0:
       print('2. Testing')
-      self.test(test_loader, model, criterion, self.output_folder, self.dataset, batch_size, use_xla=False, use_cuda=use_cuda)
+      self.test(test_loader, self.model, criterion, self.output_folder, self.dataset, batch_size, use_xla=False, use_cuda=use_cuda)
     else:
       print(' -- skipping testing')
 
     # Save the model
-    torch.save(model.state_dict(), self.output_folder + '\\model.pth')
+    torch.save(self.model.state_dict(), self.output_folder + '\\model.pth')
 
     # print summary
     print()
@@ -134,7 +134,7 @@ class Trainer:
     print(f'Best Validation Loss: {best_validation_loss}')
 
     # Plot the losses as a function of epoch
-    ModelVisualizer(model).show_losses(losses, self.output_folder + '\\losses.png')
+    ModelVisualizer(self.model).show_losses(losses, self.output_folder + '\\losses.png')
 
   def init_dataloaders (self, dataset, device, split, options):
     split_dataset_size = int(len(dataset) / split)
