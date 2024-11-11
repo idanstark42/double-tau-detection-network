@@ -115,7 +115,7 @@ class Trainer:
     self.test_start_time = time.time()
     if len(self.test_loader.dataset) > 0:
       print('Testing')
-      self.test(self.test_loader, use_xla=False)
+      self.test()
     else:
       print(' -- skipping testing')
 
