@@ -226,7 +226,7 @@ class Trainer:
     if self.using_multiprocessing:
       print(f'Number of Workers:                {int(self.num_workers)}')
       print(f'Persistent Workers:               ' + ('yes' if self.persistent_workers else 'no'))
-    print(f'Using Device:                     {torch.cuda.get_device_name(0) if self.use_cuda else 'CPU'}')
+    print('Using Device:                      ' + (torch.cuda.get_device_name(0) if self.use_cuda else 'CPU'))
     print(f'Batch Size:                       {self.batch_size}')
     print(f'Epochs:                           {self.epochs}')
     print(f'Preload Type:                     {self.preload_type}')
