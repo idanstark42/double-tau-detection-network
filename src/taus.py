@@ -5,7 +5,7 @@ from model.main import MainModel
 from utils import datafile_path, modelfolder_path
 
 from commands.show import show
-from commands.train import train_module
+from commands.train import train
 from commands.eval import evaluate
 from commands.detect import detect
 from commands.proliferate import proliferate
@@ -59,7 +59,7 @@ if __name__ == '__main__':
 
   if command == 'train':
     output = modelfolder_path(params.get('output', 'model_' + str(round(time.time() * 1000))))
-    train_module(dataset, module, output, params)
+    train(dataset, module, output, params)
     exit()
 
   if command == 'eval':
