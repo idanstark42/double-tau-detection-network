@@ -212,7 +212,7 @@ class Trainer:
     if self.limit:
       test_size = (test_size * self.limit) // self.split
     
-    leftover = len(self.dataset) - (train_size + validation_size) * self.split + test_size
+    leftover = len(self.dataset) - (train_size + validation_size) * self.split - test_size
 
     datasets = random_split(self.dataset, [train_size, validation_size] * self.split + [test_size, leftover])
 
