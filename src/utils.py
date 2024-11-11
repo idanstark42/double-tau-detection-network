@@ -44,10 +44,10 @@ def long_operation (operation, multiprocessing=False, ending_message=False, **kw
 
   bar.start()
   result = operation(next)
-  if ending_message:
-    bar.suffix = ending_message(result, time() - start)
   if bar.index < bar.max:
     bar.next(bar.max - bar.index)
+  if ending_message:
+    bar.suffix = ending_message(result, time() - start)
   bar.finish()
   return result
 
