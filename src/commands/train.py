@@ -157,7 +157,7 @@ class Trainer:
 
   def test(self):
     if self.preload_type == 'partial':
-      self.preload_lodaer(self.test_loader, 'Preloading test set')
+      self.preload_loader(self.test_loader, 'Preloading test set')
 
     self.model.eval()
     outputs, targets = [], []
@@ -260,7 +260,7 @@ class Trainer:
     self.dataset.finish_partial_preloading()
     print(f'Preloading time: {seconds_to_time(time.time() - preload_start_time)}')
   
-  def preload_lodaer (loader, message):
+  def preload_loader (loader, message):
     dataset = loader.dataset
     def run (next):
       for index in range(len(dataset)):
