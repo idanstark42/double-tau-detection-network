@@ -157,7 +157,9 @@ class Trainer:
 
   def test(self):
     if self.preload_type == 'partial':
+      self.dataset.start_partial_preloading()
       self.preload_loader(self.test_loader, 'Preloading test set')
+      self.dataset.finish_partial_preloading()
 
     self.model.eval()
     outputs, targets = [], []
