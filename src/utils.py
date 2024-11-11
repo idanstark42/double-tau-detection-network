@@ -1,5 +1,5 @@
 import os
-from time import time
+from time import time, sleep
 from progress.bar import IncrementalBar
 from threading import Lock as ThreadingLock
 from multiprocessing import Lock as MultiprocessingLock
@@ -44,14 +44,23 @@ def long_operation (operation, multiprocessing=False, ending_message=False, **kw
 
   bar.start()
   result = operation(next)
+  print('here', ending_message)
   if ending_message:
+    print(ending_message(result, time() - start))
     bar.suffix = ending_message(result, time() - start)
   else:
+    print(f'done in {seconds_to_time(time() - start)}')
     bar.suffix = f'done in {seconds_to_time(time() - start)}'
   if bar.index < bar.max:
     bar.next(bar.max - bar.index)
   bar.finish()
   return result
+
+def run (next):
+  for x in range(300):
+    next(3)
+    sleep(0.001)
+  return 'done'
 
 def transform_into_range (x, range):
   return range[0] + (x - range[0]) % (range[1] - range[0])
