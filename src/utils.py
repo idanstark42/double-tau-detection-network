@@ -55,12 +55,6 @@ def long_operation (operation, multiprocessing=False, ending_message=False, **kw
   bar.finish()
   return result
 
-def run (next):
-  for x in range(300):
-    next(3)
-    sleep(0.001)
-  return 'done'
-
 def transform_into_range (x, range):
   return range[0] + (x - range[0]) % (range[1] - range[0])
 

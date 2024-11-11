@@ -132,6 +132,8 @@ class Trainer:
     self.save_model()
     self.print_summary()
 
+  # training building blocks
+
   def train(self,training_loader, epoch):
     self.model.train()
 
@@ -186,18 +188,9 @@ class Trainer:
         return total_loss
       total_loss = long_operation(run, max=len(self.test_loader) * self.batch_size, message='Testing ')
 
-    print(f'\nTest set average loss: {total_loss / len(self.test_loader):.4f}\n')
-    if self.use_xla or self.use_cuda:
-      outputs = [output.cpu() for output in outputs]
-      targets = [target.cpu() for target in targets]
-    ModelVisualizer(self.model).plot_results(outputs, targets, self.test_loader, self.dataset, os.path.join(self.output_folder, 'graphs.png'))
+    self.print_test_summary(outputs, targets, total_loss)
 
-  def save_if_best(self, validation_loss):
-    if validation_loss < self.best_validation_loss:
-      self.best_validation_loss = validation_loss
-      self.best_model = self.model.state_dict()
-
-  # helpers
+  # proess initialization
 
   def init_device (self):
     self.use_cuda = torch.cuda.is_available()
@@ -233,7 +226,41 @@ class Trainer:
     batch_size = int(self.options.get('batch_size', BATCH_SIZE))
 
     return DataLoader(dataset, batch_size=batch_size, shuffle=True, num_workers=num_workers, pin_memory=pin_memory, persistent_workers=self.persistent_workers)
+
+  # preloading
+
+  def partial_preload (self, training_loader, validation_loader):
+    preload_start_time = time.time()
+    self.dataset.start_partial_preloading()
+    self.preload_loader(training_loader, 'Preloading training set')
+    self.preload_loader(validation_loader, 'Preloading validation set')
+    self.dataset.finish_partial_preloading()
+    print(f'Preloading time: {seconds_to_time(time.time() - preload_start_time)}')
   
+  def preload_loader (self, loader, message):
+    dataset = loader.dataset
+    def run (next):
+      for index in range(len(dataset)):
+        dataset[index]
+        next(1)
+    long_operation(run, max=len(dataset), message=message)
+
+  # helper functions
+
+  def calc (self, input, target):
+    input = input.to(self.device, non_blocking=True)
+    target = target.to(self.device, non_blocking=True)
+    output = self.model(input)
+    loss = self.criterion(output, target)
+    return output, loss
+
+  def save_if_best(self, validation_loss):
+    if validation_loss < self.best_validation_loss:
+      self.best_validation_loss = validation_loss
+      self.best_model = self.model.state_dict()
+
+  # logging & visualization
+
   def print_starting_log (self):
     print(f'Training set size:                {sum([len(loader.dataset) for loader in self.train_loaders])}')
     print(f'Validation set size:              {sum([len(loader.dataset) for loader in self.validation_loaders])}')
@@ -256,7 +283,14 @@ class Trainer:
     print(f'Learning Rate:                    {self.learning_rate}')
     print(f'Weight Decay:                     {self.weight_decay}')
     print()
-  
+
+  def print_test_summary (self, outputs, targets, total_loss):
+    print(f'\nTest set average loss: {total_loss / len(self.test_loader):.4f}\n')
+    if self.use_xla or self.use_cuda:
+      outputs = [output.cpu() for output in outputs]
+      targets = [target.cpu() for target in targets]
+    ModelVisualizer(self.model).plot_results(outputs, targets, self.test_loader, self.dataset, os.path.join(self.output_folder, 'graphs.png'))
+
   def print_summary (self):
     print()
     print('Done')
@@ -269,29 +303,6 @@ class Trainer:
     # Plot the losses as a function of epoch
     ModelVisualizer(self.model).show_losses(self.losses, os.path.join(self.output_folder, 'losses.png'))
 
-  def partial_preload (self, training_loader, validation_loader):
-    preload_start_time = time.time()
-    self.dataset.start_partial_preloading()
-    self.preload_loader(training_loader, 'Preloading training set')
-    self.preload_loader(validation_loader, 'Preloading validation set')
-    self.dataset.finish_partial_preloading()
-    print(f'Preloading time: {seconds_to_time(time.time() - preload_start_time)}')
-  
-  def preload_loader (self, loader, message):
-    dataset = loader.dataset
-    def run (next):
-      for index in range(len(dataset)):
-        dataset[index]
-        next(1)
-    long_operation(run, max=len(dataset), message=message)
-
-  def calc (self, input, target):
-    input = input.to(self.device, non_blocking=True)
-    target = target.to(self.device, non_blocking=True)
-    output = self.model(input)
-    loss = self.criterion(output, target)
-    return output, loss
-  
   # io operations
 
   def save_model (self):
