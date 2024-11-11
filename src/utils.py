@@ -43,16 +43,15 @@ def long_operation (operation, multiprocessing=False, ending_message=False, **kw
         bar.suffix = f'{bar.index + 1}/{bar.max} [{percentage * 100:.1f}%%]'
 
   bar.start()
+  
   result = operation(next)
-  print('here', ending_message)
+  
   if ending_message:
-    print(ending_message(result, time() - start))
     bar.suffix = ending_message(result, time() - start)
   else:
-    print(f'done in {seconds_to_time(time() - start)}')
     bar.suffix = f'done in {seconds_to_time(time() - start)}'
-  if bar.index < bar.max:
-    bar.next(bar.max - bar.index)
+  
+  bar.next(bar.max - bar.index if bar.index < bar.max else 0)
   bar.finish()
   return result
 
