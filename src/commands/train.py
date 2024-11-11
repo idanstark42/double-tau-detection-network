@@ -38,7 +38,7 @@ class Trainer:
     self.dataset.cache_type = self.cache_type
 
     self.split = int(self.options.get('split', '1'))
-    self.limit = int(self.options.get('limit')) if self.options.get('limit') else None
+    self.limit = int(self.options.get('limit')) if self.options.get('limit') and self.split != 1 else None
     self.epochs = int(self.options.get('epochs', EPOCHS))
     self.batch_size = int(self.options.get('batch_size', BATCH_SIZE))
 
@@ -211,14 +211,17 @@ class Trainer:
     test_size = len(self.dataset) - (train_size + validation_size) * self.split
     if self.limit:
       test_size = (test_size * self.limit) // self.split
+    
+    leftover = len(self.dataset) - (train_size + validation_size) * self.split + test_size
 
-    datasets = random_split(self.dataset, [train_size, validation_size] * self.split + [test_size])
+    datasets = random_split(self.dataset, [train_size, validation_size] * self.split + [test_size, leftover])
 
     self.train_loaders, self.validation_loaders = [], []
     for i in range(self.split):
       self.train_loaders.append(self.generate_dataloader(datasets[i * 2]))
       self.validation_loaders.append(self.generate_dataloader(datasets[i * 2 + 1]))
-    self.test_loader = self.generate_dataloader(datasets[-1])
+    self.test_loader = self.generate_dataloader(datasets[-2])
+    self.unused_indices = datasets[-1].indices
 
   def generate_dataloader (self, dataset):
     num_workers = int(self.options.get('num_workers', 0))
