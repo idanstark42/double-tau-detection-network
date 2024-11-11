@@ -46,6 +46,8 @@ def long_operation (operation, multiprocessing=False, ending_message=False, **kw
   result = operation(next)
   if ending_message:
     bar.suffix = ending_message(result, time() - start)
+  else:
+    bar.suffix = f'done in {seconds_to_time(time() - start)}'
   if bar.index < bar.max:
     bar.next(bar.max - bar.index)
   bar.finish()
