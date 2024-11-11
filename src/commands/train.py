@@ -5,7 +5,6 @@ import torch.nn as nn
 from torch.utils.data import DataLoader
 from torch.optim import Adam
 from torch.utils.data import random_split
-from torch.utils.data.dataloader import default_collate
 
 from utils import long_operation, seconds_to_time
 from visualization import ModelVisualizer
@@ -48,6 +47,7 @@ class Trainer:
     if self.use_cuda:
       # spawen start method to avoid error
       torch.multiprocessing.set_start_method('spawn')
+      torch.multiprocessing.set_sharing_strategy('file_system')
       self.model = self.model.cuda()
       print(f'Using Device:                     {torch.cuda.get_device_name(0)}')
     else:
@@ -115,6 +115,8 @@ class Trainer:
         break
       if self.midsave:
         torch.save(self.model.state_dict(), self.output_folder + f'\\model_{i}_{epoch}.pth')
+      del train_loader
+      del validation_loader
 
     # Load the best model
     self.model.load_state_dict(best_model)
