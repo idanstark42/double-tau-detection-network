@@ -115,6 +115,8 @@ class Trainer:
         break
       if self.midsave:
         torch.save(self.model.state_dict(), self.output_folder + f'\\model_{i}_{epoch}.pth')
+      self.train_loaders[i] = None
+      self.validation_loaders[i] = None
       del train_loader
       del validation_loader
 
