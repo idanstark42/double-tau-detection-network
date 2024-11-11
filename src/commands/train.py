@@ -20,6 +20,9 @@ def train(dataset, model, output_folder, options={}):
   trainer.train_model()
 
 class Trainer:
+  
+  # initializers
+
   def __init__(self, dataset, model, output_folder, options):
     self.dataset = dataset
     self.model = model
@@ -64,6 +67,8 @@ class Trainer:
       if self.limit and split == self.limit - 1:
         break
     self.posttraining()
+
+  # main procedure
 
   def pretraining(self):
     self.start_time = time.time()
@@ -188,6 +193,8 @@ class Trainer:
       self.best_validation_loss = validation_loss
       self.best_model = self.model.state_dict()
 
+  # helpers
+
   def init_device (self):
     self.use_cuda = torch.cuda.is_available()
     if self.use_cuda:
@@ -202,9 +209,10 @@ class Trainer:
     train_size = int(split_dataset_size * TRAINING_PERCENTAGE)
     validation_size = int(split_dataset_size * VALIDATION_PERCENTAGE)
     test_size = len(self.dataset) - (train_size + validation_size) * self.split
+    if self.limit:
+      test_size = (test_size * self.limit) // self.split
 
-    split_sizes = [train_size, validation_size] * self.split + [test_size]
-    datasets = random_split(self.dataset, split_sizes)
+    datasets = random_split(self.dataset, [train_size, validation_size] * self.split + [test_size])
 
     self.train_loaders, self.validation_loaders = [], []
     for i in range(self.split):
@@ -277,6 +285,8 @@ class Trainer:
     loss = self.criterion(output, target)
     return output, loss
   
+  # io operations
+
   def save_model (self):
     os.makedirs(self.output_folder, exist_ok=True)
     torch.save(self.model.state_dict(), os.path.join(self.output_folder, 'model.pth'))

@@ -44,16 +44,12 @@ def long_operation (operation, multiprocessing=False, ending_message=False, **kw
 
   bar.start()
   result = operation(next)
-  if bar.index < bar.max:
-    bar.next(bar.max - bar.index)
   if ending_message:
     bar.suffix = ending_message(result, time() - start)
+  if bar.index < bar.max:
+    bar.next(bar.max - bar.index)
   bar.finish()
   return result
-
-def run (next):
-  for x in range(333):
-    next(3)
 
 def transform_into_range (x, range):
   return range[0] + (x - range[0]) % (range[1] - range[0])
