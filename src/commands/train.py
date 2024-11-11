@@ -46,6 +46,7 @@ class Trainer:
 
     self.learning_rate = float(self.options.get('learning_rate', 0.001))
     self.weight_decay = float(self.options.get('weight_decay', 0.0001))
+    self.checkpoint = False
   
   def load_initial_state(self):
     self.position = { 'split': 0, 'epoch': 0 }
@@ -305,11 +306,11 @@ class Trainer:
     trainer.validation_loaders = [None if indices is None else trainer.generate_dataloader(torch.utils.data.Subset(dataset, indices)) for indices in checkpoint['validation_loaders']]
     trainer.test_loader = trainer.generate_dataloader(torch.utils.data.Subset(dataset, checkpoint['test_loader']))
     trainer.position = checkpoint['position']
-    trainer.checkpoint = checkpoint['name']
     trainer.epoch_start_times = checkpoint['epoch_start_times']
     trainer.losses = checkpoint['losses']
     trainer.best_validation_loss = checkpoint['best_validation_loss']
     trainer.best_model = checkpoint['best_model']
+    trainer.checkpoint = checkpoint['name']
     return trainer
   
   @staticmethod
