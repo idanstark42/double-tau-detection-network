@@ -156,6 +156,9 @@ class Trainer:
     return total_loss / len(validation_loader)
 
   def test(self):
+    if self.preload_type == 'partial':
+      self.preload_lodaer(self.test_loader, 'Preloading test set')
+
     self.model.eval()
     outputs, targets = [], []
 
@@ -250,20 +253,20 @@ class Trainer:
     ModelVisualizer(self.model).show_losses(self.losses, os.path.join(self.output_folder, 'losses.png'))
 
   def partial_preload (self, training_loader, validation_loader):
-    def preload (loader, message):
-      dataset = loader.dataset
-      def run (next):
-        for index in range(len(dataset)):
-          dataset[index]
-          next(1)
-      long_operation(run, max=len(dataset), message=message)
-
     preload_start_time = time.time()
     self.dataset.start_partial_preloading()
-    preload(training_loader, 'Preloading training set')
-    preload(validation_loader, 'Preloading validation set')
+    self.preload_loader(training_loader, 'Preloading training set')
+    self.preload_loader(validation_loader, 'Preloading validation set')
     self.dataset.finish_partial_preloading()
     print(f'Preloading time: {seconds_to_time(time.time() - preload_start_time)}')
+  
+  def preload_lodaer (loader, message):
+    dataset = loader.dataset
+    def run (next):
+      for index in range(len(dataset)):
+        dataset[index]
+        next(1)
+    long_operation(run, max=len(dataset), message=message)
 
   def calc (self, input, target):
     input = input.to(self.device, non_blocking=True)

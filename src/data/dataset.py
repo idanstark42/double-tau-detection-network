@@ -42,7 +42,7 @@ class EventsDataset (Dataset):
 
     if self.preloading:
       for i, field in enumerate(self.dataset_fields):
-        self.data[field].append(fields[i])
+        self.data[field][index] = field[i]
 
     if self.cache_type == 'events':
       self.cache[index] = item
@@ -132,7 +132,7 @@ class EventsDataset (Dataset):
     self.preloaded = False
     self.raw_data = h5py.File(self.source_file, 'r')
     self._fields = { f'{field}_fields': [(name, python_name_from_dtype_name(name)) for name in self.raw_data[field].dtype.names] for field in self.dataset_fields }
-    self.data = { field: [] for field in self.dataset_fields }
+    self.data = { field: {} for field in self.dataset_fields }
     self._length = len(self.raw_data['event'])
 
   def finish_partial_preloading (self):
