@@ -85,7 +85,7 @@ class Trainer:
   def run_split_training(self, split):
     split_start_time = time.time()
     if self.split > 1:
-      print(f'Split {split + 1}/{self.split}')
+      print(f'Split {split + 1}/{(self.limit if self.limit else self.split) + 1}')
 
     if self.preload_type == 'partial':
       self.partial_preload(self.train_loaders[split], self.validation_loaders[split])
@@ -266,7 +266,7 @@ class Trainer:
     print(f'Validation set size:              {sum([len(loader.dataset) for loader in self.validation_loaders])}')
     print(f'Test set size:                    {len(self.test_loader.dataset)}')
     print(f'Split:                            {self.split}')
-    print(f'Limit:                            {self.limit if self.limit else "none"}')
+    print('Limit:                            ' + (f'{self.limit} [{(self.limit / self.split * 10):.2f}]' if self.limit else 'none'))
     print(f'Saving Mode:                      {self.saving_mode}')
     if self.checkpoint:
       print(f'From checkpoint:                  {self.checkpoint}')
@@ -274,7 +274,7 @@ class Trainer:
     if self.using_multiprocessing:
       print(f'Number of Workers:                {int(self.num_workers)}')
       print(f'Persistent Workers:               ' + ('yes' if self.persistent_workers else 'no'))
-    print('Using Device:                      ' + (torch.cuda.get_device_name(0) if self.use_cuda else 'CPU'))
+    print('Using Device:                     ' + (torch.cuda.get_device_name(0) if self.use_cuda else 'CPU'))
     print(f'Batch Size:                       {self.batch_size}')
     print(f'Epochs:                           {self.epochs}')
     print(f'Preload Type:                     {self.preload_type}')
