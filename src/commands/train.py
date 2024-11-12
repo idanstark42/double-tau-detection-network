@@ -74,11 +74,13 @@ class Trainer:
     self.start_time = time.time()
 
     self.optimizer = Adam(self.model.parameters(), lr=self.learning_rate, weight_decay=self.weight_decay)
+    self.criterion = CylindricalLoss()
     if self.checkpoint:
       self.optimizer.load_state_dict(self.optimizer_state_dict)
-    self.criterion = CylindricalLoss()
-    self.init_device()
-    self.init_dataloaders()
+    else:
+      self.init_device()
+      self.init_dataloaders()
+
     self.print_starting_log()
 
     if self.preload_type == 'full':
@@ -271,7 +273,7 @@ class Trainer:
     print('Limit:                            ' + (f'{self.limit} [{(self.limit / self.split * 10):.2f}]' if self.limit else 'none'))
     print(f'Saving Mode:                      {self.saving_mode}')
     if self.checkpoint:
-      print(f'From checkpoint:                  true')
+      print(f'From checkpoint:                  {self.checkpoint}')
       print(f'Starting from:                   {self.position.split + 1}/{self.split} split, {self.position.epoch + 1}/{self.epochs} epoch')
     print()
     print('Using Multiprocessing:            ' + ('yes' if self.using_multiprocessing else 'no'))
@@ -340,15 +342,19 @@ class Trainer:
     trainer = Trainer(dataset, model, model_folder, checkpoint['options'])
     trainer.model.load_state_dict(checkpoint['model'])
     trainer.optimizer_state_dict = checkpoint['optimizer']
-    trainer.train_loaders = [None if indices is None else trainer.generate_dataloader(torch.utils.data.Subset(dataset, indices)) for indices in checkpoint['training_loaders']]
-    trainer.validation_loaders = [None if indices is None else trainer.generate_dataloader(torch.utils.data.Subset(dataset, indices)) for indices in checkpoint['validation_loaders']]
-    trainer.test_loader = trainer.generate_dataloader(torch.utils.data.Subset(dataset, checkpoint['test_loader']))
     trainer.position = checkpoint['position']
     trainer.epoch_start_times = checkpoint['epoch_start_times']
     trainer.losses = checkpoint['losses']
     trainer.best_validation_loss = checkpoint['best_validation_loss']
     trainer.best_model = checkpoint['best_model']
     trainer.checkpoint = checkpoint['name']
+    
+    # doing the part of the pretraining that is different from the normal pretraining
+    trainer.init_device()
+    trainer.train_loaders = [None if indices is None else trainer.generate_dataloader(torch.utils.data.Subset(dataset, indices)) for indices in checkpoint['training_loaders']]
+    trainer.validation_loaders = [None if indices is None else trainer.generate_dataloader(torch.utils.data.Subset(dataset, indices)) for indices in checkpoint['validation_loaders']]
+    trainer.test_loader = trainer.generate_dataloader(torch.utils.data.Subset(dataset, checkpoint['test_loader']))
+
     return trainer
   
   @staticmethod
