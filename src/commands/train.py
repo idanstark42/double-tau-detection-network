@@ -98,7 +98,7 @@ class Trainer:
     self.validation_loaders[split] = None
     self.dataset.clear_cache()
 
-    if split > 1:
+    if self.split > 1:
       print(f'Split time: {seconds_to_time(time.time() - split_start_time)}/{seconds_to_time((time.time() - self.start_time) * split / (self.limit if self.limit else self.split))} estimated')
   
     if self.saving_mode == 'split':
