@@ -58,8 +58,8 @@ if __name__ == '__main__':
   module = MainModel(post_processing=(dataset.post_processing if use_post_processing else False), input_channels=dataset.input_channels, model=model, dropout_probability=dropout_probability)
 
   if command == 'train':
-    output = modelfolder_path(params.get('output', 'model_' + str(round(time.time() * 1000))))
-    train(dataset, module, output, params)
+    folder = modelfolder_path(params.get('folder', 'model_' + str(round(time.time() * 1000))))
+    train(dataset, module, folder, params)
     exit()
 
   if command == 'eval':

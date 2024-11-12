@@ -11,22 +11,22 @@ from visualization import ModelVisualizer
 from model.cylindrical_loss import CylindricalLoss
 from settings import EPOCHS, BATCH_SIZE, TRAINING_PERCENTAGE, VALIDATION_PERCENTAGE
 
-def train(dataset, model, output_folder, options={}):
+def train(dataset, model, model_folder, options={}):
   if 'checkpoint' in options:
-    checkpoint = Trainer.last_checkpoint(output_folder) if options['checkpoint'] == 'true' else os.path.join(output_folder, 'checkpoints', options['checkpoint'])
+    checkpoint = Trainer.last_checkpoint(model_folder) if options['checkpoint'] == 'true' else os.path.join(model_folder, 'checkpoints', options['checkpoint'])
     trainer = Trainer.from_checkpoint(dataset, model, checkpoint)
   else:
-    trainer = Trainer(dataset, model, output_folder, options)
+    trainer = Trainer(dataset, model, model_folder, options)
   trainer.train_model()
 
 class Trainer:
   
   # initializers
 
-  def __init__(self, dataset, model, output_folder, options):
+  def __init__(self, dataset, model, model_folder, options):
     self.dataset = dataset
     self.model = model
-    self.output_folder = output_folder
+    self.model_folder = model_folder
     self.options = options
     self.load_options()
     self.load_initial_state()
@@ -281,7 +281,7 @@ class Trainer:
     print(f'Epochs:                           {self.epochs}')
     print(f'Preload Type:                     {self.preload_type}')
     print(f'Cache:                            {self.cache_type}')
-    print(f'Output Folder:                    {self.output_folder}')
+    print(f'Output Folder:                    {self.model_folder}')
     print(f'Learning Rate:                    {self.learning_rate}')
     print(f'Weight Decay:                     {self.weight_decay}')
     print()
@@ -291,7 +291,7 @@ class Trainer:
     if self.use_xla or self.use_cuda:
       outputs = [output.cpu() for output in outputs]
       targets = [target.cpu() for target in targets]
-    ModelVisualizer(self.model).plot_results(outputs, targets, self.test_loader, self.dataset, os.path.join(self.output_folder, 'graphs.png'))
+    ModelVisualizer(self.model).plot_results(outputs, targets, self.test_loader, self.dataset, os.path.join(self.model_folder, 'graphs.png'))
 
   def print_summary (self):
     print()
@@ -303,18 +303,18 @@ class Trainer:
     print(f'Best Validation Loss: {self.best_validation_loss}')
 
     # Plot the losses as a function of epoch
-    ModelVisualizer(self.model).show_losses(self.losses, os.path.join(self.output_folder, 'losses.png'))
+    ModelVisualizer(self.model).show_losses(self.losses, os.path.join(self.model_folder, 'losses.png'))
 
   # io operations
 
   def save_model (self):
-    os.makedirs(self.output_folder, exist_ok=True)
-    torch.save(self.model.state_dict(), os.path.join(self.output_folder, 'model.pth'))
+    os.makedirs(self.model_folder, exist_ok=True)
+    torch.save(self.model.state_dict(), os.path.join(self.model_folder, 'model.pth'))
 
   def save_checkpoint(self, name):
     checkpoint = {
       'options': self.options,
-      'output_folder': self.output_folder,
+      'model_folder': self.model_folder,
       'model': self.model.state_dict(),
       'position': self.position,
       'optimizer': self.optimizer.state_dict(),
@@ -327,14 +327,14 @@ class Trainer:
       'best_validation_loss': self.best_validation_loss,
       'best_model': self.best_model
     }
-    os.makedirs(self.output_folder, exist_ok=True)
-    os.makedirs(os.path.join(self.output_folder, 'checkpoints'), exist_ok=True)
-    torch.save(checkpoint, os.path.join(self.output_folder, 'checkpoints', f'{name}.pth'))
+    os.makedirs(self.model_folder, exist_ok=True)
+    os.makedirs(os.path.join(self.model_folder, 'checkpoints'), exist_ok=True)
+    torch.save(checkpoint, os.path.join(self.model_folder, 'checkpoints', f'{name}.pth'))
   
   @staticmethod
   def from_checkpoint(dataset, model, checkpoint_file):
     checkpoint = torch.load(checkpoint_file)
-    trainer = Trainer(dataset, model, checkpoint['output_folder'], checkpoint['options'])
+    trainer = Trainer(dataset, model, checkpoint['model_folder'], checkpoint['options'])
     trainer.model.load_state_dict(checkpoint['model'])
     trainer.optimizer.load_state_dict(checkpoint['optimizer'])
     trainer.train_loaders = [None if indices is None else trainer.generate_dataloader(torch.utils.data.Subset(dataset, indices)) for indices in checkpoint['training_loaders']]
@@ -349,5 +349,5 @@ class Trainer:
     return trainer
   
   @staticmethod
-  def last_checkpoint(output_folder):
-    return max([os.path.join(output_folder, 'checkpoints', file) for file in os.listdir(os.path.join(output_folder, 'checkpoints'))], key=os.path.getctime)
+  def last_checkpoint(model_folder):
+    return max([os.path.join(model_folder, 'checkpoints', file) for file in os.listdir(os.path.join(model_folder, 'checkpoints'))], key=os.path.getctime)
