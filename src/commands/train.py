@@ -62,7 +62,7 @@ class Trainer:
   def train_model(self):
     self.pretraining()
     print('Training')
-    splits = range(self.position['split'], self.split) if self.checkpoint else range(self.split)
+    splits = range(self.position['split'] + 1, self.split) if self.checkpoint else range(self.split)
     for split in splits:
       self.run_split_training(split)
       if self.limit and split == self.limit - 1:
@@ -97,7 +97,10 @@ class Trainer:
     if self.preload_type == 'partial':
       self.partial_preload(self.train_loaders[split], self.validation_loaders[split])
 
-    epochs = range(self.position['epoch'], self.epochs) if self.checkpoint and self.position['split'] == split else range(self.epochs)
+    if self.checkpoint and self.position['split'] == split and self.saving_mode == 'epoch':
+      epochs = range(self.position['epoch'] + 1, self.epochs)
+    else:
+      epochs = range(self.epochs)
     for epoch in epochs:
       self.run_epoch_training(split, epoch)
 
@@ -278,7 +281,7 @@ class Trainer:
     print(f'Saving Mode:                      {self.saving_mode}')
     if self.checkpoint:
       print(f'From checkpoint:                  {self.checkpoint}')
-      print(f'Starting from:                   {self.position["split"] + 1}/{self.split} split, {(self.position["epoch"]) + 1}/{self.epochs} epoch')
+      print(f'Starting from:                   {self.position["split"] + 2}/{self.split} split, {(self.position["epoch"]) + 2}/{self.epochs} epoch')
     print()
     print('Using Multiprocessing:            ' + ('yes' if self.using_multiprocessing else 'no'))
     if self.using_multiprocessing:
