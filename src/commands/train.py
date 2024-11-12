@@ -97,7 +97,7 @@ class Trainer:
     if self.preload_type == 'partial':
       self.partial_preload(self.train_loaders[split], self.validation_loaders[split])
 
-    if self.checkpoint and self.position['split'] == split and self.saving_mode == 'epoch':
+    if self.checkpoint and self.position['split'] == split and self.saving_mode.startswith('epoch-'):
       epochs = range(self.position['epoch'] + 1, self.epochs)
     else:
       epochs = range(self.epochs)
