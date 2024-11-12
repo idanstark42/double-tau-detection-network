@@ -57,6 +57,7 @@ class Trainer:
     self.best_model = None
     self.losses = []
     self.epoch_start_times = []
+    self.pretraining_over = False
 
   def train_model(self):
     self.pretraining()
@@ -71,6 +72,9 @@ class Trainer:
   # main procedure
 
   def pretraining(self):
+    if self.pretraining_over:
+      return
+
     self.start_time = time.time()
 
     self.optimizer = Adam(self.model.parameters(), lr=self.learning_rate, weight_decay=self.weight_decay)
@@ -82,6 +86,8 @@ class Trainer:
 
     if self.preload_type == 'full':
       self.dataset.full_preload()
+    
+    self.pretraining_over = True
 
   def run_split_training(self, split):
     split_start_time = time.time()
