@@ -269,6 +269,7 @@ class Trainer:
   # logging & visualization
 
   def print_starting_log (self):
+    print(self.position)
     print(f'Training set size:                {sum([len(loader.dataset) if loader else self.training_loader_size for loader in self.train_loaders])}')
     print(f'Validation set size:              {sum([len(loader.dataset) if loader else self.validation_loader_size for loader in self.validation_loaders])}')
     print(f'Test set size:                    {len(self.test_loader.dataset)}')
