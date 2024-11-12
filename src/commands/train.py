@@ -74,6 +74,8 @@ class Trainer:
     self.start_time = time.time()
 
     self.optimizer = Adam(self.model.parameters(), lr=self.learning_rate, weight_decay=self.weight_decay)
+    if self.checkpoint:
+      self.optimizer.load_state_dict(self.optimizer_state_dict)
     self.criterion = CylindricalLoss()
     self.init_device()
     self.init_dataloaders()
@@ -337,7 +339,7 @@ class Trainer:
     model_folder = checkpoint['model_folder'] if 'model_folder' in checkpoint else checkpoint['output_folder'] # backward compatibility
     trainer = Trainer(dataset, model, model_folder, checkpoint['options'])
     trainer.model.load_state_dict(checkpoint['model'])
-    trainer.optimizer.load_state_dict(checkpoint['optimizer'])
+    trainer.optimizer_state_dict = checkpoint['optimizer']
     trainer.train_loaders = [None if indices is None else trainer.generate_dataloader(torch.utils.data.Subset(dataset, indices)) for indices in checkpoint['training_loaders']]
     trainer.validation_loaders = [None if indices is None else trainer.generate_dataloader(torch.utils.data.Subset(dataset, indices)) for indices in checkpoint['validation_loaders']]
     trainer.test_loader = trainer.generate_dataloader(torch.utils.data.Subset(dataset, checkpoint['test_loader']))
