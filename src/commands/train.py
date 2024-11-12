@@ -85,7 +85,7 @@ class Trainer:
   def run_split_training(self, split):
     split_start_time = time.time()
     if self.split > 1:
-      print(f'Split {split + 1}/{(self.limit if self.limit else self.split) + 1}')
+      print(f'Split {split + 1}/{self.limit if self.limit else self.split}')
 
     if self.preload_type == 'partial':
       self.partial_preload(self.train_loaders[split], self.validation_loaders[split])
@@ -99,7 +99,7 @@ class Trainer:
     self.dataset.clear_cache()
 
     if split > 1:
-      print(f'Split time: {seconds_to_time(time.time() - split_start_time)}/{seconds_to_time(time.time() - self.start_time) * (split + 1) / ((self.limit if self.limit else self.split) + 1)} estimated')
+      print(f'Split time: {seconds_to_time(time.time() - split_start_time)}/{seconds_to_time((time.time() - self.start_time) * split / (self.limit if self.limit else self.split))} estimated')
   
     if self.saving_mode == 'split':
       self.save_checkpoint(f'split-{split + 1}')
