@@ -269,7 +269,9 @@ class Trainer:
     print('Limit:                            ' + (f'{self.limit} [{(self.limit / self.split * 10):.2f}]' if self.limit else 'none'))
     print(f'Saving Mode:                      {self.saving_mode}')
     if self.checkpoint:
-      print(f'From checkpoint:                  {self.checkpoint}')
+      print(f'From checkpoint:                  true')
+      print(f'Starting from:                   {self.position.split + 1}/{self.split} split, {self.position.epoch + 1}/{self.epochs} epoch')
+    print()
     print('Using Multiprocessing:            ' + ('yes' if self.using_multiprocessing else 'no'))
     if self.using_multiprocessing:
       print(f'Number of Workers:                {int(self.num_workers)}')
