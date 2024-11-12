@@ -277,7 +277,7 @@ class Trainer:
     print(f'Saving Mode:                      {self.saving_mode}')
     if self.checkpoint:
       print(f'From checkpoint:                  {self.checkpoint}')
-      print(f'Starting from:                   {self.position['split'] + 1}/{self.split} split, {self.position['epoch'] + 1}/{self.epochs} epoch')
+      print(f'Starting from:                   {self.position["split"] + 1}/{self.split} split, {self.position["epoch"] + 1}/{self.epochs} epoch')
     print()
     print('Using Multiprocessing:            ' + ('yes' if self.using_multiprocessing else 'no'))
     if self.using_multiprocessing:
