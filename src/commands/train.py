@@ -99,7 +99,7 @@ class Trainer:
     self.dataset.clear_cache()
 
     if self.split > 1:
-      print(f'Split time: {seconds_to_time(time.time() - split_start_time)}/{seconds_to_time((time.time() - self.start_time) * split / (self.limit if self.limit else self.split))} estimated')
+      print(f'Split time: {seconds_to_time(time.time() - split_start_time)}/{seconds_to_time((time.time() - self.start_time) * (self.limit if self.limit else self.split) / split)} estimated')
   
     if self.saving_mode == 'split':
       self.save_checkpoint(f'split-{split + 1}')
