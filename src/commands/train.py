@@ -207,15 +207,15 @@ class Trainer:
 
   def init_dataloaders (self):
     split_dataset_size = int(len(self.dataset) / self.split)
-    train_size = int(split_dataset_size * TRAINING_PERCENTAGE)
-    validation_size = int(split_dataset_size * VALIDATION_PERCENTAGE)
-    test_size = len(self.dataset) - (train_size + validation_size) * self.split
+    self.training_loader_size = int(split_dataset_size * TRAINING_PERCENTAGE)
+    self.validation_loader_size = int(split_dataset_size * VALIDATION_PERCENTAGE)
+    test_size = len(self.dataset) - (self.training_loader_size + self.validation_loader_size) * self.split
     if self.limit:
       test_size = (test_size * self.limit) // self.split
     
-    leftover = len(self.dataset) - (train_size + validation_size) * self.split - test_size
+    leftover = len(self.dataset) - (self.training_loader_size + self.validation_loader_size) * self.split - test_size
 
-    datasets = random_split(self.dataset, [train_size, validation_size] * self.split + [test_size, leftover])
+    datasets = random_split(self.dataset, [self.training_loader_size, self.validation_loader_size] * self.split + [test_size, leftover])
 
     self.train_loaders, self.validation_loaders = [], []
     for i in range(self.split):
@@ -266,8 +266,8 @@ class Trainer:
   # logging & visualization
 
   def print_starting_log (self):
-    print(f'Training set size:                {sum([len(loader.dataset) for loader in self.train_loaders])}')
-    print(f'Validation set size:              {sum([len(loader.dataset) for loader in self.validation_loaders])}')
+    print(f'Training set size:                {sum([len(loader.dataset) if loader else self.training_loader_size for loader in self.train_loaders])}')
+    print(f'Validation set size:              {sum([len(loader.dataset) if loader else self.validation_loader_size for loader in self.validation_loaders])}')
     print(f'Test set size:                    {len(self.test_loader.dataset)}')
     print(f'Split:                            {self.split}')
     print('Limit:                            ' + (f'{self.limit} [{(self.limit / self.split * 10):.2f}]' if self.limit else 'none'))
