@@ -278,7 +278,7 @@ class Trainer:
     print(f'Saving Mode:                      {self.saving_mode}')
     if self.checkpoint:
       print(f'From checkpoint:                  {self.checkpoint}')
-      print(f'Starting from:                   {self.position["split"] + 1}/{self.split} split, {self.position["epoch"] + 1}/{self.epochs} epoch')
+      print(f'Starting from:                   {self.position["split"] + 1}/{self.split} split, {(self.position["epoch"]) + 1}/{self.epochs} epoch')
     print()
     print('Using Multiprocessing:            ' + ('yes' if self.using_multiprocessing else 'no'))
     if self.using_multiprocessing:
@@ -346,6 +346,8 @@ class Trainer:
     trainer = Trainer(dataset, model, model_folder, checkpoint['options'])
     trainer.model.load_state_dict(checkpoint['model'])
     trainer.position = checkpoint['position']
+    if 'epoch:' in trainer.position: # backward compatibility
+      trainer.position['epoch'] = trainer.position.pop('epoch:')
     trainer.epoch_start_times = checkpoint['epoch_start_times']
     trainer.losses = checkpoint['losses']
     trainer.best_validation_loss = checkpoint['best_validation_loss']
