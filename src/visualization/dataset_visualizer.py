@@ -23,7 +23,7 @@ class DatasetVisualizer:
     axes[1].set_title('Phi Rotations')
     plt.show()
 
-  def histogram (self, config):
+  def histogram (self, config, output_file):
     fields = config['fields']
     callback = config['callback']
 
@@ -49,6 +49,8 @@ class DatasetVisualizer:
       ax = axes[index] if len(fields) > 1 else axes
       ax.hist(hist, bins=HISTOGRAM_BINS, edgecolor='black')
       ax.set_title(field)
+    if output_file:
+      plt.savefig(output_file)
     plt.show()
 
   histogram_fields = {

@@ -12,7 +12,7 @@ def with_checkpoint (model, params):
 commands = {
   'dataset': {
     '_visualizer': lambda dataset, _model, _params: DatasetVisualizer(dataset),
-    'histogram': lambda visualizer, params: visualizer.histogram(visualizer.histogram_fields[params['field']]),
+    'histogram': lambda visualizer, params: visualizer.histogram(visualizer.histogram_fields[params['field']], params['output']),
     'fields': lambda visualizer, _params: visualizer.print_fields()
   },
   'event': {
@@ -41,6 +41,3 @@ def show (dataset=None, model=None, scope='non', subcommand='non', params={}):
     exit(f'Unknown command: {subcommand} for {scope}')
 
   commands[scope][subcommand](visualizer, params)
-
-  if params['output']:
-    plt.savefig(params['output'])
