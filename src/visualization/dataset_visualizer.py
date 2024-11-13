@@ -98,7 +98,7 @@ class DatasetVisualizer:
     },
     
     'cluster_eta_phi': {
-      'callback': lambda event: { 'cluster eta': [cluster.eta for cluster in event.clusters], 'cluster phi': [cluster.phi for cluster in event.clusters] },
+      'callback': lambda event: { 'cluster eta': [cluster.position().eta for cluster in event.clusters], 'cluster phi': [cluster.position().phi for cluster in event.clusters] },
       'fields': ['cluster eta', 'cluster phi'],
       'type': '2d'
     },
