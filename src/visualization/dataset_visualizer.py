@@ -49,6 +49,8 @@ class DatasetVisualizer:
       ax = axes[index] if len(fields) > 1 else axes
       ax.hist(hist, bins=HISTOGRAM_BINS, edgecolor='black')
       ax.set_title(field)
+      if config.get('x-log', False):
+        ax.set_xscale('log')
     if output_file:
       plt.savefig(output_file)
     plt.show()
@@ -74,15 +76,18 @@ class DatasetVisualizer:
 
     'cluster_pt': {
       'callback': lambda event: { 'cluster pt': [cluster.momentum().p_t for cluster in event.clusters] },
-      'fields': ['cluster pt']
+      'fields': ['cluster pt'],
+      'x-log': True
     },
     'track_pt': {
       'callback': lambda event: { 'track pt': [track.pt for track in event.tracks] },
-      'fields': ['track pt']
+      'fields': ['track pt'],
+      'x-log': True
     },
     'truth_pt': {
       'callback': lambda event: { 'truth pt': [truth.pt for truth in event.truths] },
-      'fields': ['truth pt']
+      'fields': ['truth pt'],
+      'x-log': True
     },
 
     'normlization_factors': {
