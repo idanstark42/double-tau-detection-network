@@ -13,9 +13,9 @@ from commands.merge import merge
 from commands.config import config
 
 def main (args):
+  print('args: ' args)
   if isinstance(args, str):
     args = args.split(' ')
-  print(args)
   command = args[0]
 
   if command == 'config':
