@@ -26,16 +26,22 @@ class ModelVisualizer:
   def plot_results (self, outputs, targets, test_loader, dataset, output_file):
     events = [dataset.get_event(test_loader.dataset.indices[index]) for index in range(len(test_loader.dataset))]
     random_indeces = np.random.choice(len(test_loader.dataset), ARROWS_NUMBER, replace=False)
-    random_events = [dataset.get_event(test_loader.dataset.indices[index]) for index in random_indeces]
-    random_outputs = [outputs[index] for index in random_indeces]
-    random_targets = [targets[index] for index in random_indeces]
     sample_event_index = np.random.randint(len(events))
 
     fig, axs = plt.subplots(1, 4, figsize=(16, 4))
-    self.arrows_on_eta_phi_plot(random_outputs, random_targets, axs[0], color='blue')
     self.sample_event_plot(events[sample_event_index], targets[sample_event_index], outputs[sample_event_index], axs[1])
-    self.distances_histogram(outputs, targets, axs[2])
-    self.distances_by_pt_plot(outputs, targets, events, axs[3])
+    
+    # each output and target is a list of four values, two for each tau. Each tau has an eta and a phi
+    output_positions = [Position(output[0], output[1]) for output in outputs] + [Position(output[2], output[3]) for output in outputs]
+    target_positions = [Position(target[0], target[1]) for target in targets] + [Position(target[2], target[3]) for target in targets]
+    self.distances_histogram(output_positions, target_positions, axs[2])
+    self.distances_by_pt_plot(output_positions, target_positions, events, axs[3])
+
+    random_position_indices = np.random.choice(len(output_positions), ARROWS_NUMBER, replace=False)
+    random_output_positions = [output_positions[index] for index in random_position_indices]
+    random_target_positions = [target_positions[index] for index in random_position_indices]
+    self.arrows_on_eta_phi_plot(random_output_positions, random_target_positions, axs[0], color='blue')
+
     plt.savefig(output_file)
     plt.show()
 
@@ -46,8 +52,6 @@ class ModelVisualizer:
       ax.arrow(eta, phi, deta, dphi, head_width=0.1, head_length=0.1, fc=color, ec=color, **kwargs)
 
     for start, end in zip(starts, ends):
-      start = Position(start[0], start[1])
-      end = Position(end[0], end[1])
       if abs(start.phi - end.phi) > phi_range_size / 2:
         deta = end.eta - start.eta
         dphi = end.phi - start.phi + (phi_range_size if start.phi > end.phi else -phi_range_size)
@@ -79,28 +83,17 @@ class ModelVisualizer:
     ax.set_ylim(0, 1)
 
   def distances_histogram (self, starts, ends, ax):
-    def distance (start, end):
-      start = Position(start[0], start[1])
-      end = Position(end[0], end[1])
-      return start.distance(end)
-
-    distances = [distance(start, end) for start, end in zip(starts, ends)]
+    distances = [start.distance(end) for start, end in zip(starts, ends)]
     percent_of_distances_unser_0_2 = len([distance for distance in distances if distance < 0.2]) / len(distances)
     ax.hist(distances, bins=100)
     ax.set_xlabel('distance')
     ax.set_ylabel(f'count ({percent_of_distances_unser_0_2 * 100:.2f}% under 0.2)')
 
   def distances_by_pt_plot (self, starts, ends, events, ax):
-    def distance (start, end):
-      start = Position(start[0], start[1])
-      end = Position(end[0], end[1])
-      return start.distance(end)
-
     def pt (event):
-      # sum of event.true_four_momentum().pt for all taus in the event
       return sum([momentum.p_t for momentum in event.true_four_momentum()])
 
-    distances = [distance(start, end) for start, end in zip(starts, ends)]
+    distances = [start.distance(end) for start, end in zip(starts, ends)]
     pts = [pt(event) for event in events]
     ax.scatter(pts, distances)
     ax.set_xlabel('pt')
