@@ -20,7 +20,7 @@ if __name__ == '__main__':
     exit()
 
   from settings import DATA_FILE
-  params = { key: value for key, value in [variable.split('=') for variable in sys.argv[2:]] }
+  params = { key: value for key, value in [variable.split('=') for variable in sys.argv[2:] if variable.find('=') != -1] }
   dataset_file = params.get('ext-src', datafile_path(params.get('src', DATA_FILE)))
 
   if command == 'proliferate':
@@ -45,17 +45,16 @@ if __name__ == '__main__':
     exit()
   
   dataset = EventsDataset(dataset_file)
-
-  if command == 'show':
-    scope = sys.argv[2]
-    params = sys.argv[3:]
-    show(dataset, scope, params)
-    exit()
-
   model = params.get('model', 'small')
   use_post_processing = params.get('post_processing', 'false') == 'true'
   dropout_probability = float(params.get('dropout', 0.15))
   module = MainModel(post_processing=(dataset.post_processing if use_post_processing else False), input_channels=dataset.input_channels, model=model, dropout_probability=dropout_probability)
+
+  if command == 'show':
+    scope = sys.argv[2]
+    subcommand = sys.argv[3]
+    show(dataset=dataset, model=module, scope=scope, subcommand=subcommand, params=params)
+    exit()
 
   if command == 'train':
     folder = modelfolder_path(params.get('folder', 'model_' + str(round(time.time() * 1000))))

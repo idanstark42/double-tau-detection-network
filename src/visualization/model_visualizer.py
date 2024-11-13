@@ -5,6 +5,7 @@ import numpy as np
 from data.position import Position
 from .event_visualizer import EventVisualizer
 from settings import PHI_RANGE, ETA_RANGE, JET_SIZE, MAP_2D_TICKS, ARROWS_NUMBER
+from utils import long_operation
 
 phi_range_size = abs(PHI_RANGE[1] - PHI_RANGE[0])
 
@@ -104,3 +105,24 @@ class ModelVisualizer:
     ax.scatter(pts, distances)
     ax.set_xlabel('pt')
     ax.set_ylabel('distance')
+  
+  def parameters_histogram (self, output_file):
+    def get_params(next):
+      parameters = []
+      for parameter in self.model.conv_layers.parameters():
+        if parameter.requires_grad:
+          parameters.append(parameter.data.cpu().numpy().flatten())
+          next()
+      for parameter in self.model.linear_layers.parameters():
+        if parameter.requires_grad:
+          parameters.append(parameter.data.cpu().numpy().flatten())
+          next()
+      return parameters
+    
+    convulational_params, linear_params = self.model.parameter_counts()
+    parametrers = long_operation(get_params, max=convulational_params + linear_params, message='Loading parameters')
+    
+    plt.hist(parametrers, bins=50)
+    plt.yscale('log')
+    plt.savefig(output_file)
+    plt.show()

@@ -39,10 +39,14 @@ class MainModel (nn.Module):
         x = self.post_processing(x)
     
     return x
-
-  def print_parameters(self):
+  
+  def parameter_counts(self):
     convulational_params = sum(p.numel() for p in self.conv_layers.parameters() if p.requires_grad)
     linear_params = sum(p.numel() for p in self.linear_layers.parameters() if p.requires_grad)
+    return convulational_params, linear_params
+
+  def print_parameters(self):
+    convulational_params, linear_params = self.parameter_counts()
     print(f"Initialized NN.")
     print(f"Model:                            {self.model_name}")
     print(f"Dropout probability:              {self.dropout_probability}")

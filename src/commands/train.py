@@ -115,7 +115,7 @@ class Trainer:
     self.dataset.clear_cache()
 
     if self.split > 1:
-      print(f'Split time: {seconds_to_time(time.time() - split_start_time)}/{seconds_to_time((time.time() - self.start_time) * (self.limit if self.limit else self.split) / split)} estimated')
+      print(f'Split time: {seconds_to_time(time.time() - split_start_time)}/{seconds_to_time((time.time() - self.start_time) * (self.limit if self.limit else self.split) / (split + 1))} estimated')
   
     if self.saving_mode == 'split':
       self.save_checkpoint(f'split-{split + 1}')
@@ -351,6 +351,7 @@ class Trainer:
     os.makedirs(self.model_folder, exist_ok=True)
     os.makedirs(os.path.join(self.model_folder, 'checkpoints'), exist_ok=True)
     torch.save(checkpoint, os.path.join(self.model_folder, 'checkpoints', f'{name}.pth'))
+
     if self.backup_folder:
       model_folder_ending = self.model_folder.split('/')[-1]
       os.makedirs(os.path.join(self.backup, model_folder_ending), exist_ok=True)
