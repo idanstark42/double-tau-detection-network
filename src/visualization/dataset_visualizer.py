@@ -33,7 +33,7 @@ class DatasetVisualizer:
         event = self.dataset.get_event(i)
         datum = callback(event)
         for field in fields:
-          hist[field].append(datum[field])
+          hist[field].append(datum)
         next()
       return hist
     
