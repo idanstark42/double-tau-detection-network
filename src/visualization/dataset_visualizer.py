@@ -55,7 +55,7 @@ class DatasetVisualizer:
 
   histogram_fields = {
     'average_interaction_per_crossing': {
-      'callback': lambda event: { 'average interaction per crossing': [event.average_interactions_per_crossing] },
+      'callback': lambda event: { 'average interactions per crossing': [event.average_interactions_per_crossing] },
       'fields': ['average interactions per crossing']
     },
 
