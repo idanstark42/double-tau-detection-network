@@ -73,7 +73,7 @@ class DatasetVisualizer:
     },
 
     'cluster_pt': {
-      'callback': lambda event: { 'cluster pt': [cluster.momentum().pt for cluster in event.clusters] },
+      'callback': lambda event: { 'cluster pt': [cluster.momentum().pT for cluster in event.clusters] },
       'fields': ['cluster pt']
     },
     'track_pt': {
