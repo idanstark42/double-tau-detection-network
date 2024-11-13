@@ -278,7 +278,7 @@ class Trainer:
   # logging & visualization
 
   def print_starting_log (self):
-    print(self.position)
+    print()
     print(f'Training set size:                {sum([len(loader.dataset) if loader else self.training_loader_size for loader in self.train_loaders])}')
     print(f'Validation set size:              {sum([len(loader.dataset) if loader else self.validation_loader_size for loader in self.validation_loaders])}')
     print(f'Test set size:                    {len(self.test_loader.dataset)}')
@@ -354,8 +354,8 @@ class Trainer:
 
     if self.backup_folder:
       model_folder_ending = self.model_folder.split('/')[-1]
-      os.makedirs(os.path.join(self.backup, model_folder_ending), exist_ok=True)
-      os.system(f'cp -r {self.model_folder}/* {os.path.join(self.backup, model_folder_ending)}')
+      os.makedirs(os.path.join(self.backup_folder, model_folder_ending), exist_ok=True)
+      os.system(f'cp -r {self.model_folder}/* {os.path.join(self.backup_folder, model_folder_ending)}')
   
   @staticmethod
   def from_checkpoint(dataset, model, checkpoint_file, options={}):

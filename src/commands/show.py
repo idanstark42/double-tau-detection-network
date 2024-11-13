@@ -11,7 +11,7 @@ def with_checkpoint (model, params):
 commands = {
   'dataset': {
     '_visualizer': lambda dataset, _model, _params: DatasetVisualizer(dataset),
-    'histogram': lambda visualizer, params: visualizer.histogram(visualizer.histogram_fields[params[0]]),
+    'histogram': lambda visualizer, params: visualizer.histogram(visualizer.histogram_fields[params.field]),
     'fields': lambda visualizer, _params: visualizer.print_fields()
   },
   'event': {
