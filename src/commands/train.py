@@ -14,8 +14,9 @@ from settings import EPOCHS, BATCH_SIZE, TRAINING_PERCENTAGE, VALIDATION_PERCENT
 def train(dataset, model, model_folder, options={}):
   if 'checkpoint' in options:
     if 'backup_folder' in options:
+      model_folder_ending = model_folder.split('/')[-1]
       os.makedirs(model_folder, exist_ok=True)
-      os.system(f'cp -r {options["backup_folder"]}/* {model_folder}')
+      os.system(f'cp -r {options["backup_folder"]}/{model_folder_ending}/* {model_folder}')
     checkpoint = Trainer.last_checkpoint(model_folder) if options['checkpoint'] == 'true' else os.path.join(model_folder, 'checkpoints', options['checkpoint'])
     trainer = Trainer.from_checkpoint(dataset, model, checkpoint)
   else:
