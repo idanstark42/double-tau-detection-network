@@ -1,4 +1,5 @@
 import torch
+import matplotlib.pyplot as plt
 
 from visualization import EventVisualizer, DatasetVisualizer, ModelVisualizer
 
@@ -40,3 +41,6 @@ def show (dataset=None, model=None, scope='non', subcommand='non', params={}):
     exit(f'Unknown command: {subcommand} for {scope}')
 
   commands[scope][subcommand](visualizer, params)
+
+  if params['output']:
+    plt.savefig(params['output'])
