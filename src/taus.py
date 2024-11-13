@@ -15,14 +15,14 @@ from commands.config import config
 def main (args):
   if isinstance(args, str):
     args = args.split(' ')
-  command = args[1]
+  command = args[0]
 
   if command == 'config':
-    config(args[2], args[3])
+    config(args[1], args[2])
     exit()
 
   from settings import DATA_FILE
-  params = { key: value for key, value in [variable.split('=') for variable in args[2:] if variable.find('=') != -1] }
+  params = { key: value for key, value in [variable.split('=') for variable in args[1:] if variable.find('=') != -1] }
   dataset_file = params.get('ext-src', datafile_path(params.get('src', DATA_FILE)))
 
   if command == 'proliferate':
@@ -53,8 +53,8 @@ def main (args):
   module = MainModel(post_processing=(dataset.post_processing if use_post_processing else False), input_channels=dataset.input_channels, model=model, dropout_probability=dropout_probability)
 
   if command == 'show':
-    scope = args[2]
-    subcommand = args[3]
+    scope = args[1]
+    subcommand = args[2]
     show(dataset=dataset, model=module, scope=scope, subcommand=subcommand, params=params)
     exit()
 
@@ -76,4 +76,4 @@ def main (args):
   print(f'Unknown command: {command}')
 
 if __name__ == '__main__':
-  main(sys.argv)
+  main(sys.argv[1:])
