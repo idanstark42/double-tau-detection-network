@@ -102,6 +102,12 @@ class DatasetVisualizer:
       'fields': ['cluster eta', 'cluster phi'],
       'type': '2d'
     },
+    
+    'tracks_eta_phi': {
+      'callback': lambda event: { 'track eta': [track.position().eta for track in event.tracks], 'track phi': [track.position().phi for track in event.tracks] },
+      'fields': ['track eta', 'track phi'],
+      'type': '2d'
+    },
 
     'cluster_pt': {
       'callback': lambda event: { 'cluster pt': [cluster.momentum().p_t for cluster in event.clusters] },
