@@ -1,4 +1,5 @@
 from matplotlib import pyplot as plt
+import matplotlib.colors as colors
 import numpy as np
 
 from settings import HISTOGRAM_BINS, RESOLUTION
@@ -68,7 +69,8 @@ class DatasetVisualizer:
       return
     
     if config.get('type', 'side-by-side') == '2d' and len(fields) == 2:
-      plt.hist2d(result[fields[0]], result[fields[1]], bins=HISTOGRAM_BINS, cmap='Blues')
+      plt.hist2d(result[fields[0]], result[fields[1]], bins=HISTOGRAM_BINS, cmap='Blues', norm=colors.Normalize())
+      plt.colorbar()
       plt.xlabel(fields[0])
       plt.ylabel(fields[1])
       if output_file:
