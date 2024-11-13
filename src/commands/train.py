@@ -13,6 +13,9 @@ from settings import EPOCHS, BATCH_SIZE, TRAINING_PERCENTAGE, VALIDATION_PERCENT
 
 def train(dataset, model, model_folder, options={}):
   if 'checkpoint' in options:
+    if 'backup_folder' in options:
+      os.makedirs(model_folder, exist_ok=True)
+      os.system(f'cp -r {options["backup_folder"]}/* {model_folder}')
     checkpoint = Trainer.last_checkpoint(model_folder) if options['checkpoint'] == 'true' else os.path.join(model_folder, 'checkpoints', options['checkpoint'])
     trainer = Trainer.from_checkpoint(dataset, model, checkpoint)
   else:
@@ -32,10 +35,13 @@ class Trainer:
     self.load_initial_state()
 
   def load_options(self):
+    self.backup_folder = self.options.get('backup_folder', '')
+
     self.preload_type = self.options.get('preload', 'none')
     self.saving_mode = self.options.get('saving_mode', 'none')
     self.cache_type = self.options.get('cache', 'events')
     self.dataset.cache_type = self.cache_type
+    self.checkpoint = False
 
     self.split = int(self.options.get('split', '1'))
     self.limit = int(self.options.get('limit')) if self.options.get('limit') and self.split != 1 else None
@@ -49,7 +55,6 @@ class Trainer:
 
     self.learning_rate = float(self.options.get('learning_rate', 0.001))
     self.weight_decay = float(self.options.get('weight_decay', 0.0001))
-    self.checkpoint = False
   
   def load_initial_state(self):
     self.position = { 'split': 0, 'epoch': 0 }
@@ -278,21 +283,24 @@ class Trainer:
     print(f'Test set size:                    {len(self.test_loader.dataset)}')
     print(f'Split:                            {self.split}')
     print('Limit:                            ' + (f'{self.limit} [{(self.limit / self.split * 10):.2f}]' if self.limit else 'none'))
+    print(f'Batch Size:                       {self.batch_size}')
+    print(f'Epochs:                           {self.epochs}')
+    print()
     print(f'Saving Mode:                      {self.saving_mode}')
     if self.checkpoint:
       print(f'From checkpoint:                  {self.checkpoint}')
       print(f'Starting from:                   {self.position["split"] + 2}/{self.split} split, {(self.position["epoch"]) + 2}/{self.epochs} epoch')
+    print(f'Preload Type:                     {self.preload_type}')
+    print(f'Cache:                            {self.cache_type}')
+    print(f'Model Folder:                     {self.model_folder}')
+    print(f'Backup Folder:                    {self.backup_folder}')
     print()
     print('Using Multiprocessing:            ' + ('yes' if self.using_multiprocessing else 'no'))
     if self.using_multiprocessing:
       print(f'Number of Workers:                {int(self.num_workers)}')
       print(f'Persistent Workers:               ' + ('yes' if self.persistent_workers else 'no'))
     print('Using Device:                     ' + (torch.cuda.get_device_name(0) if self.use_cuda else 'CPU'))
-    print(f'Batch Size:                       {self.batch_size}')
-    print(f'Epochs:                           {self.epochs}')
-    print(f'Preload Type:                     {self.preload_type}')
-    print(f'Cache:                            {self.cache_type}')
-    print(f'Output Folder:                    {self.model_folder}')
+    print()
     print(f'Learning Rate:                    {self.learning_rate}')
     print(f'Weight Decay:                     {self.weight_decay}')
     print()
@@ -336,17 +344,22 @@ class Trainer:
       'epoch_start_times': self.epoch_start_times,
       'losses': self.losses,
       'best_validation_loss': self.best_validation_loss,
-      'best_model': self.best_model
+      'best_model': self.best_model,
+      'backup_folder': self.backup_folder,
     }
     os.makedirs(self.model_folder, exist_ok=True)
     os.makedirs(os.path.join(self.model_folder, 'checkpoints'), exist_ok=True)
     torch.save(checkpoint, os.path.join(self.model_folder, 'checkpoints', f'{name}.pth'))
+    if self.backup_folder:
+      model_folder_ending = self.model_folder.split('/')[-1]
+      os.makedirs(os.path.join(self.backup, model_folder_ending), exist_ok=True)
+      os.system(f'cp -r {self.model_folder}/* {os.path.join(self.backup, model_folder_ending)}')
   
   @staticmethod
-  def from_checkpoint(dataset, model, checkpoint_file):
+  def from_checkpoint(dataset, model, checkpoint_file, options={}):
     checkpoint = torch.load(checkpoint_file)
     model_folder = checkpoint['model_folder'] if 'model_folder' in checkpoint else checkpoint['output_folder'] # backward compatibility
-    trainer = Trainer(dataset, model, model_folder, checkpoint['options'])
+    trainer = Trainer(dataset, model, model_folder, { **checkpoint['options'], **options })
     trainer.model.load_state_dict(checkpoint['model'])
     trainer.position = checkpoint['position']
     if 'epoch:' in trainer.position: # backward compatibility
