@@ -31,9 +31,9 @@ class DatasetVisualizer:
       print('Dataset too large. Using only partial dataset for histogram of 10000 events.')
       random_indeces = np.random.choice(len(self.dataset), 10000, replace=False)
 
+    indicies = random_indeces if len(self.dataset) > 1000000 else range(len(self.dataset))
     def load (next):
       hist = { field: [] for field in fields }
-      indicies = random_indeces if len(self.dataset) > 1000000 else range(len(self.dataset))
       for i in indicies:
         event = self.dataset.get_event(i)
         datum = callback(event)
@@ -42,7 +42,7 @@ class DatasetVisualizer:
         next()
       return hist
     
-    result = long_operation(load, max=len(self.dataset))
+    result = long_operation(load, max=len(indicies))
     fig, axes = plt.subplots(1, len(fields))
     for index, field in enumerate(fields):
       hist = np.array(result[field]).flatten().tolist()
