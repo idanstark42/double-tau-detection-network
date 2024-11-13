@@ -1,7 +1,7 @@
 from matplotlib import pyplot as plt
 import numpy as np
 
-from settings import HISTOGRAM_BINS
+from settings import HISTOGRAM_BINS, RESOLUTION
 from utils import long_operation, python_name_from_dtype_name
 
 class DatasetVisualizer:
@@ -43,17 +43,40 @@ class DatasetVisualizer:
       return hist
     
     result = long_operation(load, max=len(indicies), message='Loading data for histogram')
-    fig, axes = plt.subplots(1, len(fields))
-    for index, field in enumerate(fields):
-      hist = np.array(result[field]).flatten().tolist()
-      ax = axes[index] if len(fields) > 1 else axes
-      ax.hist(hist, bins=HISTOGRAM_BINS, edgecolor='black')
-      ax.set_title(field)
+    if len(fields) == 1:
+      plt.hist(result[fields[0]], bins=HISTOGRAM_BINS, edgecolor='black')
+      plt.title(fields[0])
       if config.get('x-log', False):
-        ax.set_xscale('log')
-    if output_file:
-      plt.savefig(output_file)
-    plt.show()
+        plt.xscale('log')
+      if output_file:
+        plt.savefig(output_file)
+      plt.show()
+      return
+    
+    if config.get('type', 'side-by-side') == 'side-by-side':
+      fig, axes = plt.subplots(1, len(fields))
+      for index, field in enumerate(fields):
+        hist = np.array(result[field]).flatten().tolist()
+        ax = axes[index] if len(fields) > 1 else axes
+        ax.hist(hist, bins=HISTOGRAM_BINS, edgecolor='black')
+        ax.set_title(field)
+        if config.get('x-log', False):
+          ax.set_xscale('log')
+      if output_file:
+        plt.savefig(output_file)
+      plt.show()
+      return
+    
+    if config.get('type', 'side-by-side') == '2d' and len(fields) == 2:
+      plt.hist2d(result[fields[0]], result[fields[1]], bins=RESOLUTION)
+      plt.xlabel(fields[0])
+      plt.ylabel(fields[1])
+      if output_file:
+        plt.savefig(output_file)
+      plt.show()
+      return
+
+    raise Exception('Unknown histogram type')
 
   histogram_fields = {
     'average_interaction_per_crossing': {
@@ -73,6 +96,12 @@ class DatasetVisualizer:
       'callback': lambda event: { 'truth count': [len(event.truths)] },
       'fields': ['truth count']
     },
+    
+    'cluster_eta_phi': {
+      'callback': lambda event: { 'cluster eta': [cluster.eta for cluster in event.clusters], 'cluster phi': [cluster.phi for cluster in event.clusters] },
+      'fields': ['cluster eta', 'cluster phi'],
+      'type': '2d'
+    },
 
     'cluster_pt': {
       'callback': lambda event: { 'cluster pt': [cluster.momentum().p_t for cluster in event.clusters] },
@@ -89,6 +118,7 @@ class DatasetVisualizer:
 
     'normlization_factors': {
       'callback': lambda event: event.normalization_factors(),
-      'fields': ['clusters mean', 'clusters std', 'tracks mean', 'tracks std']
+      'fields': ['clusters mean', 'clusters std', 'tracks mean', 'tracks std'],
+      'type': 'side-by-side'
     }
   }
