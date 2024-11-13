@@ -76,18 +76,15 @@ class DatasetVisualizer:
 
     'cluster_pt': {
       'callback': lambda event: { 'cluster pt': [cluster.momentum().p_t for cluster in event.clusters] },
-      'fields': ['cluster pt'],
-      'x-log': True
+      'fields': ['cluster pt']
     },
     'track_pt': {
       'callback': lambda event: { 'track pt': [track.pt for track in event.tracks] },
-      'fields': ['track pt'],
-      'x-log': True
+      'fields': ['track pt']
     },
     'truth_pt': {
       'callback': lambda event: { 'truth pt': [truth.pt for truth in event.truths] },
-      'fields': ['truth pt'],
-      'x-log': True
+      'fields': ['truth pt']
     },
 
     'normlization_factors': {
