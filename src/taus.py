@@ -15,6 +15,7 @@ from commands.config import config
 def main (args):
   if isinstance(args, str):
     args = args.split(' ')
+  print(args)
   command = args[0]
 
   if command == 'config':
