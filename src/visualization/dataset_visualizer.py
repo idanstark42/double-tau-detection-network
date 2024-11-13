@@ -27,9 +27,14 @@ class DatasetVisualizer:
     fields = config['fields']
     callback = config['callback']
 
+    if len(self.dataset) > 100000:
+      print('Dataset too large. Using only partial dataset for histogram of 10000 events.')
+      random_indeces = np.random.choice(len(self.dataset), 10000, replace=False)
+
     def load (next):
       hist = { field: [] for field in fields }
-      for i in range(len(self.dataset)):
+      indicies = random_indeces if len(self.dataset) > 100000 else range(len(self.dataset))
+      for i in indicies:
         event = self.dataset.get_event(i)
         datum = callback(event)
         for field in fields:
