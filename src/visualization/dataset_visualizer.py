@@ -60,15 +60,15 @@ class DatasetVisualizer:
     },
 
     'cluster_count': {
-      'callback': lambda event: { 'cluster count': len(event.clusters) },
+      'callback': lambda event: { 'cluster count': [len(event.clusters)] },
       'fields': ['cluster count']
     },
     'track_count': {
-      'callback': lambda event: { 'track count': len(event.tracks) },
+      'callback': lambda event: { 'track count': [len(event.tracks)] },
       'fields': ['track count']
     },
     'truth_count': {
-      'callback': lambda event: { 'truth count': len(event.truths) },
+      'callback': lambda event: { 'truth count': [len(event.truths)] },
       'fields': ['truth count']
     },
 
