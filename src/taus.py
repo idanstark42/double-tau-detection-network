@@ -12,15 +12,17 @@ from commands.proliferate import proliferate
 from commands.merge import merge
 from commands.config import config
 
-if __name__ == '__main__':
-  command = sys.argv[1]
+def main (args):
+  if isinstance(args, str):
+    args = args.split(' ')
+  command = args[1]
 
   if command == 'config':
-    config(sys.argv[2], sys.argv[3])
+    config(args[2], args[3])
     exit()
 
   from settings import DATA_FILE
-  params = { key: value for key, value in [variable.split('=') for variable in sys.argv[2:] if variable.find('=') != -1] }
+  params = { key: value for key, value in [variable.split('=') for variable in args[2:] if variable.find('=') != -1] }
   dataset_file = params.get('ext-src', datafile_path(params.get('src', DATA_FILE)))
 
   if command == 'proliferate':
@@ -51,8 +53,8 @@ if __name__ == '__main__':
   module = MainModel(post_processing=(dataset.post_processing if use_post_processing else False), input_channels=dataset.input_channels, model=model, dropout_probability=dropout_probability)
 
   if command == 'show':
-    scope = sys.argv[2]
-    subcommand = sys.argv[3]
+    scope = args[2]
+    subcommand = args[3]
     show(dataset=dataset, model=module, scope=scope, subcommand=subcommand, params=params)
     exit()
 
@@ -72,3 +74,6 @@ if __name__ == '__main__':
     exit()
 
   print(f'Unknown command: {command}')
+
+if __name__ == '__main__':
+  main(sys.argv)
