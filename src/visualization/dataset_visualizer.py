@@ -69,7 +69,7 @@ class DatasetVisualizer:
       return
     
     if config.get('type', 'side-by-side') == '2d' and len(fields) == 2:
-      plt.hist2d(result[fields[0]], result[fields[1]], bins=HISTOGRAM_BINS, cmap='Blues', norm=colors.Normalize())
+      plt.hist2d(result[fields[0]], result[fields[1]], bins=HISTOGRAM_BINS, cmap='Blues', density=True)
       plt.colorbar()
       plt.xlabel(fields[0])
       plt.ylabel(fields[1])
