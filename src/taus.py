@@ -13,7 +13,7 @@ from commands.merge import merge
 from commands.config import config
 
 def main (args):
-  print('args: ' args)
+  print('args: ', args)
   if isinstance(args, str):
     args = args.split(' ')
   command = args[0]
