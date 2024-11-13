@@ -42,7 +42,7 @@ class DatasetVisualizer:
         next()
       return hist
     
-    result = long_operation(load, max=len(indicies))
+    result = long_operation(load, max=len(indicies), message='Loading data for histogram')
     fig, axes = plt.subplots(1, len(fields))
     for index, field in enumerate(fields):
       hist = np.array(result[field]).flatten().tolist()
