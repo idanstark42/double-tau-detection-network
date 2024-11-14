@@ -6,6 +6,7 @@ import numpy as np
 from settings import ETA_RANGE
 
 def create_output_file (output_file, input_file):
+  print('Loading input file...')
   with h5py.File(input_file, 'r') as input:
     event = input['event'][:]
     tracks = input['tracks'][:]
@@ -14,7 +15,9 @@ def create_output_file (output_file, input_file):
 
     event, tracks, clusters, truthTaus = clean(event, tracks, clusters, truthTaus)
   
+    print('Creating output file...')
     with h5py.File(output_file, 'w') as output:
+      print('Creating event dataset...')
       output.create_dataset(
         "event",
         data=event,
@@ -22,6 +25,7 @@ def create_output_file (output_file, input_file):
         chunks=(1,),
         maxshape=(None,),
       )
+      print('Creating tracks dataset...')
       output.create_dataset(
         "tracks",
         data=tracks,
@@ -29,6 +33,7 @@ def create_output_file (output_file, input_file):
         chunks=(1, tracks.shape[1]),
         maxshape=(None, tracks.shape[1]),
       )
+      print('Creating clusters dataset...')
       output.create_dataset(
         "clusters",
         data=clusters,
@@ -36,6 +41,7 @@ def create_output_file (output_file, input_file):
         chunks=(1, clusters.shape[1]),
         maxshape=(None, clusters.shape[1]),
       )
+      print('Creating truthTaus dataset...')
       output.create_dataset(
         "truthTaus",
         data=truthTaus,
@@ -43,6 +49,7 @@ def create_output_file (output_file, input_file):
         chunks=(1, truthTaus.shape[1]),
         maxshape=(None, truthTaus.shape[1]),
       )
+  print('Done')
 
 def append_to_output_file (output_file, input_file):
   with h5py.File(input_file, 'r') as input:
