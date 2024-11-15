@@ -2,7 +2,7 @@ from matplotlib import pyplot as plt
 import matplotlib.colors as colors
 import numpy as np
 
-from settings import HISTOGRAM_BINS, RESOLUTION
+from settings import HISTOGRAM_BINS, RESOLUTION, MAX_HISTOGRAM_SIZE
 from utils import long_operation, python_name_from_dtype_name
 
 class DatasetVisualizer:
@@ -28,11 +28,11 @@ class DatasetVisualizer:
     fields = config['fields']
     callback = config['callback']
 
-    if len(self.dataset) > 1000000:
-      print('Dataset too large. Using only partial dataset for histogram of 10000 events.')
-      random_indeces = np.random.choice(len(self.dataset), 10000, replace=False)
+    if len(self.dataset) > MAX_HISTOGRAM_SIZE:
+      print(f'Dataset too large. Using only partial dataset for histogram of {MAX_HISTOGRAM_SIZE} events.')
+      random_indeces = np.random.choice(len(self.dataset), MAX_HISTOGRAM_SIZE, replace=False)
 
-    indicies = random_indeces if len(self.dataset) > 1000000 else range(len(self.dataset))
+    indicies = random_indeces if len(self.dataset) > MAX_HISTOGRAM_SIZE else range(len(self.dataset))
     def load (next):
       hist = { field: [] for field in fields }
       for i in indicies:
