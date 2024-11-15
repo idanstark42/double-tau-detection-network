@@ -17,7 +17,7 @@ THREADS = 8
 # Data
 RESOLUTION = 128
 DATASET_FIELDS = ['event', 'clusters', 'tracks', 'truthTaus']
-DATA_FILE = 'merged'
+DATA_FILE = 'ggXtautau_mX20_run3year1_x10_x10'
 
 # TRAINING
 EPOCHS = 100
