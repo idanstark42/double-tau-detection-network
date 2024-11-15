@@ -1,7 +1,8 @@
 from matplotlib import pyplot as plt
+import matplotlib.colors as colors
 import numpy as np
 
-from settings import HISTOGRAM_BINS
+from settings import HISTOGRAM_BINS, RESOLUTION
 from utils import long_operation, python_name_from_dtype_name
 
 class DatasetVisualizer:
@@ -23,50 +24,95 @@ class DatasetVisualizer:
     axes[1].set_title('Phi Rotations')
     plt.show()
 
-  def histogram (self, config):
+  def histogram (self, config, output_file):
     fields = config['fields']
     callback = config['callback']
 
+    if len(self.dataset) > 1000000:
+      print('Dataset too large. Using only partial dataset for histogram of 10000 events.')
+      random_indeces = np.random.choice(len(self.dataset), 10000, replace=False)
+
+    indicies = random_indeces if len(self.dataset) > 1000000 else range(len(self.dataset))
     def load (next):
       hist = { field: [] for field in fields }
-      for i in range(len(self.dataset)):
+      for i in indicies:
         event = self.dataset.get_event(i)
         datum = callback(event)
         for field in fields:
-          hist[field].append(datum[field])
+          hist[field] += datum[field]
         next()
       return hist
     
-    result = long_operation(load, max=len(self.dataset))
-    fig, axes = plt.subplots(1, len(fields))
-    for index, field in enumerate(fields):
-      hist = np.array(result[field]).flatten().tolist()
-      ax = axes[index] if len(fields) > 1 else axes
-      ax.hist(hist, bins=HISTOGRAM_BINS, edgecolor='black')
-      ax.set_title(field)
-    plt.show()
+    result = long_operation(load, max=len(indicies), message='Loading data for histogram')
+    if len(fields) == 1:
+      plt.hist(result[fields[0]], bins=HISTOGRAM_BINS, edgecolor='black')
+      plt.title(fields[0])
+      if config.get('x-log', False):
+        plt.xscale('log')
+      if output_file:
+        plt.savefig(output_file)
+      plt.show()
+      return
+    
+    if config.get('type', 'side-by-side') == 'side-by-side':
+      fig, axes = plt.subplots(1, len(fields))
+      for index, field in enumerate(fields):
+        hist = np.array(result[field]).flatten().tolist()
+        ax = axes[index] if len(fields) > 1 else axes
+        ax.hist(hist, bins=HISTOGRAM_BINS, edgecolor='black')
+        ax.set_title(field)
+        if config.get('x-log', False):
+          ax.set_xscale('log')
+      if output_file:
+        plt.savefig(output_file)
+      plt.show()
+      return
+    
+    if config.get('type', 'side-by-side') == '2d' and len(fields) == 2:
+      plt.hist2d(result[fields[0]], result[fields[1]], bins=HISTOGRAM_BINS, cmap='Blues', density=True)
+      plt.colorbar()
+      plt.xlabel(fields[0])
+      plt.ylabel(fields[1])
+      if output_file:
+        plt.savefig(output_file)
+      plt.show()
+      return
+
+    raise Exception('Unknown histogram type')
 
   histogram_fields = {
     'average_interaction_per_crossing': {
-      'callback': lambda event: { 'average interaction per crossing': [event.average_interactions_per_crossing] },
+      'callback': lambda event: { 'average interactions per crossing': [event.average_interactions_per_crossing] },
       'fields': ['average interactions per crossing']
     },
 
     'cluster_count': {
-      'callback': lambda event: { 'cluster count': len(event.clusters) },
+      'callback': lambda event: { 'cluster count': [len(event.clusters)] },
       'fields': ['cluster count']
     },
     'track_count': {
-      'callback': lambda event: { 'track count': len(event.tracks) },
+      'callback': lambda event: { 'track count': [len(event.tracks)] },
       'fields': ['track count']
     },
     'truth_count': {
-      'callback': lambda event: { 'truth count': len(event.truths) },
+      'callback': lambda event: { 'truth count': [len(event.truths)] },
       'fields': ['truth count']
+    },
+    
+    'cluster_eta_phi': {
+      'callback': lambda event: { 'cluster eta': [cluster.position().eta for cluster in event.clusters], 'cluster phi': [cluster.position().phi for cluster in event.clusters] },
+      'fields': ['cluster eta', 'cluster phi'],
+      'type': '2d'
+    },
+    
+    'tracks_eta_phi': {
+      'callback': lambda event: { 'track eta': [track.position().eta for track in event.tracks], 'track phi': [track.position().phi for track in event.tracks] },
+      'fields': ['track eta', 'track phi'],
+      'type': '2d'
     },
 
     'cluster_pt': {
-      'callback': lambda event: { 'cluster pt': [cluster.pt for cluster in event.clusters] },
+      'callback': lambda event: { 'cluster pt': [cluster.momentum().p_t for cluster in event.clusters] },
       'fields': ['cluster pt']
     },
     'track_pt': {
@@ -80,6 +126,7 @@ class DatasetVisualizer:
 
     'normlization_factors': {
       'callback': lambda event: event.normalization_factors(),
-      'fields': ['clusters mean', 'clusters std', 'tracks mean', 'tracks std']
+      'fields': ['clusters mean', 'clusters std', 'tracks mean', 'tracks std'],
+      'type': 'side-by-side'
     }
   }

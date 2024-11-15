@@ -49,11 +49,11 @@ def proliferate (source_file, factor):
 
   def create_copies (next):
     with ProcessPoolExecutor() as executor:
-      futures = [run_with_next(lambda: executor.submit(transform_chunk, indices, factor, initial_count, source_file, file_access_lock, shared_keys, sharable_flips, sharable_rotations), next) for indices in chunks]
+      futures = [run_with_next(lambda: executor.submit(transform_chunk, indices, factor, initial_count, source_file, file_access_lock, shared_keys, sharable_flips, sharable_rotations), next, chunk_size) for indices in chunks]
       return [future.result() for future in as_completed(futures)]
     
   print('Generating copies')
-  copy_chunks = long_operation(create_copies, multiprocessing=True, max=len(chunks))
+  copy_chunks = long_operation(create_copies, multiprocessing=True, max=len(chunks) * chunk_size)
 
   def add_copies (next):
     with h5py.File(output_file, 'a') as output:
@@ -73,9 +73,9 @@ def proliferate (source_file, factor):
   print(f'Proliferated {initial_count} events by a factor of {factor} to {final_count} events')
   DatasetVisualizer(None).show_proliferation(initial_count * (factor - 1) ,len([flipping for flipping in flips if flipping]), rotations)
 
-def run_with_next (operation, next):
+def run_with_next (operation, next, amount=1):
   future = operation()
-  future.add_done_callback(lambda _: next())
+  future.add_done_callback(lambda _: next(amount))
   return future
 
 def transform_chunk (indices, factor, dataset_length, source_file, source_file_access_lock, keys, flips, rotations):

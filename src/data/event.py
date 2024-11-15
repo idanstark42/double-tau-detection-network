@@ -98,26 +98,26 @@ class Event:
 
     return self.calculate_and_cache('clusters_and_tracks_momentum_map', calculate)
   
-  def clusters_map (self, resulotion, channel_providers):
+  def clusters_map (self, resulotion, channels_provider, channels_count):
     def calculate ():
-      map = np.zeros((len(channel_providers), resulotion, resulotion), dtype=np.float32)
+      map = np.zeros((channels_count, resulotion, resulotion), dtype=np.float32)
       for cluster in self.clusters:
         x, y = cluster.position().relative()
         if (x > 0 and x < 1 and y > 0 and y < 1):
-          for index, provider in enumerate(channel_providers):
-            map[index, int(x * resulotion), int(y * resulotion)] += provider(cluster)
+          for index, channel in enumerate(channels_provider(cluster)):
+            map[index, int(x * resulotion), int(y * resulotion)] += channel
       return map
 
     return self.calculate_and_cache('clusters_map', calculate)
   
-  def tracks_map (self, resulotion, channel_providers):
+  def tracks_map (self, resulotion, channels_provider, channels_count):
     def calculate():
-      map = np.zeros((len(channel_providers), resulotion, resulotion), dtype=np.float32)
+      map = np.zeros((channels_count, resulotion, resulotion), dtype=np.float32)
       for track in self.tracks:
         x, y = track.position().relative()
         if (x > 0 and x < 1 and y > 0 and y < 1):
-          for index, provider in enumerate(channel_providers):
-            map[index, int(x * resulotion), int(y * resulotion)] += provider(track)
+          for index, channel in enumerate(channels_provider(track)):
+            map[index, int(x * resulotion), int(y * resulotion)] += channel
       return map
     
     return self.calculate_and_cache('tracks_map', calculate)

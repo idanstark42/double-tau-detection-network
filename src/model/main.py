@@ -39,10 +39,14 @@ class MainModel (nn.Module):
         x = self.post_processing(x)
     
     return x
-
-  def print_parameters(self):
+  
+  def parameter_counts(self):
     convulational_params = sum(p.numel() for p in self.conv_layers.parameters() if p.requires_grad)
     linear_params = sum(p.numel() for p in self.linear_layers.parameters() if p.requires_grad)
+    return convulational_params, linear_params
+
+  def print_parameters(self):
+    convulational_params, linear_params = self.parameter_counts()
     print(f"Initialized NN.")
     print(f"Model:                            {self.model_name}")
     print(f"Dropout probability:              {self.dropout_probability}")
@@ -147,6 +151,32 @@ class MainModel (nn.Module):
       ])
     }
   
+  def jet_ssd_min_model_alt(self):
+    return {
+      'conv_layers': nn.ModuleList([
+        self.conv_block(self.input_channels, 32, kernel_size=3, padding=1, stride=1, bias=False, drop=True),
+        nn.AvgPool2d(kernel_size=2, stride=2, padding=1),
+        self.conv_block(32, 64, kernel_size=3, padding=1, stride=1, bias=False),
+        self.conv_block(64, 128, kernel_size=3, padding=1, stride=1, bias=False),
+        AttentionLayer(),
+        nn.AvgPool2d(kernel_size=2, stride=2, padding=1),
+        self.conv_block(128, 128, kernel_size=3, padding=1, stride=1, bias=False),
+        self.conv_block(128, 256, kernel_size=3, padding=1, stride=1, bias=False),
+        AttentionLayer(),
+        nn.AvgPool2d(kernel_size=2, stride=2, padding=1),
+        self.conv_block(256, 256, kernel_size=3, padding=1, stride=1, bias=False),
+        self.conv_block(256, 512, kernel_size=3, padding=1, stride=1, bias=False),
+        AttentionLayer(),
+        nn.AvgPool2d(kernel_size=2, stride=2, padding=1),
+        self.conv_block(512, 512, kernel_size=3, padding=1, stride=1, bias=False),
+        AttentionLayer()
+      ]),
+      'connection_size': 512 * 9 ** 2,
+      'linear_layers': nn.ModuleList([
+        nn.Linear(512 * 9 ** 2, 4)
+      ])
+    }
+  
   def conv_block(self, input_channels, output_channels, kernel_size, padding, bias=False, drop=False, stride=1):
     layers = (
       CylindricalConv2d(input_channels, output_channels, kernel_size=kernel_size, padding=padding, stride=stride, bias=bias),
@@ -163,5 +193,6 @@ class MainModel (nn.Module):
       'small': self.mini_model,
       'jet_ssd': self.jet_ssd_model,
       'jet_ssd_min': self.jet_ssd_min_model,
-      'jet_ssd_min_long': self.jet_ssd_min_long_model
+      'jet_ssd_min_long': self.jet_ssd_min_long_model,
+      'jet_ssd_min_alt': self.jet_ssd_min_model_alt
     }[name]()

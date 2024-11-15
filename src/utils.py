@@ -1,5 +1,5 @@
 import os
-from time import time
+from time import time, sleep
 from progress.bar import IncrementalBar
 from threading import Lock as ThreadingLock
 from multiprocessing import Lock as MultiprocessingLock
@@ -33,7 +33,7 @@ def long_operation (operation, multiprocessing=False, ending_message=False, **kw
 
   def next (step=1):
     with lock:
-      bar.next(step)
+      bar.next(min(step, bar.max - bar.index))
       percentage = (bar.index + 1) / bar.max
       elapsed = time() - start
       if elapsed > 5:
@@ -43,9 +43,15 @@ def long_operation (operation, multiprocessing=False, ending_message=False, **kw
         bar.suffix = f'{bar.index + 1}/{bar.max} [{percentage * 100:.1f}%%]'
 
   bar.start()
+  
   result = operation(next)
+  
   if ending_message:
-    bar.suffix = ending_message()
+    bar.suffix = ending_message(result, time() - start)
+  else:
+    bar.suffix = f'done in {seconds_to_time(time() - start)}'
+  
+  bar.next(bar.max - bar.index if bar.index < bar.max else 0)
   bar.finish()
   return result
 
