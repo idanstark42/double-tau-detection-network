@@ -171,9 +171,9 @@ class MainModel (nn.Module):
         self.conv_block(512, 512, kernel_size=3, padding=1, stride=1, bias=False),
         AttentionLayer()
       ]),
-      'connection_size': 512 * 17 ** 2,
+      'connection_size': 512 * 9 ** 2,
       'linear_layers': nn.ModuleList([
-        nn.Linear(256 * 17 ** 2, 4)
+        nn.Linear(256 * 9 ** 2, 4)
       ])
     }
   
