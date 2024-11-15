@@ -173,7 +173,7 @@ class MainModel (nn.Module):
       ]),
       'connection_size': 512 * 9 ** 2,
       'linear_layers': nn.ModuleList([
-        nn.Linear(256 * 9 ** 2, 4)
+        nn.Linear(512 * 9 ** 2, 4)
       ])
     }
   
