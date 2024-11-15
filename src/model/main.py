@@ -169,12 +169,11 @@ class MainModel (nn.Module):
         AttentionLayer(),
         nn.AvgPool2d(kernel_size=2, stride=2, padding=1),
         self.conv_block(512, 512, kernel_size=3, padding=1, stride=1, bias=False),
-        self.conv_block(512, 1024, kernel_size=3, padding=1, stride=1, bias=False),
         AttentionLayer()
       ]),
-      'connection_size': 2 * 1024 * 9 ** 2,
+      'connection_size': 512 * 2 * 9 ** 2,
       'linear_layers': nn.ModuleList([
-        nn.Linear(2 * 1024 * 9 ** 2, 4)
+        nn.Linear(512 * 2 * 9 ** 2, 4)
       ])
     }
   
