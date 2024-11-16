@@ -53,7 +53,7 @@ class EventVisualizer:
       plt.hist(values, bins=HISTOGRAM_BINS, **kwargs)
       if output_file:
         plt.savefig(output_file)
-      plt.show
+      plt.show()
 
   def map (self, maps, weights=None, scatter=None, output_file=None, ax=None):
     independent = ax == None
