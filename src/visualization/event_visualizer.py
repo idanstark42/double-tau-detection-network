@@ -13,7 +13,7 @@ class EventVisualizer:
     tracks_points = [track.position().relative() for track in self.event.tracks]
     truth_points = [truth.visible_position().relative() for truth in self.event.truths]
 
-    self.map([clusters_points, tracks_points], scatter=(truth_points if show_truth else None), ax=ax)
+    self.map([clusters_points, tracks_points], scatter=(truth_points if show_truth else None), ax=ax, output_file=output_file)
 
   def momentum_map (self, show_truth=True, ax=None, output_file=None):
     cluster_points = [cluster.position().relative() for cluster in self.event.clusters]
@@ -23,28 +23,28 @@ class EventVisualizer:
     clusters_momentum = [cluster.momentum().p_t for cluster in self.event.clusters]
     tracks_momentum = [track.momentum().p_t for track in self.event.tracks]
 
-    self.map([cluster_points, track_points], weights=[clusters_momentum, tracks_momentum], scatter=(truth_points if show_truth else None), ax=ax)
+    self.map([cluster_points, track_points], weights=[clusters_momentum, tracks_momentum], scatter=(truth_points if show_truth else None), ax=ax, output_file=output_file)
 
   def tracks_by_pt_histogram (self, ax=None, output_file=None):
-    self.histogram([track.pt for track in self.event.tracks], ax=ax, label='Tracks')
+    self.histogram([track.pt for track in self.event.tracks], ax=ax, label='Tracks', output_file=output_file)
 
   def tracks_by_eta_histogram (self, ax=None, output_file=None):
-    self.histogram([track.position().eta for track in self.event.tracks], ax=ax, label='Tracks')
+    self.histogram([track.position().eta for track in self.event.tracks], ax=ax, label='Tracks', output_file=output_file)
   
   def tracks_by_phi_histogram (self, ax=None, output_file=None):
-    self.histogram([track.position().phi for track in self.event.tracks], ax=ax, label='Tracks')
+    self.histogram([track.position().phi for track in self.event.tracks], ax=ax, label='Tracks', output_file=output_file)
 
   def clusters_by_pt_histogram (self, ax=None, output_file=None):
-    self.histogram([cluster.momentum().p_t for cluster in self.event.clusters], ax=ax, label='Clusters')
+    self.histogram([cluster.momentum().p_t for cluster in self.event.clusters], ax=ax, label='Clusters', output_file=output_file)
 
   def clusters_by_cal_e_histogram (self, ax=None, output_file=None):
-    self.histogram([cluster.cal_e for cluster in self.event.clusters], ax=ax, label='Clusters')
+    self.histogram([cluster.cal_e for cluster in self.event.clusters], ax=ax, label='Clusters', output_file=output_file)
   
   def clusters_by_eta_histogram (self, ax=None, output_file=None):
-    self.histogram([cluster.position().eta for cluster in self.event.clusters], ax=ax, label='Clusters')
+    self.histogram([cluster.position().eta for cluster in self.event.clusters], ax=ax, label='Clusters', output_file=output_file)
 
   def clusters_by_phi_histogram (self, ax=None, output_file=None):
-    self.histogram([cluster.position().phi for cluster in self.event.clusters], ax=ax, label='Clusters')
+    self.histogram([cluster.position().phi for cluster in self.event.clusters], ax=ax, label='Clusters', output_file=output_file)
 
   def histogram (self, values, ax=None, output_file=None, **kwargs):
     if ax:
@@ -64,6 +64,9 @@ class EventVisualizer:
         ax.hist2d(*zip(*map), bins=self.resolution, range=[[0, 1], [0, 1]], cmap='Blues')
       else:
         ax.hist2d(*zip(*map), bins=self.resolution, range=[[0, 1], [0, 1]], cmap='Blues', weights=weights[index])
+    
+    if output_file and independent:
+      plt.savefig(output_file)
         
 
     if scatter != None:
