@@ -104,21 +104,17 @@ class DatasetVisualizer:
       'fields': ['cluster eta', 'cluster phi'],
       'type': '2d'
     },
-    'cluster_cal_e': {
-      'callback': lambda event: { 'cluster cal_E': [cluster.cal_e for cluster in event.clusters] },
-      'fields': ['cluster cal_E']
-    },
     
     'tracks_eta_phi': {
       'callback': lambda event: { 'track eta': [track.position().eta for track in event.tracks], 'track phi': [track.position().phi for track in event.tracks] },
       'fields': ['track eta', 'track phi'],
       'type': '2d'
     },
-    'track_pt': {
-      'callback': lambda event: { 'track pt': [track.pt for track in event.tracks] },
-      'fields': ['track pt']
-    },
 
+    'cluster_cal_e': {
+      'callback': lambda event: { 'cluster cal_E': [cluster.cal_e for cluster in event.clusters] },
+      'fields': ['cluster cal_E']
+    },
     'cluster_pt': {
       'callback': lambda event: { 'cluster pt': [cluster.momentum().p_t for cluster in event.clusters] },
       'fields': ['cluster pt']
