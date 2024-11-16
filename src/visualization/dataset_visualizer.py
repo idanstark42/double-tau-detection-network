@@ -122,7 +122,7 @@ class DatasetVisualizer:
       'type': '2d'
     },
     
-    'tracks_eta_phi': {
+    'track_eta_phi': {
       'callback': lambda event: { 'track eta': [track.position().eta for track in event.tracks], 'track phi': [track.position().phi for track in event.tracks] },
       'fields': ['track eta', 'track phi'],
       'type': '2d'
