@@ -13,7 +13,8 @@ commands = {
   'dataset': {
     '_visualizer': lambda dataset, _model, _params: DatasetVisualizer(dataset),
     'histogram': lambda visualizer, params: visualizer.histogram(visualizer.histogram_fields[params['field']], params['output']),
-    'fields': lambda visualizer, _params: visualizer.print_fields()
+    'fields': lambda visualizer, _params: visualizer.print_fields(),
+    'events': lambda visualizer, params: visualizer.random_events(int(params['count']), params['output']),
   },
   'event': {
     '_test': lambda dataset, _model, params: 'Event not in dataset' if int(params['event']) > len(dataset) else None,

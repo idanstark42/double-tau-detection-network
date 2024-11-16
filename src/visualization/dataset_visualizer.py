@@ -1,7 +1,8 @@
 from matplotlib import pyplot as plt
-import matplotlib.colors as colors
 import numpy as np
+import os
 
+from .event_visualizer import EventVisualizer
 from settings import HISTOGRAM_BINS, RESOLUTION, MAX_HISTOGRAM_SIZE
 from utils import long_operation, python_name_from_dtype_name
 
@@ -23,6 +24,22 @@ class DatasetVisualizer:
     axes[1].hist(rotations, bins=HISTOGRAM_BINS, edgecolor='black')
     axes[1].set_title('Phi Rotations')
     plt.show()
+
+  def random_events (self, count, output_folder):
+    random_indeces = np.random.choice(len(self.dataset), count, replace=False)
+    os.makedirs(output_folder, exist_ok=True)
+    for i in random_indeces:
+      event = self.dataset.get_event(i)
+      visualizer = EventVisualizer(event)
+      visualizer.density_map(output_file=os.path.join(output_folder, f'event_{i}_density_map.png'))
+      visualizer.tracks_by_pt_histogram(output_file=os.path.join(output_folder, f'event_{i}_tracks_by_pt_histogram.png'))
+      visualizer.tracks_by_eta_histogram(output_file=os.path.join(output_folder, f'event_{i}_tracks_by_eta_histogram.png'))
+      visualizer.tracks_by_phi_histogram(output_file=os.path.join(output_folder, f'event_{i}_tracks_by_phi_histogram.png'))
+      visualizer.clusters_by_pt_histogram(output_file=os.path.join(output_folder, f'event_{i}_clusters_by_pt_histogram.png'))
+      visualizer.clusters_by_cal_e_histogram(output_file=os.path.join(output_folder, f'event_{i}_clusters_by_cal_e_histogram.png'))
+      visualizer.clusters_by_eta_histogram(output_file=os.path.join(output_folder, f'event_{i}_clusters_by_eta_histogram.png'))
+      visualizer.clusters_by_phi_histogram(output_file=os.path.join(output_folder, f'event_{i}_clusters_by_phi_histogram.png'))
+
 
   def histogram (self, config, output_file):
     fields = config['fields']
