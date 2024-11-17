@@ -66,8 +66,8 @@ class DatasetVisualizer:
       plt.hist(result[fields[0]], bins=HISTOGRAM_BINS, edgecolor='black', density=True)
       plt.title(f'events by {fields[0]}')
       plt.xlabel(fields[0])
-      if 'xlim' in field_configs[fields[0]]:
-        plt.xlim(field_configs[fields[0]]['xlim'])
+      if 'xlim' in field_configs[0]:
+        plt.xlim(field_configs[0]['xlim'])
       if config.get('x-log', False):
         plt.xscale('log')
       if output_file:
