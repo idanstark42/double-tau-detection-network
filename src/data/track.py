@@ -7,6 +7,9 @@ class Track:
   def __init__ (self, track, fields):
     for name, python_name in fields:
       setattr(self, python_name, track[name])
+    
+  def has_field (self, field):
+    return hasattr(self, field)
 
   def position (self):
     return Position(self.eta, self.phi)

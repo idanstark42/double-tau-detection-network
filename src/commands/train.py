@@ -38,10 +38,9 @@ class Trainer:
   def load_options(self):
     self.backup_folder = self.options.get('backup_folder', '')
 
-    self.preload_type = self.options.get('preload', 'none')
+    self.loading_type = self.options.get('preload', 'none')
     self.saving_mode = self.options.get('saving_mode', 'none')
     self.cache_type = self.options.get('cache', 'events')
-    self.dataset.cache_type = self.cache_type
     self.checkpoint = False
 
     self.split = int(self.options.get('split', '1'))
@@ -90,7 +89,7 @@ class Trainer:
 
     self.print_starting_log()
 
-    if self.preload_type == 'full':
+    if self.loading_type == 'full':
       self.dataset.full_preload()
     
     self.pretraining_over = True
@@ -100,7 +99,7 @@ class Trainer:
     if self.split > 1:
       print(f'Split {split + 1}/{self.limit if self.limit else self.split}')
 
-    if self.preload_type == 'partial':
+    if self.loading_type == 'partial':
       self.partial_preload(self.train_loaders[split], self.validation_loaders[split])
 
     if self.checkpoint and self.position['split'] == split and self.saving_mode.startswith('epoch-'):
@@ -183,7 +182,7 @@ class Trainer:
     return total_loss / len(validation_loader)
 
   def test(self):
-    if self.preload_type == 'partial':
+    if self.loading_type == 'partial':
       self.dataset.start_partial_preloading()
       self.preload_loader(self.test_loader, 'Preloading test set')
       self.dataset.finish_partial_preloading()
@@ -291,7 +290,7 @@ class Trainer:
     if self.checkpoint:
       print(f'From checkpoint:                  {self.checkpoint}')
       print(f'Starting from:                   {self.position["split"] + 2}/{self.split} split, {(self.position["epoch"]) + 2}/{self.epochs} epoch')
-    print(f'Preload Type:                     {self.preload_type}')
+    print(f'Preload Type:                     {self.loading_type}')
     print(f'Cache:                            {self.cache_type}')
     print(f'Model Folder:                     {self.model_folder}')
     print(f'Backup Folder:                    {self.backup_folder}')
