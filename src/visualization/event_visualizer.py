@@ -13,7 +13,7 @@ class EventVisualizer:
     tracks_points = [track.position().relative() for track in self.event.tracks]
     truth_points = [truth.visible_position().relative() for truth in self.event.truths]
 
-    self.map([clusters_points, tracks_points], scatter=(truth_points if show_truth else None), ax=ax, output_file=output_file)
+    self.map([clusters_points, tracks_points], scatter=(truth_points if show_truth else None), ax=ax, output_file=output_file, configs=[{'cmap': 'Blues'}, {'cmap': 'Oranges'}])
 
   def momentum_map (self, show_truth=True, ax=None, output_file=None):
     cluster_points = [cluster.position().relative() for cluster in self.event.clusters]
@@ -23,7 +23,7 @@ class EventVisualizer:
     clusters_momentum = [cluster.momentum().p_t for cluster in self.event.clusters]
     tracks_momentum = [track.momentum().p_t for track in self.event.tracks]
 
-    self.map([cluster_points, track_points], weights=[clusters_momentum, tracks_momentum], scatter=(truth_points if show_truth else None), ax=ax, output_file=output_file)
+    self.map([cluster_points, track_points], weights=[clusters_momentum, tracks_momentum], scatter=(truth_points if show_truth else None), ax=ax, output_file=output_file, config=[{'cmap': 'Blues'}, {'cmap': 'Oranges'}])
 
   def tracks_by_pt_histogram (self, ax=None, output_file=None):
     self.histogram([track.pt for track in self.event.tracks], ax=ax, label='Tracks', output_file=output_file)
@@ -55,15 +55,15 @@ class EventVisualizer:
         plt.savefig(output_file)
       plt.show()
 
-  def map (self, maps, weights=None, scatter=None, output_file=None, ax=None):
+  def map (self, maps, weights=None, scatter=None, output_file=None, ax=None, configs=None):
     independent = ax == None
     if independent:
       fig, ax = plt.subplots()
     for index, map in enumerate(maps):
       if weights == None or weights[index] == None:
-        ax.hist2d(*zip(*map), bins=self.resolution, range=[[0, 1], [0, 1]], cmap='Blues')
+        ax.hist2d(*zip(*map), bins=self.resolution, range=[[0, 1], [0, 1]], **(configs[index] if configs else {}))
       else:
-        ax.hist2d(*zip(*map), bins=self.resolution, range=[[0, 1], [0, 1]], cmap='Blues', weights=weights[index])
+        ax.hist2d(*zip(*map), bins=self.resolution, range=[[0, 1], [0, 1]], weights=weights[index], **(configs[index] if configs else {}))
     
     if output_file and independent:
       plt.savefig(output_file)

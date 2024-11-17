@@ -5,7 +5,6 @@ from visualization.model_visualizer import ModelVisualizer
 def evaluate (dataset, module, model_file, output_folder, params):
   module.load_state_dict(torch.load(model_file))
   n = params.get('n', 1000)
-  cutoff = params.get('cutoff', 0.2)
   random_indices = torch.randperm(len(dataset))[:n]
   module.eval()
   print()

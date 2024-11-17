@@ -15,10 +15,10 @@ class Truth:
     return Position(self.eta_invis, self.phi_invis)
   
   def visible_momentum (self):
-    return Momentum4.m_eta_phi_pt(self.pt_vis, self.eta_vis, self.phi_vis, self.m_vis)
+    return Momentum4.m_eta_phi_pt(self.m_vis, self.eta_vis, self.phi_vis, self.pt_vis)
   
   def invisible_momentum (self):
-    return Momentum4.m_eta_phi_pt(self.pt_invis, self.eta_invis, self.phi_invis, self.m_invis)
+    return Momentum4.m_eta_phi_pt(self.m_invis, self.eta_invis, self.phi_invis, self.pt_invis)
   
   def total_momentum (self):
     return self.visible_momentum() + self.invisible_momentum()

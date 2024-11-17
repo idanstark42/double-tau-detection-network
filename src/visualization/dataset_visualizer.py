@@ -25,13 +25,14 @@ class DatasetVisualizer:
     axes[1].set_title('Phi Rotations')
     plt.show()
 
-  def random_events (self, count, output_folder):
+  def sample_random_events (self, count, output_folder):
     random_indeces = np.random.choice(len(self.dataset), count, replace=False)
     os.makedirs(output_folder, exist_ok=True)
     for i in random_indeces:
       event = self.dataset.get_event(i)
       visualizer = EventVisualizer(event)
       visualizer.density_map(output_file=os.path.join(output_folder, f'event_{i}_density_map.png'))
+      visualizer.momentum_map(output_file=os.path.join(output_folder, f'event_{i}_momentum_map.png'))
       visualizer.tracks_by_pt_histogram(output_file=os.path.join(output_folder, f'event_{i}_tracks_by_pt_histogram.png'))
       visualizer.tracks_by_eta_histogram(output_file=os.path.join(output_folder, f'event_{i}_tracks_by_eta_histogram.png'))
       visualizer.tracks_by_phi_histogram(output_file=os.path.join(output_folder, f'event_{i}_tracks_by_phi_histogram.png'))
@@ -40,9 +41,9 @@ class DatasetVisualizer:
       visualizer.clusters_by_eta_histogram(output_file=os.path.join(output_folder, f'event_{i}_clusters_by_eta_histogram.png'))
       visualizer.clusters_by_phi_histogram(output_file=os.path.join(output_folder, f'event_{i}_clusters_by_phi_histogram.png'))
 
-
   def histogram (self, config, output_file):
     fields = config['fields']
+    field_configs = [config.get('config', {}).get(field, {}) for field in fields]
     callback = config['callback']
 
     if len(self.dataset) > MAX_HISTOGRAM_SIZE:
@@ -62,8 +63,11 @@ class DatasetVisualizer:
     
     result = long_operation(load, max=len(indicies), message='Loading data for histogram')
     if len(fields) == 1:
-      plt.hist(result[fields[0]], bins=HISTOGRAM_BINS, edgecolor='black')
-      plt.title(fields[0])
+      plt.hist(result[fields[0]], bins=HISTOGRAM_BINS, edgecolor='black', density=True)
+      plt.title(f'events by {fields[0]}')
+      plt.xlabel(fields[0])
+      if 'xlim' in field_configs[fields[0]]:
+        plt.xlim(field_configs[fields[0]]['xlim'])
       if config.get('x-log', False):
         plt.xscale('log')
       if output_file:
@@ -76,8 +80,9 @@ class DatasetVisualizer:
       for index, field in enumerate(fields):
         hist = np.array(result[field]).flatten().tolist()
         ax = axes[index] if len(fields) > 1 else axes
-        ax.hist(hist, bins=HISTOGRAM_BINS, edgecolor='black')
-        ax.set_title(field)
+        ax.hist(hist, bins=HISTOGRAM_BINS, edgecolor='black', density=True)
+        ax.set_title(f'events by {field}')
+        ax.set_xlabel(field)
         if config.get('x-log', False):
           ax.set_xscale('log')
       if output_file:
@@ -88,6 +93,7 @@ class DatasetVisualizer:
     if config.get('type', 'side-by-side') == '2d' and len(fields) == 2:
       plt.hist2d(result[fields[0]], result[fields[1]], bins=HISTOGRAM_BINS, cmap='Blues', density=True)
       plt.colorbar()
+      plt.title(f'events by {fields[0]} and {fields[1]}')
       plt.xlabel(fields[0])
       plt.ylabel(fields[1])
       if output_file:
@@ -98,51 +104,95 @@ class DatasetVisualizer:
     raise Exception('Unknown histogram type')
 
   histogram_fields = {
-    'average_interaction_per_crossing': {
-      'callback': lambda event: { 'average interactions per crossing': [event.average_interactions_per_crossing] },
-      'fields': ['average interactions per crossing']
+    'pileup': {
+      'callback': lambda event: { 'pileup': [event.average_interactions_per_crossing] },
+      'fields': ['pileup']
     },
 
     'cluster_count': {
       'callback': lambda event: { 'cluster count': [len(event.clusters)] },
       'fields': ['cluster count']
     },
+    'cluster_cal_e': {
+      'callback': lambda event: { 'cluster cal_E': [cluster.cal_e for cluster in event.clusters] },
+      'fields': ['cluster cal_E'],
+      'config': { 'cluster cal_E': { 'xlim': [0, 0.5] } }
+    },
+    'cluster_pt': {
+      'callback': lambda event: { 'cluster pt': [cluster.momentum().p_t for cluster in event.clusters] },
+      'fields': ['cluster pt'],
+      'config': { 'cluster pt': { 'xlim': [0, 0.4] } }
+    },
+    'cluster_eta_phi': {
+      'callback': lambda event: { 'cluster η': [cluster.position().eta for cluster in event.clusters], 'cluster φ': [cluster.position().phi for cluster in event.clusters] },
+      'fields': ['cluster η', 'cluster φ'],
+      'type': '2d'
+    },
+    'cluster_count_vs_cal_e': {
+      'callback': lambda event: { 'amount': [len(event.clusters)], 'cal_E': [cluster.cal_e for cluster in event.clusters] },
+      'fields': ['amount', 'cal_E'],
+      'type': '2d'
+    },
+    'cluster_count_vs_pt': {
+      'callback': lambda event: { 'amount': [len(event.clusters)], 'pT': [cluster.momentum().p_t for cluster in event.clusters] },
+      'fields': ['amount', 'pT'],
+      'type': '2d'
+    },
+    'cluster_count_vs_pileup': {
+      'callback': lambda event: { 'amount': [len(event.clusters)], 'pileup': [event.average_interactions_per_crossing] },
+      'fields': ['amount', 'pileup'],
+      'type': '2d'
+    },
+    
     'track_count': {
       'callback': lambda event: { 'track count': [len(event.tracks)] },
       'fields': ['track count']
     },
+    'track_pt': {
+      'callback': lambda event: { 'track pt': [track.pt for track in event.tracks] },
+      'fields': ['track pt'],
+      'config': { 'track pt': { 'xlim': [0, 0.4] } }
+    },
+    'track_eta_phi': {
+      'callback': lambda event: { 'track η': [track.position().eta for track in event.tracks], 'track φ': [track.position().phi for track in event.tracks] },
+      'fields': ['track η', 'track φ'],
+      'type': '2d'
+    },
+    'track_count_vs_pt': {
+      'callback': lambda event: { 'amount': [len(event.tracks)], 'pT': [track.pt for track in event.tracks] },
+      'fields': ['amount', 'pT'],
+      'type': '2d'
+    },
+    'track_count_vs_pileup': {
+      'callback': lambda event: { 'amount': [len(event.tracks)], 'pileup': [event.average_interactions_per_crossing] },
+      'fields': ['amount', 'pileup'],
+      'type': '2d'
+    },
+    
     'truth_count': {
       'callback': lambda event: { 'truth count': [len(event.truths)] },
       'fields': ['truth count']
     },
-    
-    'cluster_eta_phi': {
-      'callback': lambda event: { 'cluster eta': [cluster.position().eta for cluster in event.clusters], 'cluster phi': [cluster.position().phi for cluster in event.clusters] },
-      'fields': ['cluster eta', 'cluster phi'],
-      'type': '2d'
-    },
-    
-    'track_eta_phi': {
-      'callback': lambda event: { 'track eta': [track.position().eta for track in event.tracks], 'track phi': [track.position().phi for track in event.tracks] },
-      'fields': ['track eta', 'track phi'],
-      'type': '2d'
-    },
-
-    'cluster_cal_e': {
-      'callback': lambda event: { 'cluster cal_E': [cluster.cal_e for cluster in event.clusters] },
-      'fields': ['cluster cal_E']
-    },
-    'cluster_pt': {
-      'callback': lambda event: { 'cluster pt': [cluster.momentum().p_t for cluster in event.clusters] },
-      'fields': ['cluster pt']
-    },
-    'track_pt': {
-      'callback': lambda event: { 'track pt': [track.pt for track in event.tracks] },
-      'fields': ['track pt']
-    },
-    'truth_pt': {
-      'callback': lambda event: { 'truth pt': [truth.pt for truth in event.truths] },
+    'truth_x_pt': {
+      'callback': lambda event: { 'X pT': [event.total_visible_four_momentum().p_t] },
       'fields': ['truth pt']
+    },
+    'truth_x_eta_phi': {
+      'callback': lambda event: { 'X η': [event.total_visible_four_momentum().eta], 'X φ': [event.total_visible_four_momentum().phi] },
+      'fields': ['truth η', 'truth φ'],
+      'type': '2d'
+    },
+    'truth_delta_r': {
+      'callback': lambda event: { 'ΔR': [event.angular_distance_between_taus()] },
+      'fields': ['ΔR']
+    },
+    'truth_leading_pt': {
+      'callback': lambda event: { 'leadgint pT': [event.leading_pt()] },
+      'fields': ['leading pT']
+    },
+    'truth_subleading_pt': {
+      'callback': lambda event: { 'subleadgint pT': [event.subleading_pt()] },
+      'fields': ['subleading pT']
     },
 
     'normlization_factors': {
