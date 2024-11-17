@@ -63,7 +63,7 @@ class DatasetVisualizer:
     
     result = long_operation(load, max=len(indicies), message='Loading data for histogram')
     if len(fields) == 1:
-      plt.hist(result[fields[0]], bins=HISTOGRAM_BINS, edgecolor='black', density=True, range=field_configs[index].get('xlim', None))
+      plt.hist(result[fields[0]], bins=HISTOGRAM_BINS, edgecolor='black', density=True, range=field_configs[0].get('xlim', None))
       plt.title(f'events by {fields[0]}')
       plt.xlabel(fields[0])
       plt.ylabel('events density')
