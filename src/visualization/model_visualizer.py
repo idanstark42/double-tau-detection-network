@@ -1,10 +1,11 @@
 import matplotlib.pyplot as plt
 import matplotlib.patches as patches
+import os
 import numpy as np
 
 from data.position import Position
 from .event_visualizer import EventVisualizer
-from settings import PHI_RANGE, ETA_RANGE, JET_SIZE, MAP_2D_TICKS, ARROWS_NUMBER
+from settings import PHI_RANGE, ETA_RANGE, JET_SIZE, MAP_2D_TICKS, ARROWS_NUMBER, HISTOGRAM_BINS
 from utils import long_operation
 
 phi_range_size = abs(PHI_RANGE[1] - PHI_RANGE[0])
@@ -12,6 +13,22 @@ phi_range_size = abs(PHI_RANGE[1] - PHI_RANGE[0])
 class ModelVisualizer:
   def __init__(self, model):
     self.model = model
+
+  def show_reconstruction_rate_stats (self, outputs, targets, events, output_folder):
+    # like these lines only flat:
+    output_positions = [Position(output[0], output[1]) for output in outputs] + [Position(output[2], output[3]) for output in outputs]
+    target_positions = [Position(target[0], target[1]) for target in targets] + [Position(target[2], target[3]) for target in targets]
+    self.plot_reconstruction_rate_by(output_positions, target_positions, events, lambda event: event.total_visible_momentum().pt, 'X pT', os.path.join(output_folder, 'reconstruction_rate_by_pt.png'))
+    self.plot_reconstruction_rate_by(output_positions, target_positions, events, lambda event: event.total_visible_momentum().eta, 'X η', os.path.join(output_folder, 'reconstruction_rate_by_eta.png'))
+    self.plot_reconstruction_rate_by(output_positions, target_positions, events, lambda event: event.total_visible_momentum().phi, 'X φ', os.path.join(output_folder, 'reconstruction_rate_by_phi.png'))
+    self.plot_reconstruction_rate_by(output_positions, target_positions, events, lambda event: event.total_visible_momentum().m, 'X m', os.path.join(output_folder, 'reconstruction_rate_by_m.png'))
+
+    self.plot_reconstruction_rate_by(output_positions, target_positions, events, lambda event: event.average_interactions_per_crossing, 'average interactions per crossing', os.path.join(output_folder, 'reconstruction_rate_by_interactions.png'))
+    self.plot_reconstruction_rate_by(output_positions, target_positions, events, lambda event: event.angular_distance_between_taus(), 'clusters count', os.path.join(output_folder, 'reconstruction_rate_by_clusters_count.png'))
+
+    self.distances_histogram(output_positions, target_positions, plt)
+    plt.savefig(os.path.join(output_folder, 'distances_histogram.png'))
+    plt.show()
   
   def show_losses(self, losses, output_file):
     plt.plot([loss[0] for loss in losses], label='Train Loss')
@@ -118,4 +135,24 @@ class ModelVisualizer:
     plt.hist(parametrers, bins=50)
     plt.yscale('log')
     plt.savefig(output_file)
+    plt.show()
+
+  def plot_reconstruction_rate_by (self, outputs, targets, events, get, label, output_file):
+    field_values = [get(event) for event in events]
+    hist = [0] * HISTOGRAM_BINS
+    bin_sizes = [0] * HISTOGRAM_BINS
+    for output, target, field_value in zip(outputs, targets, field_values):
+      reconstruction_success = Position(output[0], output[1]).distance(Position(target[0], target[1])) < 0.2 and Position(output[2], output[3]).distance(Position(target[2], target[3])) < 0.2
+      bin_index = int((field_value - min(field_values)) / (max(field_values) - min(field_values)) * HISTOGRAM_BINS)
+      hist[bin_index] += 1 if reconstruction_success else 0
+      bin_sizes[bin_index] += 1
+    
+    hist = [100 * hist[i] / bin_sizes[i] if bin_sizes[i] != 0 else 0 for i in range(HISTOGRAM_BINS)]
+
+    plt.bar(hist, bins=HISTOGRAM_BINS)
+    plt.xlabel(label)
+    plt.ylabel('reconstruction rate (%)')
+    plt.ylim(0, 100)
+    if output_file:
+      plt.savefig(output_file)
     plt.show()
