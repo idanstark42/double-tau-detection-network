@@ -11,10 +11,10 @@ from utils import *
 from settings import RESOLUTION, DATASET_FIELDS, ETA_RANGE, PHI_RANGE
 
 class EventsDataset (Dataset):
-  def __init__(self, source_file, loading_type='none', normliaze_fields=False):
+  def __init__(self, source_file, loading_type='none', cache_type='none', normliaze_fields=False):
     super().__init__()
     self.dataset_fields = DATASET_FIELDS
-    self.cache_type = 'events'
+    self.cache_type = cache_type
     self.cache = {}
     self.items_cache = {}
     self.preloaded = False
