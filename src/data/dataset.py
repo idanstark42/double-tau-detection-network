@@ -11,7 +11,7 @@ from utils import *
 from settings import RESOLUTION, DATASET_FIELDS, ETA_RANGE, PHI_RANGE
 
 class EventsDataset (Dataset):
-  def __init__(self, source_file, loading_type='none', cache_type='none', normliaze_fields=False):
+  def __init__(self, source_file, loading_type='none', cache_type='none', normalize_fields=False):
     super().__init__()
     self.dataset_fields = DATASET_FIELDS
     self.cache_type = cache_type
@@ -20,7 +20,7 @@ class EventsDataset (Dataset):
     self.preloaded = False
     self.source_file = source_file
     self.loading_type = loading_type
-    self.normalize_fields = normliaze_fields
+    self.normalize_fields = normalize_fields
     self.preloading = False
     self.load()
     self.cluster_channels_count = 1
