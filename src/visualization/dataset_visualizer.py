@@ -96,6 +96,7 @@ class DatasetVisualizer:
       return
     
     if config.get('type', 'side-by-side') == '2d' and len(fields) == 2:
+      breakpoint()
       hist_x, hist_y = result[fields[0]], result[fields[1]]
       print(f'[before] hist_x: {len(hist_x)}, hist_y: {len(hist_y)}')
       if field_configs[0].get('cross', False) == 'leader':
