@@ -51,8 +51,8 @@ class DatasetVisualizer:
       random_indeces = np.random.choice(len(self.dataset), MAX_HISTOGRAM_SIZE, replace=False)
 
     indicies = random_indeces if len(self.dataset) > MAX_HISTOGRAM_SIZE else range(len(self.dataset))
-    skipped = 0
     def load (next):
+      skipped = 0
       hist = { field: [] for field in fields }
       for i in indicies:
         event = self.dataset.get_event(i)
@@ -66,11 +66,11 @@ class DatasetVisualizer:
           else:
             hist[field] += datum[field]
         next()
-      return hist
+      return hist, skipped
     
-    result = long_operation(load, max=len(indicies), message='Loading data for histogram')
-    if skipped:
-      print(f'Skipped {skipped} events')
+    result, skipped_count = long_operation(load, max=len(indicies), message='Loading data for histogram')
+    if skipped_count:
+      print(f'Skipped {skipped_count} events')
     if len(fields) == 1:
       plt.hist(result[fields[0]], bins=HISTOGRAM_BINS, edgecolor='black', density=True, range=field_configs[0].get('xlim', None))
       plt.title(f'events by {fields[0]}')
