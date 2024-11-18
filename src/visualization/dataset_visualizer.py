@@ -1,4 +1,4 @@
-from matplotlib import pyplot as plt
+from matplotlib import pyplot as plt, colors
 import numpy as np
 import os
 
@@ -96,7 +96,6 @@ class DatasetVisualizer:
       return
     
     if config.get('type', 'side-by-side') == '2d' and len(fields) == 2:
-      breakpoint()
       hist_x, hist_y = result[fields[0]], result[fields[1]]
       print(f'[before] hist_x: {len(hist_x)}, hist_y: {len(hist_y)}')
       if field_configs[0].get('cross', False) == 'leader':
@@ -110,7 +109,7 @@ class DatasetVisualizer:
 
       print(f'[after] hist_x: {len(hist_x)}, hist_y: {len(hist_y)}')
 
-      plt.hist2d(hist_x, hist_y, bins=HISTOGRAM_BINS, cmap='Blues', density=True, range=[field_configs[0].get('xlim', None), field_configs[1].get('xlim', None)])
+      plt.hist2d(hist_x, hist_y, bins=HISTOGRAM_BINS, cmap='Blues', density=True, range=[field_configs[0].get('xlim', None), field_configs[1].get('xlim', None)], norm=colors.LogNorm())
       plt.colorbar()
       plt.title(f'events by {fields[0]} and {fields[1]}')
       plt.xlabel(fields[0])
