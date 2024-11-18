@@ -163,7 +163,7 @@ class Trainer:
         total_loss += loss.item()
       return total_loss
 
-    total_loss = long_operation(run, max=len(training_loader) * self.batch_size, message=f'Epoch {epoch+1} training', ending_message=lambda l, t: f'loss: {l / len(training_loader):.6f} [{seconds_to_time(t)}]')
+    total_loss = long_operation(run, max=len(training_loader) * self.batch_size, message=f'Epoch {epoch+1} training  ', ending_message=lambda l, t: f'loss: {l / len(training_loader):.6f} [{seconds_to_time(t)}]')
     return total_loss / len(training_loader)
 
   def validate(self, validation_loader, epoch):

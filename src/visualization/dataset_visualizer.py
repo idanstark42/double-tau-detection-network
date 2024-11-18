@@ -99,11 +99,11 @@ class DatasetVisualizer:
       hist_x, hist_y = result[fields[0]], result[fields[1]]
       print(f'[before] hist_x: {len(hist_x)}, hist_y: {len(hist_y)}')
       if field_configs[0].get('cross', False) == 'leader':
-        print(f'crossing according to {fields[0]}')
+        print(f'crossing according to {fields[0]} (x)')
         hist_x = [hist_x[i] * len(hist_y[i]) for i in range(len(hist_y))]
         hist_y = [item for sublist in hist_y for item in sublist]
       elif field_configs[1].get('cross', False) == 'leader':
-        print(f'crossing according to {fields[1]}')
+        print(f'crossing according to {fields[1]} (y)')
         hist_y = [hist_y[i] * len(hist_x[i]) for i in range(len(hist_x))]
         hist_x = [item for sublist in hist_x for item in sublist]
 
@@ -150,7 +150,7 @@ class DatasetVisualizer:
       'callback': lambda event: { 'amount': [len(event.clusters)], 'cal_E': [cluster.cal_e for cluster in event.clusters] },
       'fields': ['amount', 'cal_E'],
       'type': '2d',
-      'config': { 'cal_E': { 'xlim': [0, 0.5], 'cross': 'leader' }, 'amount': { 'cross': 'follower' } }
+      'config': { 'cal_E': { 'xlim': [0, 0.5], 'cross': 'follower' }, 'amount': { 'cross': 'leader' } }
     },
     'cluster_count_vs_pt': {
       'callback': lambda event: { 'amount': [len(event.clusters)], 'pT': [cluster.momentum().p_t for cluster in event.clusters] },
