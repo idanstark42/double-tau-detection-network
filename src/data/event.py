@@ -1,4 +1,5 @@
 import numpy as np
+from pylorentz import Momentum4
 from sklearn.preprocessing import StandardScaler
 
 from data.cluster import Cluster
@@ -148,7 +149,7 @@ class Event:
     return self.calculate_and_cache('true_four_momentum', lambda: [truth.visible_momentum() for truth in self.truths])
   
   def total_visible_four_momentum (self):
-    return self.calculate_and_cache('total_visible_momentum', lambda: sum([truth.visible_momentum() for truth in self.truths]))
+    return self.calculate_and_cache('total_visible_momentum', lambda: sum([truth.visible_momentum() for truth in self.truths], Momentum4(0,0,0,0)))
   
   def angular_distance_between_taus (self):
     return self.calculate_and_cache('angular_distance_between_taus', lambda: self.truths[0].visible_position().distance(self.truths[1].visible_position()))
