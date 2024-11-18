@@ -51,10 +51,14 @@ class DatasetVisualizer:
       random_indeces = np.random.choice(len(self.dataset), MAX_HISTOGRAM_SIZE, replace=False)
 
     indicies = random_indeces if len(self.dataset) > MAX_HISTOGRAM_SIZE else range(len(self.dataset))
+    skipped = 0
     def load (next):
       hist = { field: [] for field in fields }
       for i in indicies:
         event = self.dataset.get_event(i)
+        if config.get('valid', False) and not config['valid'](event):
+          skipped += 1
+          continue
         datum = callback(event)
         for field in fields:
           if field_configs[fields.index(field)].get('cross', False) == 'follower':
@@ -65,6 +69,8 @@ class DatasetVisualizer:
       return hist
     
     result = long_operation(load, max=len(indicies), message='Loading data for histogram')
+    if skipped:
+      print(f'Skipped {skipped} events')
     if len(fields) == 1:
       plt.hist(result[fields[0]], bins=HISTOGRAM_BINS, edgecolor='black', density=True, range=field_configs[0].get('xlim', None))
       plt.title(f'events by {fields[0]}')
@@ -97,17 +103,12 @@ class DatasetVisualizer:
     
     if config.get('type', 'side-by-side') == '2d' and len(fields) == 2:
       hist_x, hist_y = result[fields[0]], result[fields[1]]
-      print(f'[before] hist_x: {len(hist_x)}, hist_y: {len(hist_y)}')
       if field_configs[0].get('cross', False) == 'leader':
-        print(f'crossing according to {fields[0]} (x)')
         hist_x = [x for x, ys in zip(hist_x, hist_y) for _ in range(len(ys))]
         hist_y = [item for sublist in hist_y for item in sublist]
       elif field_configs[1].get('cross', False) == 'leader':
-        print(f'crossing according to {fields[1]} (y)')
         hist_y = [y for y, xs in zip(hist_y, hist_x) for _ in range(len(xs))]
         hist_x = [item for sublist in hist_x for item in sublist]
-
-      print(f'[after] hist_x: {len(hist_x)}, hist_y: {len(hist_y)}')
 
       plt.hist2d(hist_x, hist_y, bins=HISTOGRAM_BINS, cmap='Blues', density=True, range=[field_configs[0].get('xlim', None), field_configs[1].get('xlim', None)], norm=colors.LogNorm())
       plt.colorbar()
@@ -206,7 +207,8 @@ class DatasetVisualizer:
     },
     'truth_delta_r': {
       'callback': lambda event: { 'ΔR': [event.angular_distance_between_taus()] },
-      'fields': ['ΔR']
+      'fields': ['ΔR'],
+      'valid': lambda event: len(event.truths) == 2
     },
     'truth_leading_pt': {
       'callback': lambda event: { 'leading pT': [event.leading_pt()] },
