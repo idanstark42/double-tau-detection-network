@@ -55,6 +55,7 @@ class Trainer:
 
     self.learning_rate = float(self.options.get('learning_rate', 0.001))
     self.weight_decay = float(self.options.get('weight_decay', 0.0001))
+    self.initial_weights = self.options.get('start_from', None)
   
   def load_initial_state(self):
     self.position = { 'split': 0, 'epoch': 0 }
@@ -86,6 +87,10 @@ class Trainer:
     self.criterion = CylindricalLoss()
     self.init_device()
     self.init_dataloaders()
+
+    if self.initial_weights:
+      models_folder = self.model_folder.split('/')[:-1].join('/')
+      self.model.load_state_dict(torch.load(os.path.join(models_folder, self.initial_weights)))
 
     self.print_starting_log()
 
@@ -303,6 +308,8 @@ class Trainer:
     print()
     print(f'Learning Rate:                    {self.learning_rate}')
     print(f'Weight Decay:                     {self.weight_decay}')
+    if self.initial_weights:
+      print(f'Starting from:                    {self.initial_weights}')
     print()
 
   def print_test_summary (self, outputs, targets, total_loss):
