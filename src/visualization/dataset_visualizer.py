@@ -97,6 +97,7 @@ class DatasetVisualizer:
     
     if config.get('type', 'side-by-side') == '2d' and len(fields) == 2:
       hist_x, hist_y = result[fields[0]], result[fields[1]]
+      print(f'[before] hist_x: {len(hist_x)}, hist_y: {len(hist_y)}')
       if field_configs[0].get('cross-leader', False):
         print(f'crossing according to {fields[0]}')
         hist_y = [hist_y[i] * len(hist_x[i]) for i in range(len(hist_x))]
@@ -105,6 +106,8 @@ class DatasetVisualizer:
         print(f'crossing according to {fields[1]}')
         hist_x = [hist_x[i] * len(hist_y[i]) for i in range(len(hist_y))]
         hist_y = [item for sublist in hist_y for item in sublist]
+
+      print(f'[after] hist_x: {len(hist_x)}, hist_y: {len(hist_y)}')
 
       plt.hist2d(hist_x, hist_y, bins=HISTOGRAM_BINS, cmap='Blues', density=True, range=[field_configs[0].get('xlim', None), field_configs[1].get('xlim', None)])
       plt.colorbar()
