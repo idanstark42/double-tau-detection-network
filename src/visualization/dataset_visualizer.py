@@ -57,7 +57,7 @@ class DatasetVisualizer:
         event = self.dataset.get_event(i)
         datum = callback(event)
         for field in fields:
-          if field_configs[fields.index(field)].get('cross-leader', False):
+          if field_configs[fields.index(field)].get('cross', False) == 'follower':
             hist[field].append(datum[field])
           else:
             hist[field] += datum[field]
@@ -98,14 +98,14 @@ class DatasetVisualizer:
     if config.get('type', 'side-by-side') == '2d' and len(fields) == 2:
       hist_x, hist_y = result[fields[0]], result[fields[1]]
       print(f'[before] hist_x: {len(hist_x)}, hist_y: {len(hist_y)}')
-      if field_configs[0].get('cross-leader', False):
+      if field_configs[0].get('cross', False) == 'leader':
         print(f'crossing according to {fields[0]}')
-        hist_y = [hist_y[i] * len(hist_x[i]) for i in range(len(hist_x))]
-        hist_x = [item for sublist in hist_x for item in sublist]
-      elif field_configs[1].get('cross-leader', False):
-        print(f'crossing according to {fields[1]}')
         hist_x = [hist_x[i] * len(hist_y[i]) for i in range(len(hist_y))]
         hist_y = [item for sublist in hist_y for item in sublist]
+      elif field_configs[1].get('cross', False) == 'leader':
+        print(f'crossing according to {fields[1]}')
+        hist_y = [hist_y[i] * len(hist_x[i]) for i in range(len(hist_x))]
+        hist_x = [item for sublist in hist_x for item in sublist]
 
       print(f'[after] hist_x: {len(hist_x)}, hist_y: {len(hist_y)}')
 
@@ -150,7 +150,7 @@ class DatasetVisualizer:
       'callback': lambda event: { 'amount': [len(event.clusters)], 'cal_E': [cluster.cal_e for cluster in event.clusters] },
       'fields': ['amount', 'cal_E'],
       'type': '2d',
-      'config': { 'cal_E': { 'xlim': [0, 0.5] }, 'amount': { 'cross-leader': True } }
+      'config': { 'cal_E': { 'xlim': [0, 0.5], 'cross': 'leader' }, 'amount': { 'cross': 'follower' } }
     },
     'cluster_count_vs_pt': {
       'callback': lambda event: { 'amount': [len(event.clusters)], 'pT': [cluster.momentum().p_t for cluster in event.clusters] },
