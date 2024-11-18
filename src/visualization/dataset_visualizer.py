@@ -197,7 +197,7 @@ class DatasetVisualizer:
     },
     'truth_x_pt': {
       'callback': lambda event: { 'X pT': [event.total_visible_four_momentum().p_t] },
-      'fields': ['X pt']
+      'fields': ['X pT']
     },
     'truth_x_eta_phi': {
       'callback': lambda event: { 'X η': [event.total_visible_four_momentum().eta], 'X φ': [event.total_visible_four_momentum().phi] },
