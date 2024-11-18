@@ -101,11 +101,11 @@ class DatasetVisualizer:
       print(f'[before] hist_x: {len(hist_x)}, hist_y: {len(hist_y)}')
       if field_configs[0].get('cross', False) == 'leader':
         print(f'crossing according to {fields[0]} (x)')
-        hist_x = [x for i in range(len(hist_y)) for x in hist_x[i] * len(hist_y[i])]
+        hist_x = [x for x, ys in zip(hist_x, hist_y) for _ in range(len(ys))]
         hist_y = [item for sublist in hist_y for item in sublist]
       elif field_configs[1].get('cross', False) == 'leader':
         print(f'crossing according to {fields[1]} (y)')
-        hist_y = [y for i in range(len(hist_x)) for y in hist_y[i] * len(hist_x[i])]
+        hist_y = [y for y, xs in zip(hist_y, hist_x) for _ in range(len(xs))]
         hist_x = [item for sublist in hist_x for item in sublist]
 
       print(f'[after] hist_x: {len(hist_x)}, hist_y: {len(hist_y)}')
