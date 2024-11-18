@@ -155,12 +155,14 @@ class DatasetVisualizer:
     'cluster_count_vs_pt': {
       'callback': lambda event: { 'amount': [len(event.clusters)], 'pT': [cluster.momentum().p_t for cluster in event.clusters] },
       'fields': ['amount', 'pT'],
-      'type': '2d'
+      'type': '2d',
+      'config': { 'pT': { 'xlim': [0, 0.4], 'cross': 'follower' }, 'amount': { 'cross': 'leader' } }
     },
     'cluster_count_vs_pileup': {
       'callback': lambda event: { 'amount': [len(event.clusters)], 'pileup': [event.average_interactions_per_crossing] },
       'fields': ['amount', 'pileup'],
-      'type': '2d'
+      'type': '2d',
+      'config': { 'pileup': { 'cross': 'follower' }, 'amount': { 'cross': 'leader' } }
     },
     
     'track_count': {
@@ -180,12 +182,14 @@ class DatasetVisualizer:
     'track_count_vs_pt': {
       'callback': lambda event: { 'amount': [len(event.tracks)], 'pT': [track.pt for track in event.tracks] },
       'fields': ['amount', 'pT'],
-      'type': '2d'
+      'type': '2d',
+      'config': { 'pT': { 'xlim': [0, 0.4], 'cross': 'follower' }, 'amount': { 'cross': 'leader' } }
     },
     'track_count_vs_pileup': {
       'callback': lambda event: { 'amount': [len(event.tracks)], 'pileup': [event.average_interactions_per_crossing] },
       'fields': ['amount', 'pileup'],
-      'type': '2d'
+      'type': '2d',
+      'config': { 'pileup': { 'cross': 'follower' }, 'amount': { 'cross': 'leader' } }
     },
     
     'truth_count': {
