@@ -57,7 +57,10 @@ class DatasetVisualizer:
         event = self.dataset.get_event(i)
         datum = callback(event)
         for field in fields:
-          hist[field] += datum[field]
+          if field_configs[fields.index(field)].get('cross-leader', False):
+            hist[field].append(datum[field])
+          else:
+            hist[field] += datum[field]
         next()
       return hist
     
@@ -93,7 +96,19 @@ class DatasetVisualizer:
       return
     
     if config.get('type', 'side-by-side') == '2d' and len(fields) == 2:
-      plt.hist2d(result[fields[0]], result[fields[1]], bins=HISTOGRAM_BINS, cmap='Blues', density=True)
+      hist_x, hist_y = result[fields[0]], result[fields[1]]
+      if field_configs[0].get('cross-leader', False):
+        print(f'crossing according to {fields[0]}')
+        hist_y = [hist_y[i] * len(hist_x[i]) for i in range(len(hist_x))]
+        hist_x = [item for sublist in hist_x for item in sublist]
+        hist_y = [item for sublist in hist_y for item in sublist]
+      elif field_configs[1].get('cross-leader', False):
+        print(f'crossing according to {fields[1]}')
+        hist_x = [hist_x[i] * len(hist_y[i]) for i in range(len(hist_y))]
+        hist_x = [item for sublist in hist_x for item in sublist]
+        hist_y = [item for sublist in hist_y for item in sublist]
+
+      plt.hist2d(hist_x, hist_y, bins=HISTOGRAM_BINS, cmap='Blues', density=True, range=[field_configs[0].get('xlim', None), field_configs[1].get('xlim', None)])
       plt.colorbar()
       plt.title(f'events by {fields[0]} and {fields[1]}')
       plt.xlabel(fields[0])
@@ -133,7 +148,8 @@ class DatasetVisualizer:
     'cluster_count_vs_cal_e': {
       'callback': lambda event: { 'amount': [len(event.clusters)], 'cal_E': [cluster.cal_e for cluster in event.clusters] },
       'fields': ['amount', 'cal_E'],
-      'type': '2d'
+      'type': '2d',
+      'config': { 'cal_E': { 'xlim': [0, 0.5] }, 'amount': { 'cross-leader': True } }
     },
     'cluster_count_vs_pt': {
       'callback': lambda event: { 'amount': [len(event.clusters)], 'pT': [cluster.momentum().p_t for cluster in event.clusters] },
