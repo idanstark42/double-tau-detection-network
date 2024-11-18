@@ -197,11 +197,11 @@ class DatasetVisualizer:
     },
     'truth_x_pt': {
       'callback': lambda event: { 'X pT': [event.total_visible_four_momentum().p_t] },
-      'fields': ['truth pt']
+      'fields': ['X pt']
     },
     'truth_x_eta_phi': {
       'callback': lambda event: { 'X η': [event.total_visible_four_momentum().eta], 'X φ': [event.total_visible_four_momentum().phi] },
-      'fields': ['truth η', 'truth φ'],
+      'fields': ['X η', 'X φ'],
       'type': '2d'
     },
     'truth_delta_r': {
@@ -209,11 +209,11 @@ class DatasetVisualizer:
       'fields': ['ΔR']
     },
     'truth_leading_pt': {
-      'callback': lambda event: { 'leadgint pT': [event.leading_pt()] },
+      'callback': lambda event: { 'leading pT': [event.leading_pt()] },
       'fields': ['leading pT']
     },
     'truth_subleading_pt': {
-      'callback': lambda event: { 'subleadgint pT': [event.subleading_pt()] },
+      'callback': lambda event: { 'subleading pT': [event.subleading_pt()] },
       'fields': ['subleading pT']
     },
 
