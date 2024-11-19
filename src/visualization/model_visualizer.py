@@ -151,7 +151,8 @@ class ModelVisualizer:
     events = [dataset.get_event(test_loader.dataset.indices[index]) for index in range(len(test_loader.dataset))]
     sample_event_index = np.random.randint(len(events))
 
-    fig, axs = plt.subplots(1, 5, figsize=(4, 4))
+    fig, axs = plt.subplots(1, 5, figsize=(20, 4))
+    fig.tight_layout(pad=2.0)
     self.sample_event_plot(events[sample_event_index], targets[sample_event_index], outputs[sample_event_index], axs[1])
     
     # each output and target is a list of four values, two for each tau. Each tau has an eta and a phi
