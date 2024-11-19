@@ -44,7 +44,7 @@ class ModelVisualizer:
   def plot_results (self, outputs, targets, events, output_file):
     sample_event_index = np.random.randint(len(events))
 
-    fig, axs = plt.subplots(1, 6, figsize=(24, 4))
+    fig, axs = plt.subplots(1, 5, figsize=(20, 4))
     fig.tight_layout(pad=2.0)
     self.sample_event_plot(events[sample_event_index], targets[sample_event_index], outputs[sample_event_index], axs[1])
     
@@ -53,7 +53,6 @@ class ModelVisualizer:
     target_positions = [Position(target[0], target[1]) for target in targets] + [Position(target[2], target[3]) for target in targets]
     self.distances_histogram(output_positions, target_positions, axs[2])
     self.distances_by_pt_plot(output_positions, target_positions, events, axs[3])
-    self.plot_reconstruction_rate_by(output_positions, target_positions, events, lambda event: event.mc_channel_number, 'channnel', None, ax=axs[4])
     
     self.distances_by_channel_plot(output_positions, target_positions, events, axs[5])
 
