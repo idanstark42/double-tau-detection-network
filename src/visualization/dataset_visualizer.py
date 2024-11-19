@@ -61,7 +61,7 @@ class DatasetVisualizer:
         datum = callback(event)
         for field in fields:
           if field_configs[fields.index(field)].get('cross', False) == 'follower':
-          hist[field].append(datum[field])
+            hist[field].append(datum[field])
           else:
             hist[field] += datum[field]
         next()
@@ -87,10 +87,10 @@ class DatasetVisualizer:
       return
 
     if config.get('type', 'side-by-side') == 'side-by-side':
-    fig, axes = plt.subplots(1, len(fields))
-    for index, field in enumerate(fields):
-      hist = np.array(result[field]).flatten().tolist()
-      ax = axes[index] if len(fields) > 1 else axes
+      fig, axes = plt.subplots(1, len(fields))
+      for index, field in enumerate(fields):
+        hist = np.array(result[field]).flatten().tolist()
+        ax = axes[index] if len(fields) > 1 else axes
         ax.hist(hist, bins=HISTOGRAM_BINS, edgecolor='black', density=True, range=field_configs[index].get('xlim', None))
         ax.set_title(f'events by {field}')
         ax.set_xlabel(field)
@@ -118,7 +118,7 @@ class DatasetVisualizer:
       plt.ylabel(fields[1])
       if output_file:
         plt.savefig(output_file)
-    plt.show()
+      plt.show()
       return
 
     raise Exception('Unknown histogram type')
