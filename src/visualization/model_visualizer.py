@@ -143,7 +143,7 @@ class ModelVisualizer:
     
     hist = [100 * hist[i] / bin_sizes[i] if bin_sizes[i] != 0 else 0 for i in range(HISTOGRAM_BINS)]
 
-    plt.bar(range(min(field_values), max(field_values), (max(field_values) - min(field_values)) // HISTOGRAM_BINS), hist)
+    plt.bar(range(min(field_values), max(field_values), int((max(field_values) - min(field_values)) // HISTOGRAM_BINS)), hist)
     plt.xlabel(label)
     plt.ylabel('reconstruction rate (%)')
     plt.ylim(0, 100)
