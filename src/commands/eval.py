@@ -4,7 +4,7 @@ from visualization.model_visualizer import ModelVisualizer
 from utils import long_operation
 from settings import BATCH_SIZE
 
-def evaluate (dataset, module, model_file, output_file, params):
+def evaluate (dataset, module, model_file, output_folder, params):
   module.load_state_dict(torch.load(model_file))
   n = int(params.get('n', '1000'))
   batch_size = int(params.get('batch_size', BATCH_SIZE))
@@ -16,7 +16,7 @@ def evaluate (dataset, module, model_file, output_file, params):
   outputs = run_model(module, inputs, batch_size)
   print('3. Visualizing results')
   visualizer = ModelVisualizer(module)
-  visualizer.plot_results(outputs, targets, events, output_file)
+  visualizer.show_reconstruction_rate_stats(outputs, targets, events, output_folder)
   print('4. Done')
 
 def load_data (dataset, n):
