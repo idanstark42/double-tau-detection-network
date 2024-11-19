@@ -72,6 +72,7 @@ class DatasetVisualizer:
     print(f'Loaded {len(indicies) - skipped_count} events. Got {len(result[fields[0]])} events for histogram')
     if skipped_count:
       print(f'Skipped {skipped_count} events')
+
     if len(fields) == 1:
       plt.hist(result[fields[0]], bins=HISTOGRAM_BINS, edgecolor='black', density=True, range=field_configs[0].get('xlim', None))
       plt.title(f'events by {fields[0]}')

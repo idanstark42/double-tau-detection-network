@@ -28,6 +28,7 @@ class ModelVisualizer:
     self.plot_reconstruction_rate_by(output_positions, target_positions, events, lambda event: event.total_visible_four_momentum().m, 'X m', os.path.join(output_folder, 'reconstruction_rate_by_m.png'))
 
     self.plot_reconstruction_rate_by(output_positions, target_positions, events, lambda event: event.average_interactions_per_crossing, 'average interactions per crossing', os.path.join(output_folder, 'reconstruction_rate_by_interactions.png'))
+    events = [event for event in events if len(event.truths) >= 2]
     self.plot_reconstruction_rate_by(output_positions, target_positions, events, lambda event: event.angular_distance_between_taus(), 'clusters count', os.path.join(output_folder, 'reconstruction_rate_by_clusters_count.png'))
   
   def show_losses(self, losses, output_file):
