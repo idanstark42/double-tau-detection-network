@@ -142,7 +142,7 @@ class ModelVisualizer:
     channels = { f'{20 + 10 * i} GeV': [d for event_index, d in enumerate(distances) if events[event_index].mc_channel_number == CHANNEL_START + i] for i in range(5) }
     for channel in channels:
       print(channel, len(channels[channel]))
-      ax.hist(channels[channel], bins=HISTOGRAM_BINS, alpha=0.5, label=channel)
+      ax.hist(channels[channel], bins=HISTOGRAM_BINS, alpha=0.5, label=channel, fc=(0, 0, 0, 0), lw=2)
     ax.legend()
     ax.set_xlabel('distance')
     ax.set_ylabel('count')
