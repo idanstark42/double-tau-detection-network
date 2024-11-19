@@ -68,7 +68,8 @@ def main (args):
 
   if command == 'eval':
     model_file = modelfolder_path(params.get('weights', 'model_' + str(round(time.time() * 1000))))
-    evaluate(dataset, module, model_file, params)
+    output_folder = params.get('output', 'eval_' + str(round(time.time() * 1000)))
+    evaluate(dataset, module, model_file, output_folder, params)
     return
 
   if command == 'detect':
