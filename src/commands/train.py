@@ -109,7 +109,7 @@ class Trainer:
 
     if self.checkpoint and self.position['split'] == split and self.saving_mode.startswith('epoch-'):
       epochs = range(self.position['epoch'] + 1, self.epochs)
-  else:
+    else:
       epochs = range(self.epochs)
     for epoch in epochs:
       self.run_epoch_training(split, epoch)
@@ -154,19 +154,19 @@ class Trainer:
 
   # training building blocks
 
-  def train(self,training_loader, epoch):
+  def train(self, training_loader, epoch):
     self.model.train()
 
-  def run (next):
-    total_loss = 0
+    def run (next):
+      total_loss = 0
       for batch_idx, (input, target) in enumerate(training_loader):
         self.optimizer.zero_grad()
         output, loss = self.calc(input, target)
-      loss.backward()
+        loss.backward()
         self.optimizer.step()
         next(self.batch_size)
       total_loss += loss.item()
-    return total_loss
+      return total_loss
 
     total_loss = long_operation(run, max=len(training_loader) * self.batch_size, message=f'Epoch {epoch+1} training  ', ending_message=lambda l, t: f'loss: {l / len(training_loader):.6f} [{seconds_to_time(t)}]')
     return total_loss / len(training_loader)
@@ -174,14 +174,14 @@ class Trainer:
   def validate(self, validation_loader, epoch):
     self.model.eval()
 
-  with torch.no_grad():
-    def run (next):
-      total_loss = 0
+    with torch.no_grad():
+      def run (next):
+        total_loss = 0
         for batch_idx, (input, target) in enumerate(validation_loader):
           output, loss = self.calc(input, target)
           next(self.batch_size)
-        total_loss += loss.item()
-      return total_loss
+          total_loss += loss.item()
+        return total_loss
 
       total_loss = long_operation(run, max=len(validation_loader) * self.batch_size, message=f'Epoch {epoch+1} validation', ending_message=lambda l, t: f'loss: {l / len(validation_loader):.6f} [{seconds_to_time(t)}]')
     return total_loss / len(validation_loader)
@@ -193,19 +193,20 @@ class Trainer:
       self.dataset.finish_partial_preloading()
 
     self.model.eval()
-  outputs, targets = [], []
+    outputs, targets = [], []
 
-  with torch.no_grad():
-    def run (next):
-      total_loss = 0
+    with torch.no_grad():
+      def run (next):
+        total_loss = 0
         for batch_idx, (input, target) in enumerate(self.test_loader):
           output, loss = self.calc(input, target)
           next(self.batch_size)
         for index, (output, target) in enumerate(zip(output, target)):
           outputs.append(output)
           targets.append(target)
-        total_loss += loss.item()
-      return total_loss
+          total_loss += loss.item()
+        return total_loss
+      
       total_loss = long_operation(run, max=len(self.test_loader) * self.batch_size, message='Testing ')
 
     self.print_test_summary(outputs, targets, total_loss)
@@ -315,8 +316,8 @@ class Trainer:
   def print_test_summary (self, outputs, targets, total_loss):
     print(f'\nTest set average loss: {total_loss / len(self.test_loader):.4f}\n')
     if self.use_xla or self.use_cuda:
-    outputs = [output.cpu() for output in outputs]
-    targets = [target.cpu() for target in targets]
+      outputs = [output.cpu() for output in outputs]
+      targets = [target.cpu() for target in targets]
     ModelVisualizer(self.model).plot_results(outputs, targets, self.test_loader, self.dataset, os.path.join(self.model_folder, 'graphs.png'))
 
   def print_summary (self):
