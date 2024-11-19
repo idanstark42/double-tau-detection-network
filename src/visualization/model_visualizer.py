@@ -140,9 +140,11 @@ class ModelVisualizer:
     events = events * 2
     distances = [start.distance(end) for start, end in zip(starts, ends)]
     channels = { f'{20 + 10 * i} GeV': [d for event_index, d in enumerate(distances) if events[event_index].mc_channel_number == CHANNEL_START + i] for i in range(5) }
+    COLORS = ['blue', 'green', 'red', 'cyan', 'magenta']
+    COLORS = { f'{20 + 10 * i} GeV': COLORS[i] for i in range(5) }
     for channel in channels:
       print(channel, len(channels[channel]))
-      ax.hist(channels[channel], bins=HISTOGRAM_BINS, edgecolor='black', label=channel, alpha=0.5)
+      ax.hist(channels[channel], bins=HISTOGRAM_BINS, edgecolor=COLORS[channel], label=channel, alpha=0)
     ax.legend()
     ax.set_xlabel('distance')
     ax.set_ylabel('count')
