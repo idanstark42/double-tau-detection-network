@@ -9,6 +9,7 @@ from utils import long_operation, python_name_from_dtype_name
 class DatasetVisualizer:
   def __init__ (self, dataset):
     self.dataset = dataset
+
   def print_fields (self):
     for field in self.dataset.dataset_fields:
       print(f'{python_name_from_dtype_name(field)} fields:')
