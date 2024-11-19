@@ -5,7 +5,7 @@ from model.main import MainModel
 from utils import datafile_path, modelfolder_path
 
 from commands.show import show
-from commands.train import train_module as train
+from commands.train import train
 from commands.eval import evaluate
 from commands.detect import detect
 from commands.proliferate import proliferate
