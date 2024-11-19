@@ -69,6 +69,7 @@ class DatasetVisualizer:
       return hist, skipped
     
     result, skipped_count = long_operation(load, max=len(indicies), message='Loading data for histogram')
+    print(f'Loaded {len(indicies) - skipped_count} events. Got {len(result[fields[0]])} events for histogram')
     if skipped_count:
       print(f'Skipped {skipped_count} events')
     if len(fields) == 1:
