@@ -53,8 +53,7 @@ class ModelVisualizer:
     target_positions = [Position(target[0], target[1]) for target in targets] + [Position(target[2], target[3]) for target in targets]
     self.distances_histogram(output_positions, target_positions, axs[2])
     self.distances_by_pt_plot(output_positions, target_positions, events, axs[3])
-    
-    self.distances_by_channel_plot(output_positions, target_positions, events, axs[5])
+    self.distances_by_channel_plot(output_positions, target_positions, events, axs[4])
 
     random_position_indices = np.random.choice(len(output_positions), ARROWS_NUMBER, replace=False)
     random_output_positions = [output_positions[index] for index in random_position_indices]
