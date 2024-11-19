@@ -104,12 +104,9 @@ class ModelVisualizer:
     ax.set_ylabel(f'count ({percent_of_distances_unser_0_2 * 100:.2f}% under 0.2)')
 
   def distances_by_pt_plot (self, starts, ends, events, ax):
-    def pt (event):
-      return sum([momentum.p_t for momentum in event.true_four_momentum()])
-
     distances = [start.distance(end) for start, end in zip(starts, ends)]
-    pts = [pt(event) for event in events]
-    ax.scatter(pts, distances)
+    pts = [event.total_visible_four_momentum().p_t for event in events] * 2
+    ax.scatter(pts, distances, s=1)
     ax.set_xlabel('pt')
     ax.set_ylabel('distance')
   
