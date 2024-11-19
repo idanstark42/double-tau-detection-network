@@ -56,6 +56,7 @@ class ModelVisualizer:
     self.distances_histogram(output_positions, target_positions, axs[2])
     self.distances_by_pt_plot(output_positions, target_positions, events, axs[3])
     self.plot_reconstruction_rate_by(output_positions, target_positions, events, lambda event: event.mc_channel_number, 'channnel', None, ax=axs[4])
+    
     self.distances_by_channel_plot(output_positions, target_positions, events, axs[5])
 
     random_position_indices = np.random.choice(len(output_positions), ARROWS_NUMBER, replace=False)
@@ -136,6 +137,7 @@ class ModelVisualizer:
     plt.show()
 
   def distances_by_channel_plot (self, starts, ends, events, ax):
+    events = events * 2
     distances = [start.distance(end) for start, end in zip(starts, ends)]
     channels = { f'{20 + 10 * i} GeV': [d for event_index, d in enumerate(distances) if events[event_index].mc_channel_number == CHANNEL_START + i] for i in range(5) }
     for channel in channels:
