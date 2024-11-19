@@ -2,21 +2,22 @@ import torch
 
 from visualization.model_visualizer import ModelVisualizer
 from utils import long_operation
+from settings import BATCH_SIZE
 
 def evaluate (dataset, module, model_file, output_folder, params):
   module.load_state_dict(torch.load(model_file))
   n = int(params.get('n', '1000'))
+  batch_size = int(params.get('batch_size', BATCH_SIZE))
   module.eval()
   print()
-  with torch.no_grad():
-    print('1. Loading data')
-    events, inputs, targets = load_data(dataset, n)
-    print('2. Running model')
-    outputs = module(inputs)
-    print('3. Visualizing results')
-    visualizer = ModelVisualizer(module)
-    visualizer.show_reconstruction_rate_stats(outputs, targets, events, output_folder)
-    print('4. Done')
+  print('1. Loading data')
+  events, inputs, targets = load_data(dataset, n)
+  print('2. Running model')
+  outputs = run_model(module, inputs, batch_size)
+  print('3. Visualizing results')
+  visualizer = ModelVisualizer(module)
+  visualizer.show_reconstruction_rate_stats(outputs, targets, events, output_folder)
+  print('4. Done')
 
 def load_data (dataset, n):
   random_indices = torch.randperm(len(dataset))[:n]
@@ -36,3 +37,14 @@ def load_data (dataset, n):
   inputs = torch.stack(inputs)
   targets = torch.stack(targets)
   return events, inputs, targets
+
+def run_model (module, inputs, batch_size):
+  def run (next):
+    outputs = []
+    with torch.no_grad():
+      for i in range(0, len(inputs), batch_size):
+        output = module(inputs[i:i + batch_size])
+        outputs.append(output)
+        next()
+      return torch.cat(outputs)
+  return long_operation(run, max=len(inputs), message='Running model')
