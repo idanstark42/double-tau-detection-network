@@ -19,7 +19,9 @@ class ModelVisualizer:
     output_positions = [Position(output[0], output[1]) for output in outputs] + [Position(output[2], output[3]) for output in outputs]
     target_positions = [Position(target[0], target[1]) for target in targets] + [Position(target[2], target[3]) for target in targets]
     self.distances_histogram(output_positions, target_positions, plt.gca())
-    plt.savefig(os.path.join(output_folder, 'distances_histogram.png'))
+    if output_folder:
+      os.mkaedirs(output_folder, exist_ok=True)
+      plt.savefig(os.path.join(output_folder, 'distances_histogram.png'))
     plt.show()
 
     self.plot_reconstruction_rate_by(output_positions, target_positions, events, lambda event: event.total_visible_four_momentum().p_t, 'X pT', os.path.join(output_folder, 'reconstruction_rate_by_pt.png'))
@@ -39,7 +41,8 @@ class ModelVisualizer:
     plt.ylabel('Loss')
     plt.yscale('log')
     plt.legend()
-    plt.savefig(output_file)
+    if output_file:
+      plt.savefig(output_file)
     plt.show()
 
   def plot_results (self, outputs, targets, events, output_file):
