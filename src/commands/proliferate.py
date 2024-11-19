@@ -61,7 +61,7 @@ def proliferate (source_file, factor):
         for key in keys:
           start_index = initial_count + index * chunk_size * (factor - 1)
           output[key][start_index:start_index + chunk_size * (factor - 1)] = chunk[key]
-      next()
+        next()
 
   print('Saving copies')
   long_operation(add_copies, multiprocessing=False, max=len(copy_chunks))

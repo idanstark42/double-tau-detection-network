@@ -8,6 +8,9 @@ class Cluster:
     for name, python_name in fields:
       setattr(self, python_name, cluster[name])
 
+  def has_field (self, field):
+    return hasattr(self, field)
+
   def position (self):
     return Position(self.cal_eta, self.cal_phi)
   
