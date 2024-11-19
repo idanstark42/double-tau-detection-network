@@ -8,6 +8,8 @@ from .event_visualizer import EventVisualizer
 from settings import PHI_RANGE, ETA_RANGE, JET_SIZE, MAP_2D_TICKS, ARROWS_NUMBER, HISTOGRAM_BINS
 from utils import long_operation
 
+CHANNEL_START = 525007
+
 phi_range_size = abs(PHI_RANGE[1] - PHI_RANGE[0])
 
 class ModelVisualizer:
@@ -140,11 +142,13 @@ class ModelVisualizer:
       return start.distance(end)
 
     distances = [distance(start, end) for start, end in zip(starts, ends)]
-    channels = [event.mc_channel_number for event in events]
-    ax.hist2d(channels, distances, bins=(5, 100), cmap='viridis')
-    ax.set_xlabel('channel')
-    ax.set_ylabel('distance')
-    ax.set_xticks(range(5), [f'{20 + 10 * i} GeV' for i in range(5)])
+    channels = { f'{20 + 10 * i} GeV': [d for event_index, d in enumerate(distances) if events[event_index].mc_channel_number == CHANNEL_START + i] for i in range(5) }
+    for channel in channels:
+      print(channel, len(channels[channel]))
+      ax.hist(channels[channel], bins=HISTOGRAM_BINS, alpha=0.5, label=channel)
+    ax.legend()
+    ax.set_xlabel('distance')
+    ax.set_ylabel('count')
 
   def plot_reconstruction_rate_by (self, outputs, targets, events, get, label, output_file, ax=None):
     field_values = [get(event) for event in events] * 2
