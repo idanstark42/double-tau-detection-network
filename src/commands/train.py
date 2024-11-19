@@ -89,7 +89,7 @@ class Trainer:
     self.init_dataloaders()
 
     if self.initial_weights:
-      models_folder = self.model_folder.split('/')[:-1].join('/')
+      models_folder = '/'.join(self.model_folder.split('/')[:-1])
       self.model.load_state_dict(torch.load(os.path.join(models_folder, self.initial_weights)))
 
     self.print_starting_log()
