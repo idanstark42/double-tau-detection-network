@@ -39,7 +39,8 @@ def generate_graphs (dataset, module, params):
 
   events_count = int(params.get('sample-events', 4))
 
-  output_folder = os.path.join(os.path.dirname(__file__), GRAPHS_DIR, params.get('output', str(round(time() * 1000))))
+  origin_folder = os.path.dirname(__file__).replace('commands', '')
+  output_folder = os.path.join(origin_folder, GRAPHS_DIR, params.get('output', str(round(time() * 1000))))
   dataset_folder = os.path.join(output_folder, 'dataset')
   events_folder = os.path.join(dataset_folder, 'events')
   model_folder = os.path.join(output_folder, 'model')
