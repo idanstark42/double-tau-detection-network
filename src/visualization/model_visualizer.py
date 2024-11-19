@@ -144,7 +144,7 @@ class ModelVisualizer:
     ax.hist2d(channels, distances, bins=(5, 100), cmap='viridis')
     ax.set_xlabel('channel')
     ax.set_ylabel('distance')
-
+    ax.set_xticks(range(5), [f'{20 + 10 * i} GeV' for i in range(5)])
 
   def plot_reconstruction_rate_by (self, outputs, targets, events, get, label, output_file, ax=None):
     field_values = [get(event) for event in events] * 2
