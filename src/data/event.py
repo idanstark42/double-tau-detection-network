@@ -11,7 +11,7 @@ from settings import FIELDS_TO_NORMALIZE
 class Event:
   def __init__ (self, event, clusters, tracks, truth, event_fields, clusters_fields, tracks_fields, truthTaus_fields, normalize_fields=False):
     self.average_interactions_per_crossing = event[0]
-    self.mc_channel_number = event[1] if len(event) > 1 else 'default-channel'
+    self.mc_channel_number = event[1] if len(event) > 1 else 0
     self.clusters = [Cluster(cluster, clusters_fields) for cluster in clusters if cluster['valid']]
     self.tracks = [Track(track, tracks_fields) for track in tracks if track['valid']]
     self.truths = [Truth(truth, truthTaus_fields) for truth in truth if truth['valid']]
