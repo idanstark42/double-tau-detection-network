@@ -99,6 +99,6 @@ class ModelVisualizer:
 
     distances = [distance(start, end) for start, end in zip(starts, ends)]
     pts = [pt(event) for event in events]
-    ax.scatter(pts, distances, size=1)
+    ax.scatter(pts, distances, s=2)
     ax.set_xlabel('pt')
     ax.set_ylabel('distance')
