@@ -67,12 +67,13 @@ def main (args):
     return
 
   if command == 'eval':
-    model_file = modelfolder_path(params.get('weights', 'model_' + str(round(time.time() * 1000)))) + '\\model.pth'
-    evaluate(dataset, module, model_file, params)
+    model_file = modelfolder_path(params.get('weights', 'model_' + str(round(time.time() * 1000))))
+    output_folder = params.get('output', 'eval_' + str(round(time.time() * 1000)))
+    evaluate(dataset, module, model_file, output_folder, params)
     return
 
   if command == 'detect':
-    model_file = modelfolder_path(params.get('weights', 'model_' + str(round(time.time() * 1000)))) + '\\model.pth'
+    model_file = modelfolder_path(params.get('weights', 'model_' + str(round(time.time() * 1000))))
     detect(dataset, module, model_file)
     return
 
