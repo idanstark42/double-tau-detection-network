@@ -44,7 +44,7 @@ class ModelVisualizer:
   def plot_results (self, outputs, targets, events, output_file):
     sample_event_index = np.random.randint(len(events))
 
-    fig, axs = plt.subplots(1, 5, figsize=(20, 4))
+    fig, axs = plt.subplots(1, 6, figsize=(24, 4))
     fig.tight_layout(pad=2.0)
     self.sample_event_plot(events[sample_event_index], targets[sample_event_index], outputs[sample_event_index], axs[1])
     
@@ -54,6 +54,7 @@ class ModelVisualizer:
     self.distances_histogram(output_positions, target_positions, axs[2])
     self.distances_by_pt_plot(output_positions, target_positions, events, axs[3])
     self.plot_reconstruction_rate_by(output_positions, target_positions, events, lambda event: event.mc_channel_number, 'channnel', None, ax=axs[4])
+    self.plot_distance_by_channel_histogram(output_positions, target_positions, events, axs[5])
 
     random_position_indices = np.random.choice(len(output_positions), ARROWS_NUMBER, replace=False)
     random_output_positions = [output_positions[index] for index in random_position_indices]
@@ -140,7 +141,7 @@ class ModelVisualizer:
 
     distances = [distance(start, end) for start, end in zip(starts, ends)]
     channels = [event.mc_channel_number for event in events]
-    ax.scatter(channels, distances, s=2)
+    ax.hist2d(channels, distances, bins=(5, 100), cmap='viridis')
     ax.set_xlabel('channel')
     ax.set_ylabel('distance')
 
