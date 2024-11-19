@@ -16,7 +16,7 @@ MODELS_DIR = 'models'
 # Data
 RESOLUTION = 128
 DATASET_FIELDS = ['event', 'clusters', 'tracks', 'truthTaus']
-DATA_FILE = 'merged_x3'
+DATA_FILE = 'ggXtautau_mX20_run3year1_x10_x10'
 
 CHANNEL_START = 525007
 FIELDS_TO_NORMALIZE = {
