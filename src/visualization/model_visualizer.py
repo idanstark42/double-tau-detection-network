@@ -22,10 +22,8 @@ class ModelVisualizer:
     plt.savefig(output_file)
     plt.show()
 
-  def plot_results (self, outputs, targets, test_loader, dataset, output_file):
-    events = [dataset.get_event(test_loader.dataset.indices[index]) for index in range(len(test_loader.dataset))]
-    random_indeces = np.random.choice(len(test_loader.dataset), ARROWS_NUMBER, replace=False)
-    random_events = [dataset.get_event(test_loader.dataset.indices[index]) for index in random_indeces]
+  def plot_results (self, outputs, targets, events, output_file):
+    random_indeces = np.random.choice(len(events), ARROWS_NUMBER, replace=False)
     random_outputs = [outputs[index] for index in random_indeces]
     random_targets = [targets[index] for index in random_indeces]
     sample_event_index = np.random.randint(len(events))
@@ -101,6 +99,6 @@ class ModelVisualizer:
 
     distances = [distance(start, end) for start, end in zip(starts, ends)]
     pts = [pt(event) for event in events]
-    ax.scatter(pts, distances)
+    ax.scatter(pts, distances, size=1)
     ax.set_xlabel('pt')
     ax.set_ylabel('distance')

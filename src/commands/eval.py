@@ -1,36 +1,50 @@
-# This command evaluates the model it was given as a parameter.
-# First, it loads the model.
-# Then, running it a random set of n events from the give dataset, it the percentage of events for which the distance between the output and the taget is less then 0.2.
-
 import torch
-from data.position import Position
 
-def evaluate (dataset, module, model_file, params):
+from visualization.model_visualizer import ModelVisualizer
+from utils import long_operation
+from settings import BATCH_SIZE
+
+def evaluate (dataset, module, model_file, output_folder, params):
   module.load_state_dict(torch.load(model_file))
-  n = params.get('n', 1000)
-  cutoff = params.get('cutoff', 0.2)
-  random_indices = torch.randperm(len(dataset))[:n]
+  n = int(params.get('n', '1000'))
+  batch_size = int(params.get('batch_size', BATCH_SIZE))
   module.eval()
   print()
-  print('Calculating outputs...')
-  with torch.no_grad():
-    correct = 0
-    input_target_touples = [dataset[i] for i in random_indices]
-    input = torch.stack([input for input, _ in input_target_touples])
-    target = torch.stack([target for _, target in input_target_touples])
-    output = module(input)
-    print('Evaluating model accuracy...')
-    for i in range(n):
-      current_target = target[i]
-      current_output = output[i]
+  print('1. Loading data')
+  events, inputs, targets = load_data(dataset, n)
+  print('2. Running model')
+  outputs = run_model(module, inputs, batch_size)
+  print('3. Visualizing results')
+  visualizer = ModelVisualizer(module)
+  visualizer.plot_results(outputs, targets, events, output_folder)
+  print('4. Done')
 
-      target_positions = [Position(tau[0], tau[1]) for tau in current_target.view(-1, 2)]
-      output_positions = [Position(tau[0], tau[1]) for tau in current_output.view(-1, 2)]
+def load_data (dataset, n):
+  random_indices = torch.randperm(len(dataset))[:n]
+  
+  def load (next):
+    events = []
+    inputs = []
+    targets = []
+    for i in random_indices:
+      events.append(dataset.get_event(i))
+      inputs.append(dataset[i][0])
+      targets.append(dataset[i][1])
+      next()
+    return events, inputs, targets
 
-      distances = torch.tensor([target_positions[i].distance(output_positions[i]) for i in range(len(target_positions))])
-      if torch.all(distances < cutoff):
-        correct += 1
+  events, inputs, targets = long_operation(load, max=n, message='Loading data')
+  inputs = torch.stack(inputs)
+  targets = torch.stack(targets)
+  return events, inputs, targets
 
-    print('Done.')
-    print()
-    print(f'Accuracy (< {cutoff}): {100 * correct/n:.2f}%')
+def run_model (module, inputs, batch_size):
+  def run (next):
+    outputs = []
+    with torch.no_grad():
+      for i in range(0, len(inputs), batch_size):
+        output = module(inputs[i:i + batch_size])
+        outputs.append(output)
+        next(batch_size)
+      return torch.cat(outputs)
+  return long_operation(run, max=len(inputs), message='Running model')
