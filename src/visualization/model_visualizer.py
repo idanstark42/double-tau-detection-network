@@ -104,7 +104,7 @@ class ModelVisualizer:
   def distances_histogram (self, starts, ends, ax):
     distances = [start.distance(end) for start, end in zip(starts, ends)]
     percent_of_distances_unser_0_2 = len([distance for distance in distances if distance < 0.2]) / len(distances)
-    ax.hist(distances, bins=100)
+    ax.hist(distances, bins=HISTOGRAM_BINS, edgecolor='black')
     ax.set_xlabel('distance')
     ax.set_ylabel(f'count ({percent_of_distances_unser_0_2 * 100:.2f}% under 0.2)')
 
@@ -131,7 +131,7 @@ class ModelVisualizer:
     convulational_params, linear_params = self.model.parameter_counts()
     parametrers = long_operation(get_params, max=convulational_params + linear_params, message='Loading parameters')
     
-    plt.hist(parametrers, bins=50)
+    plt.hist(parametrers, bins=HISTOGRAM_BINS, edgecolor='black')
     plt.yscale('log')
     plt.savefig(output_file)
     plt.show()
@@ -142,7 +142,7 @@ class ModelVisualizer:
     channels = { f'{20 + 10 * i} GeV': [d for event_index, d in enumerate(distances) if events[event_index].mc_channel_number == CHANNEL_START + i] for i in range(5) }
     for channel in channels:
       print(channel, len(channels[channel]))
-      ax.hist(channels[channel], bins=HISTOGRAM_BINS, alpha=0.5, label=channel, fc=(0, 0, 0, 0), lw=2)
+      ax.hist(channels[channel], bins=HISTOGRAM_BINS, edgecolor='black', label=channel, alpha=0.5)
     ax.legend()
     ax.set_xlabel('distance')
     ax.set_ylabel('count')
@@ -165,7 +165,7 @@ class ModelVisualizer:
     hist = long_operation(load_hist, max=len(outputs), message='Calculating histogram values')  
 
     if ax is None:
-      plt.bar(range(HISTOGRAM_BINS), hist)
+      plt.bar(range(HISTOGRAM_BINS), hist, edgecolor='black')
       plt.xlabel(label)
       plt.ylabel('reconstruction rate (%)')
       plt.xticks([0, int(HISTOGRAM_BINS / 2), HISTOGRAM_BINS], [round(min(field_values), 2), round((min(field_values) + max(field_values)) / 2, 2), round(max(field_values), 2)])
