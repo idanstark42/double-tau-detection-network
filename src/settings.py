@@ -18,6 +18,11 @@ RESOLUTION = 128
 DATASET_FIELDS = ['event', 'clusters', 'tracks', 'truthTaus']
 DATA_FILE = 'merged_x3'
 
+FIELDS_TO_NORMALIZE = {
+  'clusters': [], #['center_mag', 'center_lambda', 'second_r', 'second_lambda'],
+  'tracks': [] #['number_of_pixel_hits', 'number_of_sct_hits', 'number_of_trt_hits', 'q_over_p'],
+}
+
 # TRAINING
 EPOCHS = 2
 BATCH_SIZE = 64
