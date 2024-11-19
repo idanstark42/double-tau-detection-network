@@ -45,6 +45,6 @@ def run_model (module, inputs, batch_size):
       for i in range(0, len(inputs), batch_size):
         output = module(inputs[i:i + batch_size])
         outputs.append(output)
-        next()
+        next(batch_size)
       return torch.cat(outputs)
   return long_operation(run, max=len(inputs), message='Running model')

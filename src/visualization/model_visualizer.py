@@ -133,20 +133,24 @@ class ModelVisualizer:
 
   def plot_reconstruction_rate_by (self, outputs, targets, events, get, label, output_file):
     field_values = [get(event) for event in events] * 2
-    hist = [0] * HISTOGRAM_BINS
-    bin_sizes = [0] * HISTOGRAM_BINS
-    for output, target, field_value in zip(outputs, targets, field_values):
-      bin_index = int((field_value - min(field_values)) / (max(field_values) - min(field_values)) * HISTOGRAM_BINS)
-      bin_index = min(HISTOGRAM_BINS - 1, max(0, bin_index))
-      hist[bin_index] += 1 if output.distance(target) < 0.2 else 0
-      bin_sizes[bin_index] += 1
     
-    hist = [100 * hist[i] / bin_sizes[i] if bin_sizes[i] != 0 else 0 for i in range(HISTOGRAM_BINS)]
+    def load_hist(next):
+      hist = [0] * HISTOGRAM_BINS
+      bin_sizes = [0] * HISTOGRAM_BINS
+      for output, target, field_value in zip(outputs, targets, field_values):
+        bin_index = int((field_value - min(field_values)) / (max(field_values) - min(field_values)) * HISTOGRAM_BINS)
+        bin_index = min(HISTOGRAM_BINS - 1, max(0, bin_index))
+        hist[bin_index] += 1 if output.distance(target) < 0.2 else 0
+        bin_sizes[bin_index] += 1
+        next()
+      
+      return [100 * hist[i] / bin_sizes[i] if bin_sizes[i] != 0 else 0 for i in range(HISTOGRAM_BINS)]
+
+    hist = long_operation(load_hist, max=len(outputs), message='Calculating histogram values')  
 
     plt.bar(range(HISTOGRAM_BINS), hist)
     plt.xlabel(label)
     plt.ylabel('reconstruction rate (%)')
-    plt.ylim(0, 100)
     plt.xticks([0, int(HISTOGRAM_BINS / 2), HISTOGRAM_BINS], [round(min(field_values), 2), round((min(field_values) + max(field_values)) / 2, 2), round(max(field_values), 2)])
     if output_file:
       plt.savefig(output_file)
