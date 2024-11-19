@@ -144,7 +144,7 @@ def train(train_loader, model, criterion, optimizer, epoch):
       total_loss += loss.item()
     return total_loss
 
-  total_loss = long_operation(run, max=len(train_loader) * BATCH_SIZE, message=f'Epoch {epoch+1} training')
+  total_loss = long_operation(run, max=len(train_loader) * BATCH_SIZE, message=f'Epoch {epoch+1} training', ending_message=lambda result, elapsed: f'loss: {result / len(train_loader):.4f} ({seconds_to_time(elapsed)})')
   return total_loss / len(train_loader)
 
 # validate the model
@@ -160,7 +160,7 @@ def validate(val_loader, model, criterion, epoch):
         total_loss += loss.item()
       return total_loss
   
-    total_loss = long_operation(run, max=len(val_loader) * BATCH_SIZE, message=f'Epoch {epoch+1} validation')
+    total_loss = long_operation(run, max=len(val_loader) * BATCH_SIZE, message=f'Epoch {epoch+1} validation', ending_message=lambda result, elapsed: f'loss: {result / len(val_loader):.4f} ({seconds_to_time(elapsed)})')
   return total_loss / len(val_loader)
 
 # test the model

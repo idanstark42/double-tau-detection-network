@@ -24,20 +24,29 @@ def print_map (map):
     print('#')
   print('#' * map.shape[0] + '##')
 
-def long_operation (operation, **kwargs):
+def long_operation (operation, ending_message=False, **kwargs):
   bar = IncrementalBar(**kwargs)
   start = time()
   def next (step=1):
-    bar.next(step)
-    percentage = bar.index / bar.max
+    bar.next(min(step, bar.max - bar.index))
+    percentage = (bar.index + 1) / bar.max
     elapsed = time() - start
     if elapsed > 5:
       remaining = (1 - percentage) * elapsed / percentage
-      bar.suffix = f'{bar.index}/{bar.max} [{percentage * 100:.1f}%%] {seconds_to_time(remaining)}'
+      bar.suffix = f'{bar.index + 1}/{bar.max} [{percentage * 100:.1f}%%] {seconds_to_time(remaining)}'
     else:
-      bar.suffix = f'{bar.index}/{bar.max} [{percentage * 100:.1f}%%]'
+      bar.suffix = f'{bar.index + 1}/{bar.max} [{percentage * 100:.1f}%%]'
+
+  bar.start()
+
   result = operation(next)
-  next()
+  
+  if ending_message:
+    bar.suffix = ending_message(result, time() - start)
+  else:
+    bar.suffix = f'done in {seconds_to_time(time() - start)}'
+  
+  bar.next(bar.max - bar.index if bar.index < bar.max else 0)
   bar.finish()
   return result
 
