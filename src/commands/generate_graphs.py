@@ -37,7 +37,7 @@ def generate_graphs (dataset, module, params):
   # disable plt.show() to avoid blocking the execution. Close the plot instead
   plt.show = lambda: plt.clf()
 
-  events_count = int(params.get('events', 4))
+  events_count = int(params.get('sample-events', 4))
 
   output_folder = os.path.join(os.path.dirname(__file__), GRAPHS_DIR, params.get('output', str(round(time() * 1000))))
   dataset_folder = os.path.join(output_folder, 'dataset')
