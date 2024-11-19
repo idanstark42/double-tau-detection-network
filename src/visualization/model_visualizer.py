@@ -132,11 +132,11 @@ class ModelVisualizer:
     plt.show()
 
   def plot_reconstruction_rate_by (self, outputs, targets, events, get, label, output_file):
-    field_values = [get(event) for event in events]
+    field_values = [get(event) for event in events] * 2
     hist = [0] * HISTOGRAM_BINS
     bin_sizes = [0] * HISTOGRAM_BINS
     for output, target, field_value in zip(outputs, targets, field_values):
-      reconstruction_success = Position(output[0], output[1]).distance(Position(target[0], target[1])) < 0.2 and Position(output[2], output[3]).distance(Position(target[2], target[3])) < 0.2
+      reconstruction_success = output.distance(target) < 0.2
       bin_index = int((field_value - min(field_values)) / (max(field_values) - min(field_values)) * HISTOGRAM_BINS)
       hist[bin_index] += 1 if reconstruction_success else 0
       bin_sizes[bin_index] += 1
