@@ -15,5 +15,5 @@ def evaluate (dataset, module, model_file, output_folder, params):
     targets = torch.stack(targets)
     outputs = module(inputs)
 
-    visualizer = ModelVisualizer()
+    visualizer = ModelVisualizer(module)
     visualizer.show_reconstruction_rate_stats(outputs, targets, dataset, output_folder)
