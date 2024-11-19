@@ -28,6 +28,7 @@ class DatasetVisualizer:
   def sample_random_events (self, count, output_folder):
     random_indeces = np.random.choice(len(self.dataset), count, replace=False)
     os.makedirs(output_folder, exist_ok=True)
+    print(f'Sampling {count} random events to {output_folder}')
     for i in random_indeces:
       event = self.dataset.get_event(i)
       visualizer = EventVisualizer(event)
