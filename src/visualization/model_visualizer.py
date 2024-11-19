@@ -5,10 +5,8 @@ import numpy as np
 
 from data.position import Position
 from .event_visualizer import EventVisualizer
-from settings import PHI_RANGE, ETA_RANGE, JET_SIZE, MAP_2D_TICKS, ARROWS_NUMBER, HISTOGRAM_BINS
+from settings import PHI_RANGE, ETA_RANGE, JET_SIZE, MAP_2D_TICKS, ARROWS_NUMBER, HISTOGRAM_BINS, CHANNEL_START
 from utils import long_operation
-
-CHANNEL_START = 525007
 
 phi_range_size = abs(PHI_RANGE[1] - PHI_RANGE[0])
 
