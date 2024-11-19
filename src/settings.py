@@ -13,6 +13,7 @@ MAX_HISTOGRAM_SIZE=100000
 # IO
 DATA_DIR = 'data'
 MODELS_DIR = 'models'
+GRAPHS_DIR = 'plots'
 
 # Data
 RESOLUTION = 128

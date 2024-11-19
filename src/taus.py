@@ -10,6 +10,7 @@ from commands.eval import evaluate
 from commands.detect import detect
 from commands.proliferate import proliferate
 from commands.merge import merge
+from commands.generate_graphs import generate_graphs
 from commands.config import config
 
 def main (args):
@@ -55,6 +56,9 @@ def main (args):
   use_post_processing = params.get('post_processing', 'false') == 'true'
   dropout_probability = float(params.get('dropout', 0.15))
   module = MainModel(post_processing=(dataset.post_processing if use_post_processing else False), input_channels=dataset.input_channels, model=model, dropout_probability=dropout_probability)
+
+  if command == 'generate-graphs':
+    generate_graphs(dataset, module, params)
 
   if command == 'show':
     scope = args[1]

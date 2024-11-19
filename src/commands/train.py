@@ -39,6 +39,7 @@ class Trainer:
     self.backup_folder = self.options.get('backup_folder', '')
 
     self.loading_type = self.options.get('preload', 'none')
+    self.preloading_output = self.options.get('preload_output', 'none')
     self.saving_mode = self.options.get('saving_mode', 'none')
     self.cache_type = self.options.get('cache', 'events')
     self.checkpoint = False
@@ -259,11 +260,22 @@ class Trainer:
 
   def preload_loader (self, loader, message):
     dataset = loader.dataset
+    if self.preloading_output == 'mass':
+      masses = { f'{20 + 10 * i} GeV': 0 for i in range(5) }
     def run (next):
       for index in range(len(dataset)):
+        if self.preloading_output == 'mass':
+          mass = dataset.get_event(index).mass_by_channel_number()
+          if mass in masses:
+            masses[mass] += 1
         dataset[index]
         next(1)
     long_operation(run, max=len(dataset), message=message)
+
+    if self.preloading_output == 'mass':
+      print('Mass distribution:')
+      for mass, count in masses.items():
+        print(f'{mass}: {count}')
 
   # helper functions
 

@@ -2,7 +2,7 @@ import os
 from time import time
 from progress.bar import IncrementalBar
 
-from settings import DATA_DIR
+from settings import DATA_DIR, MODELS_DIR
 
 def python_names_from_dtype(dtype):
   return [python_name_from_dtype_name(name) for name in dtype.names]
@@ -63,4 +63,4 @@ def datafile_path (name):
 
 def modelfolder_path (name):
   # go to parent directory of this file, then go to the models directory and add pth suffix
-  return os.path.join(os.path.dirname(os.path.dirname(__file__)), 'models', name)
+  return os.path.join(os.path.dirname(os.path.dirname(__file__)), MODELS_DIR, name)

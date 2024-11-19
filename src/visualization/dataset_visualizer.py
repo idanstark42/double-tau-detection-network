@@ -3,7 +3,7 @@ import numpy as np
 import os
 
 from .event_visualizer import EventVisualizer
-from settings import HISTOGRAM_BINS, RESOLUTION, MAX_HISTOGRAM_SIZE
+from settings import HISTOGRAM_BINS, MAX_HISTOGRAM_SIZE
 from utils import long_operation, python_name_from_dtype_name
 
 class DatasetVisualizer:
@@ -41,16 +41,46 @@ class DatasetVisualizer:
       visualizer.clusters_by_eta_histogram(output_file=os.path.join(output_folder, f'event_{i}_clusters_by_eta_histogram.png'))
       visualizer.clusters_by_phi_histogram(output_file=os.path.join(output_folder, f'event_{i}_clusters_by_phi_histogram.png'))
 
+  def multiple_histograms (self, fields, output_folder):
+    os.makedirs(output_folder, exist_ok=True)
+    
+    histograms_data = { 'fields': [], 'configs': [], 'callbacks': [], 'histograms': [], 'skipped': [] }
+    for field in fields:
+      histogram_fields, histogram_field_configs, callback = self.load_histogram_data(self.histogram_fields[field])
+      histograms_data['fields'].append(histogram_fields)
+      histograms_data['configs'].append(histogram_field_configs)
+      histograms_data['callbacks'].append(callback)
+      histograms_data['histograms'].append({ field: [] for field in histogram_fields })
+      histograms_data['skipped'].append(0)
+
+    indicies = self.histogram_indices()
+    
+    def load (next):
+      for i in indicies:
+        event = self.dataset.get_event(i)
+        
+        for j, field in enumerate(fields):
+          if self.histogram_fields[field].get('valid', False) and not self.histogram_fields[field]['valid'](event):
+            histograms_data['skipped'][j] += 1
+            continue
+          datum = histograms_data['callbacks'][j](event)
+          for field in histograms_data['fields'][j]:
+            if histograms_data['configs'][j][histograms_data['fields'][j].index(field)].get('cross', False) == 'follower':
+              histograms_data['histograms'][j][field].append(datum[field])
+            else:
+              histograms_data['histograms'][j][field] += datum[field]
+        next()
+      return histograms_data
+    
+    histograms_data = long_operation(load, max=len(indicies), message='Loading data for histograms')
+
+    for i, field in enumerate(fields):
+      self.draw_histogram(histograms_data['fields'][i], histograms_data['configs'][i], histograms_data['histograms'][i], self.histogram_fields[field], os.path.join(output_folder, f'{field}.png'))
+
   def histogram (self, config, output_file):
-    fields = config['fields']
-    field_configs = [config.get('config', {}).get(field, {}) for field in fields]
-    callback = config['callback']
+    fields, field_configs, callback = self.load_histogram_data(config)
+    indicies = self.histogram_indices()
 
-    if len(self.dataset) > MAX_HISTOGRAM_SIZE:
-      print(f'Dataset too large. Using only partial dataset for histogram of {MAX_HISTOGRAM_SIZE} events.')
-      random_indeces = np.random.choice(len(self.dataset), MAX_HISTOGRAM_SIZE, replace=False)
-
-    indicies = random_indeces if len(self.dataset) > MAX_HISTOGRAM_SIZE else range(len(self.dataset))
     def load (next):
       skipped = 0
       hist = { field: [] for field in fields }
@@ -73,6 +103,9 @@ class DatasetVisualizer:
     if skipped_count:
       print(f'Skipped {skipped_count} events')
 
+    self.draw_histogram(fields, field_configs, result, config, output_file)
+
+  def draw_histogram (self, fields, field_configs, result, config, output_file):
     if len(fields) == 1:
       plt.hist(result[fields[0]], bins=HISTOGRAM_BINS, edgecolor='black', density=True, range=field_configs[0].get('xlim', None))
       plt.title(f'events by {fields[0]}')
@@ -123,6 +156,19 @@ class DatasetVisualizer:
       return
 
     raise Exception('Unknown histogram type')
+  
+  def load_histogram_data (self, config):
+    fields = config['fields']
+    field_configs = [config.get('config', {}).get(field, {}) for field in fields]
+    callback = config['callback']
+    return fields, field_configs, callback
+  
+  def histogram_indices (self):
+    if len(self.dataset) > MAX_HISTOGRAM_SIZE:
+      print(f'Dataset too large. Using only partial dataset for histogram of {MAX_HISTOGRAM_SIZE} events.')
+      return np.random.choice(len(self.dataset), MAX_HISTOGRAM_SIZE, replace=False)
+
+    return range(len(self.dataset))
 
   histogram_fields = {
     'pileup': {
@@ -199,27 +245,27 @@ class DatasetVisualizer:
       'callback': lambda event: { 'truth count': [len(event.truths)] },
       'fields': ['truth count']
     },
-    'truth_x_pt': {
+    'x_pt': {
       'callback': lambda event: { 'X pT': [event.total_visible_four_momentum().p_t] },
       'fields': ['X pT']
     },
-    'truth_x_eta_phi': {
+    'x_eta_phi': {
       'callback': lambda event: { 'X η': [event.total_visible_four_momentum().eta], 'X φ': [event.total_visible_four_momentum().phi] },
       'fields': ['X η', 'X φ'],
       'type': '2d'
     },
-    'truth_delta_r': {
+    'taus_delta_r': {
       'callback': lambda event: { 'ΔR': [event.angular_distance_between_taus()] },
       'fields': ['ΔR'],
       'valid': lambda event: len(event.truths) == 2
     },
-    'truth_leading_pt': {
-      'callback': lambda event: { 'leading pT': [event.leading_pt()] },
-      'fields': ['leading pT']
+    'leading_tau_pt': {
+      'callback': lambda event: { 'leading τ pT': [event.leading_pt()] },
+      'fields': ['leading τ pT']
     },
-    'truth_subleading_pt': {
-      'callback': lambda event: { 'subleading pT': [event.subleading_pt()] },
-      'fields': ['subleading pT']
+    'subleading_tau_pt': {
+      'callback': lambda event: { 'subleading τ pT': [event.subleading_pt()] },
+      'fields': ['subleading τ pT']
     },
 
     'normlization_factors': {

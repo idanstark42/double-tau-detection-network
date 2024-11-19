@@ -6,7 +6,7 @@ from data.cluster import Cluster
 from data.track import Track
 from data.tau_truth import Truth
 
-from settings import FIELDS_TO_NORMALIZE
+from settings import FIELDS_TO_NORMALIZE, CHANNEL_START
 
 class Event:
   def __init__ (self, event, clusters, tracks, truth, event_fields, clusters_fields, tracks_fields, truthTaus_fields, normalize_fields=False, normalize_energy=True):
@@ -167,3 +167,6 @@ class Event:
   
   def subleading_pt (self):
     return self.calculate_and_cache('subleading_pt', lambda: min([truth.visible_momentum().p_t for truth in self.truths]))
+  
+  def mass_by_channel_number (self):
+    return self.calculate_and_cache('mass_by_channel_number', lambda: f'{20 + 10 * self.mc_channel_number - CHANNEL_START} GeV')
