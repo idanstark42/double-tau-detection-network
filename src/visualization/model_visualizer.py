@@ -147,7 +147,7 @@ class ModelVisualizer:
     plt.xlabel(label)
     plt.ylabel('reconstruction rate (%)')
     plt.ylim(0, 100)
-    plt.xticks(range(HISTOGRAM_BINS), [round(min(field_values) + i * (max(field_values) - min(field_values)) / HISTOGRAM_BINS, 2) for i in range(HISTOGRAM_BINS)])
+    plt.xticks([0, int(HISTOGRAM_BINS / 2), HISTOGRAM_BINS], [round(min(field_values), 2), round((min(field_values) + max(field_values)) / 2, 2), round(max(field_values), 2)])
     if output_file:
       plt.savefig(output_file)
     plt.show()
