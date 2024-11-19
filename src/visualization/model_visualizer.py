@@ -136,12 +136,7 @@ class ModelVisualizer:
     plt.show()
 
   def distances_by_channel_plot (self, starts, ends, events, ax):
-    def distance (start, end):
-      start = Position(start[0], start[1])
-      end = Position(end[0], end[1])
-      return start.distance(end)
-
-    distances = [distance(start, end) for start, end in zip(starts, ends)]
+    distances = [start.distance(end) for start, end in zip(starts, ends)]
     channels = { f'{20 + 10 * i} GeV': [d for event_index, d in enumerate(distances) if events[event_index].mc_channel_number == CHANNEL_START + i] for i in range(5) }
     for channel in channels:
       print(channel, len(channels[channel]))
