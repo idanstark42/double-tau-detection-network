@@ -11,7 +11,7 @@ from utils import *
 from settings import RESOLUTION, DATASET_FIELDS, ETA_RANGE, PHI_RANGE
 
 class EventsDataset (Dataset):
-  def __init__(self, source_file, loading_type='none', cache_type='none', normalize_fields=False):
+  def __init__(self, source_file, loading_type='none', cache_type='none', normalize_fields=False, normalize_energy=True):
     super().__init__()
     self.dataset_fields = DATASET_FIELDS
     self.cache_type = cache_type
@@ -21,6 +21,7 @@ class EventsDataset (Dataset):
     self.source_file = source_file
     self.loading_type = loading_type
     self.normalize_fields = normalize_fields
+    self.normalize_energy = normalize_energy
     self.preloading = False
     self.load()
     self.cluster_channels_count = 1
@@ -32,14 +33,14 @@ class EventsDataset (Dataset):
 
   def track_channels (self, track):
     return [track.pt]
-  
+
   def get_event(self, index):
     if self.cache_type == 'events' and index in self.cache:
       return self.cache[index]
-    
+
     fields = [(self.data if self.preloaded else self.raw_data)[field][index] for field in self.dataset_fields]
 
-    item = Event(*fields, **self._fields, normalize_fields=self.normalize_fields)
+    item = Event(*fields, **self._fields, normalize_fields=self.normalize_fields, normalize_energy=self.normalize_energy)
 
     if self.preloading:
       for i, field in enumerate(self.dataset_fields):
@@ -58,7 +59,7 @@ class EventsDataset (Dataset):
     tracks_map = event.tracks_map(RESOLUTION, lambda track: self.track_channels(track), self.track_channels_count)
     input = np.concatenate([clusters_map, tracks_map], axis=0)
     target = np.array([position.to_list() for position in event.true_position()], dtype=np.float32).flatten()[:4]
-    
+
     if len(target) < 4:
       target = np.concatenate([target, np.zeros(4 - len(target), dtype=np.float32)])
     
@@ -77,7 +78,7 @@ class EventsDataset (Dataset):
 
   def __len__(self):
     return self._length
-  
+
   def __iter__(self):
     worker_info = torch.utils.data.get_worker_info()
     if worker_info is None:
@@ -95,14 +96,13 @@ class EventsDataset (Dataset):
     self.cache = {}
     self.items_cache = {}
     gc.collect()
-  
+
   def post_processing(self, x):
     x[0::2] = transform_into_range(x[..., 0::2], ETA_RANGE)
     x[1::2] = transform_into_range(x[..., 1::2], PHI_RANGE)
     return x
   
   # io operations
-
   def save (self, filename):
     with h5py.File(filename, 'w') as f:
       for key in self.raw_data:
@@ -115,7 +115,7 @@ class EventsDataset (Dataset):
       self._length = len(self.raw_data['event'])
     elif self.loading_type == 'full':
       self.full_preload()
-  
+
   def full_preload (self):
     self.preloaded = True
     self.data = {}

@@ -67,7 +67,7 @@ class DatasetVisualizer:
             hist[field] += datum[field]
         next()
       return hist, skipped
-    
+
     result, skipped_count = long_operation(load, max=len(indicies), message='Loading data for histogram')
     print(f'Loaded {len(indicies) - skipped_count} events. Got {len(result[fields[0]])} events for histogram')
     if skipped_count:
@@ -86,7 +86,7 @@ class DatasetVisualizer:
         plt.savefig(output_file)
       plt.show()
       return
-    
+
     if config.get('type', 'side-by-side') == 'side-by-side':
       fig, axes = plt.subplots(1, len(fields))
       for index, field in enumerate(fields):
@@ -102,7 +102,7 @@ class DatasetVisualizer:
         plt.savefig(output_file)
       plt.show()
       return
-    
+
     if config.get('type', 'side-by-side') == '2d' and len(fields) == 2:
       hist_x, hist_y = result[fields[0]], result[fields[1]]
       if field_configs[0].get('cross', False) == 'leader':
@@ -167,7 +167,7 @@ class DatasetVisualizer:
       'type': '2d',
       'config': { 'pileup': { 'cross': 'follower' }, 'amount': { 'cross': 'leader' } }
     },
-    
+
     'track_count': {
       'callback': lambda event: { 'track count': [len(event.tracks)] },
       'fields': ['track count']
@@ -194,7 +194,7 @@ class DatasetVisualizer:
       'type': '2d',
       'config': { 'pileup': { 'cross': 'follower' }, 'amount': { 'cross': 'leader' } }
     },
-    
+
     'truth_count': {
       'callback': lambda event: { 'truth count': [len(event.truths)] },
       'fields': ['truth count']

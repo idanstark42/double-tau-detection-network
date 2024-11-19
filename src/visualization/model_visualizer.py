@@ -5,7 +5,7 @@ import numpy as np
 
 from data.position import Position
 from .event_visualizer import EventVisualizer
-from settings import PHI_RANGE, ETA_RANGE, JET_SIZE, MAP_2D_TICKS, ARROWS_NUMBER, HISTOGRAM_BINS
+from settings import PHI_RANGE, ETA_RANGE, JET_SIZE, MAP_2D_TICKS, ARROWS_NUMBER, HISTOGRAM_BINS, CHANNEL_START
 from utils import long_operation
 
 phi_range_size = abs(PHI_RANGE[1] - PHI_RANGE[0])
@@ -19,7 +19,9 @@ class ModelVisualizer:
     output_positions = [Position(output[0], output[1]) for output in outputs] + [Position(output[2], output[3]) for output in outputs]
     target_positions = [Position(target[0], target[1]) for target in targets] + [Position(target[2], target[3]) for target in targets]
     self.distances_histogram(output_positions, target_positions, plt.gca())
-    plt.savefig(os.path.join(output_folder, 'distances_histogram.png'))
+    if output_folder:
+      os.makedirs(output_folder, exist_ok=True)
+      plt.savefig(os.path.join(output_folder, 'distances_histogram.png'))
     plt.show()
 
     self.plot_reconstruction_rate_by(output_positions, target_positions, events, lambda event: event.total_visible_four_momentum().p_t, 'X pT', os.path.join(output_folder, 'reconstruction_rate_by_pt.png'))
@@ -30,6 +32,7 @@ class ModelVisualizer:
     self.plot_reconstruction_rate_by(output_positions, target_positions, events, lambda event: event.average_interactions_per_crossing, 'average interactions per crossing', os.path.join(output_folder, 'reconstruction_rate_by_interactions.png'))
     events = [event for event in events if len(event.truths) >= 2]
     self.plot_reconstruction_rate_by(output_positions, target_positions, events, lambda event: event.angular_distance_between_taus(), 'clusters count', os.path.join(output_folder, 'reconstruction_rate_by_clusters_count.png'))
+    self.plot_reconstruction_rate_by(output_positions, target_positions, events, lambda event: event.mc_channel_number, 'X mass', os.path.join(output_folder, 'reconstruction_rate_by_mc_channel_number.png'))
   
   def show_losses(self, losses, output_file):
     plt.plot([loss[0] for loss in losses], label='Train Loss')
@@ -38,15 +41,15 @@ class ModelVisualizer:
     plt.ylabel('Loss')
     plt.yscale('log')
     plt.legend()
-    plt.savefig(output_file)
+    if output_file:
+      plt.savefig(output_file)
     plt.show()
 
-  def plot_results (self, outputs, targets, test_loader, dataset, output_file):
-    events = [dataset.get_event(test_loader.dataset.indices[index]) for index in range(len(test_loader.dataset))]
-    random_indeces = np.random.choice(len(test_loader.dataset), ARROWS_NUMBER, replace=False)
+  def plot_results (self, outputs, targets, events, output_file):
     sample_event_index = np.random.randint(len(events))
 
-    fig, axs = plt.subplots(1, 4, figsize=(16, 4))
+    fig, axs = plt.subplots(1, 5, figsize=(20, 4))
+    fig.tight_layout(pad=2.0)
     self.sample_event_plot(events[sample_event_index], targets[sample_event_index], outputs[sample_event_index], axs[1])
     
     # each output and target is a list of four values, two for each tau. Each tau has an eta and a phi
@@ -54,6 +57,7 @@ class ModelVisualizer:
     target_positions = [Position(target[0], target[1]) for target in targets] + [Position(target[2], target[3]) for target in targets]
     self.distances_histogram(output_positions, target_positions, axs[2])
     self.distances_by_pt_plot(output_positions, target_positions, events, axs[3])
+    self.distances_by_channel_plot(output_positions, target_positions, events, axs[4])
 
     random_position_indices = np.random.choice(len(output_positions), ARROWS_NUMBER, replace=False)
     random_output_positions = [output_positions[index] for index in random_position_indices]
@@ -100,7 +104,7 @@ class ModelVisualizer:
   def distances_histogram (self, starts, ends, ax):
     distances = [start.distance(end) for start, end in zip(starts, ends)]
     percent_of_distances_unser_0_2 = len([distance for distance in distances if distance < 0.2]) / len(distances)
-    ax.hist(distances, bins=100)
+    ax.hist(distances, bins=HISTOGRAM_BINS, edgecolor='black')
     ax.set_xlabel('distance')
     ax.set_ylabel(f'count ({percent_of_distances_unser_0_2 * 100:.2f}% under 0.2)')
 
@@ -127,12 +131,23 @@ class ModelVisualizer:
     convulational_params, linear_params = self.model.parameter_counts()
     parametrers = long_operation(get_params, max=convulational_params + linear_params, message='Loading parameters')
     
-    plt.hist(parametrers, bins=50)
+    plt.hist(parametrers, bins=HISTOGRAM_BINS, edgecolor='black')
     plt.yscale('log')
     plt.savefig(output_file)
     plt.show()
 
-  def plot_reconstruction_rate_by (self, outputs, targets, events, get, label, output_file):
+  def distances_by_channel_plot (self, starts, ends, events, ax):
+    events = events * 2
+    distances = [start.distance(end) for start, end in zip(starts, ends)]
+    channels = { f'{20 + 10 * i} GeV': [d for event_index, d in enumerate(distances) if events[event_index].mc_channel_number == CHANNEL_START + i] for i in range(5) }
+    for channel in channels:
+      print(channel, len(channels[channel]))
+      ax.hist(channels[channel], bins=HISTOGRAM_BINS, histtype='step', label=channel, alpha=0.5, linewidth=2)
+    ax.legend()
+    ax.set_xlabel('distance')
+    ax.set_ylabel('count')
+
+  def plot_reconstruction_rate_by (self, outputs, targets, events, get, label, output_file, ax=None):
     field_values = [get(event) for event in events] * 2
     
     def load_hist(next):
@@ -149,10 +164,16 @@ class ModelVisualizer:
 
     hist = long_operation(load_hist, max=len(outputs), message='Calculating histogram values')  
 
-    plt.bar(range(HISTOGRAM_BINS), hist)
-    plt.xlabel(label)
-    plt.ylabel('reconstruction rate (%)')
-    plt.xticks([0, int(HISTOGRAM_BINS / 2), HISTOGRAM_BINS], [round(min(field_values), 2), round((min(field_values) + max(field_values)) / 2, 2), round(max(field_values), 2)])
-    if output_file:
-      plt.savefig(output_file)
-    plt.show()
+    if ax is None:
+      plt.bar(range(HISTOGRAM_BINS), hist, edgecolor='black')
+      plt.xlabel(label)
+      plt.ylabel('reconstruction rate (%)')
+      plt.xticks([0, int(HISTOGRAM_BINS / 2), HISTOGRAM_BINS], [round(min(field_values), 2), round((min(field_values) + max(field_values)) / 2, 2), round(max(field_values), 2)])
+      if output_file:
+        plt.savefig(output_file)
+      plt.show()
+    else:
+      ax.bar(range(HISTOGRAM_BINS), hist)
+      ax.set_xlabel(label)
+      ax.set_ylabel('reconstruction rate (%)')
+      ax.set_xticks([0, int(HISTOGRAM_BINS / 2), HISTOGRAM_BINS], [round(min(field_values), 2), round((min(field_values) + max(field_values)) / 2, 2), round(max(field_values), 2)])

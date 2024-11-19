@@ -57,7 +57,7 @@ def merge (input_files, output_file, create_output=True):
   if create_output:
     print(f'Creating output file from {input_files[0]}')
     create_output_file(output_file, input_files[0])
-  
+
   files_to_add = input_files[1:] if create_output else input_files
 
   if len(files_to_add) > 0:

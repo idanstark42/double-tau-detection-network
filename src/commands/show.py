@@ -36,7 +36,7 @@ def show (dataset=None, model=None, scope='non', subcommand='non', params={}):
     error = commands[scope]['_test'](dataset, model, params)
     if error:
       exit(error)
-  
+
   visualizer = commands[scope]['_visualizer'](dataset, model, params)
   if subcommand not in commands[scope]:
     exit(f'Unknown command: {subcommand} for {scope}')

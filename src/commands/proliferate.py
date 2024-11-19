@@ -51,7 +51,7 @@ def proliferate (source_file, factor):
     with ProcessPoolExecutor() as executor:
       futures = [run_with_next(lambda: executor.submit(transform_chunk, indices, factor, initial_count, source_file, file_access_lock, shared_keys, sharable_flips, sharable_rotations), next, chunk_size) for indices in chunks]
       return [future.result() for future in as_completed(futures)]
-    
+
   print('Generating copies')
   copy_chunks = long_operation(create_copies, multiprocessing=True, max=len(chunks) * chunk_size)
 
@@ -65,7 +65,7 @@ def proliferate (source_file, factor):
 
   print('Saving copies')
   long_operation(add_copies, multiprocessing=False, max=len(copy_chunks))
-  
+
   final_count = len(h5py.File(output_file, 'r')['event'])
 
   print()

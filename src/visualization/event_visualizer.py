@@ -30,7 +30,7 @@ class EventVisualizer:
 
   def tracks_by_eta_histogram (self, ax=None, output_file=None):
     self.histogram([track.position().eta for track in self.event.tracks], ax=ax, label='Tracks', output_file=output_file)
-  
+
   def tracks_by_phi_histogram (self, ax=None, output_file=None):
     self.histogram([track.position().phi for track in self.event.tracks], ax=ax, label='Tracks', output_file=output_file)
 
@@ -39,7 +39,7 @@ class EventVisualizer:
 
   def clusters_by_cal_e_histogram (self, ax=None, output_file=None):
     self.histogram([cluster.cal_e for cluster in self.event.clusters], ax=ax, label='Clusters', output_file=output_file)
-  
+
   def clusters_by_eta_histogram (self, ax=None, output_file=None):
     self.histogram([cluster.position().eta for cluster in self.event.clusters], ax=ax, label='Clusters', output_file=output_file)
 
@@ -64,10 +64,10 @@ class EventVisualizer:
         ax.hist2d(*zip(*map), bins=self.resolution, range=[[0, 1], [0, 1]], **(configs[index] if configs else {}))
       else:
         ax.hist2d(*zip(*map), bins=self.resolution, range=[[0, 1], [0, 1]], weights=weights[index], **(configs[index] if configs else {}))
-    
+
     if output_file and independent:
       plt.savefig(output_file)
-        
+
 
     if scatter != None:
       ax.scatter(*zip(*scatter), s=30, c='black', marker='x')
@@ -82,5 +82,3 @@ class EventVisualizer:
 
     if independent:
       plt.show()
-
-  

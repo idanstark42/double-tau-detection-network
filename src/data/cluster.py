@@ -7,7 +7,7 @@ class Cluster:
   def __init__ (self, cluster, fields):
     for name, python_name in fields:
       setattr(self, python_name, cluster[name])
-    
+
   def has_field (self, field):
     return hasattr(self, field)
 

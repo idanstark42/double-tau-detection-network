@@ -1,6 +1,6 @@
 import numpy as np
-from pylorentz import Momentum4
 from sklearn.preprocessing import StandardScaler
+from pylorentz import Momentum4
 
 from data.cluster import Cluster
 from data.track import Track
@@ -9,8 +9,9 @@ from data.tau_truth import Truth
 from settings import FIELDS_TO_NORMALIZE
 
 class Event:
-  def __init__ (self, event, clusters, tracks, truth, event_fields, clusters_fields, tracks_fields, truthTaus_fields, normalize_fields=False):
+  def __init__ (self, event, clusters, tracks, truth, event_fields, clusters_fields, tracks_fields, truthTaus_fields, normalize_fields=False, normalize_energy=True):
     self.average_interactions_per_crossing = event[0]
+    self.mc_channel_number = event[1] if len(event) > 1 else 0
     self.clusters = [Cluster(cluster, clusters_fields) for cluster in clusters if cluster['valid']]
     self.tracks = [Track(track, tracks_fields) for track in tracks if track['valid']]
     self.truths = [Truth(truth, truthTaus_fields) for truth in truth if truth['valid']]
@@ -20,6 +21,7 @@ class Event:
     self.truths = [truth for truth in self.truths if truth.visible_position().in_range()]
 
     self.normalize_fields = normalize_fields
+    self.normalize_energy = normalize_energy
 
     self._calculateion_cache = {}
     self.clusters_scaler = StandardScaler()
@@ -28,23 +30,29 @@ class Event:
     self.normalize()
 
   def normalize (self):
+    if not self.normalize_fields and not self.normalize_energy:
+      return
     # normalize clusters
     if self.normalize_fields:
-      normalizable_clusters_fields_values = np.array([[getattr(cluster, field) for cluster in self.clusters] for field in FIELDS_TO_NORMALIZE['clusters'] if self.clusters[0].has_field(field)]).T
+      normalizable_clusters_fields_values = np.array([[getattr(cluster, field) for cluster in self.clusters] for field in FIELDS_TO_NORMALIZE['clusters']]).T
       normalized_cluster_fields_values = self.clusters_scaler.fit_transform(normalizable_clusters_fields_values)
-      max_energy = max([cluster.cal_e for cluster in self.clusters])
-      for index, cluster in enumerate(self.clusters):
+    max_energy = max([cluster.cal_e for cluster in self.clusters])
+    for index, cluster in enumerate(self.clusters):
+      if self.normalize_energy:
         cluster.cal_e /= max_energy
+      if self.normalize_fields:
         for field in FIELDS_TO_NORMALIZE['clusters']:
           setattr(cluster, field, normalized_cluster_fields_values[index][FIELDS_TO_NORMALIZE['clusters'].index(field)])
     
     # normalize tracks
     if self.normalize_fields:
-      normalizable_tracks_fields_values = np.array([[getattr(track, field) for track in self.tracks] for field in FIELDS_TO_NORMALIZE['tracks'] if self.tracks[0].has_field(field)]).T
+      normalizable_tracks_fields_values = np.array([[getattr(track, field) for track in self.tracks] for field in FIELDS_TO_NORMALIZE['tracks']]).T
       normalized_track_fields_values = self.tracks_scaler.fit_transform(normalizable_tracks_fields_values)
-      max_pt = max([track.pt for track in self.tracks])
-      for index, track in enumerate(self.tracks):
+    max_pt = max([track.pt for track in self.tracks])
+    for index, track in enumerate(self.tracks):
+      if self.normalize_energy:
         track.pt /= max_pt
+      if self.normalize_fields:
         for field in FIELDS_TO_NORMALIZE['tracks']:
           setattr(track, field, normalized_track_fields_values[index][FIELDS_TO_NORMALIZE['tracks'].index(field)])
 
@@ -105,7 +113,7 @@ class Event:
       return map
 
     return self.calculate_and_cache('clusters_map', calculate)
-  
+
   def tracks_map (self, resulotion, channels_provider, channels_count):
     def calculate():
       map = np.zeros((channels_count, resulotion, resulotion), dtype=np.float32)
@@ -115,7 +123,7 @@ class Event:
           for index, channel in enumerate(channels_provider(track)):
             map[index, int(x * resulotion), int(y * resulotion)] += channel
       return map
-    
+
     return self.calculate_and_cache('tracks_map', calculate)
   
   # target types

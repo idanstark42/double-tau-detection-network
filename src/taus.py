@@ -45,11 +45,12 @@ def main (args):
 
     merge(input_files, output_file, create_output)
     return
-  
+
   loading_type = params.get('loading', 'none')
   cache_type = params.get('cache', 'none')
-  normalize_fields = params.get('normalize', 'false') == 'true'
-  dataset = EventsDataset(dataset_file, loading_type=loading_type, cache_type=cache_type, normalize_fields=normalize_fields)
+  normalize_fields = params.get('normalize_fields', 'false') == 'true'
+  normalize_energy = params.get('normalize_energy', 'true') == 'true'
+  dataset = EventsDataset(dataset_file, loading_type=loading_type, cache_type=cache_type, normalize_fields=normalize_fields, normalize_energy=normalize_energy)
   model = params.get('model', 'small')
   use_post_processing = params.get('post_processing', 'false') == 'true'
   dropout_probability = float(params.get('dropout', 0.15))

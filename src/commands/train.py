@@ -24,7 +24,7 @@ def train(dataset, model, model_folder, options={}):
   trainer.train_model()
 
 class Trainer:
-  
+
   # initializers
 
   def __init__(self, dataset, model, model_folder, options):
@@ -56,7 +56,7 @@ class Trainer:
     self.learning_rate = float(self.options.get('learning_rate', 0.001))
     self.weight_decay = float(self.options.get('weight_decay', 0.0001))
     self.initial_weights = self.options.get('start_from', None)
-  
+
   def load_initial_state(self):
     self.position = { 'split': 0, 'epoch': 0 }
     self.best_validation_loss = float('inf')
@@ -96,7 +96,7 @@ class Trainer:
 
     if self.loading_type == 'full':
       self.dataset.full_preload()
-    
+
     self.pretraining_over = True
 
   def run_split_training(self, split):
@@ -120,19 +120,19 @@ class Trainer:
 
     if self.split > 1:
       print(f'Split time: {seconds_to_time(time.time() - split_start_time)}/{seconds_to_time((time.time() - self.start_time) * (self.limit if self.limit else self.split) / (split + 1))} estimated')
-  
+
     if self.saving_mode == 'split':
       self.save_checkpoint(f'split-{split + 1}')
-  
+
   def run_epoch_training(self, split, epoch):
     self.epoch_start_times.append(time.time())
-    
+
     training_loss = self.train(self.train_loaders[split], epoch)
     validation_loss = self.validate(self.validation_loaders[split], epoch)
 
     self.save_if_best(validation_loss)
     self.losses.append((training_loss, validation_loss))
-    
+
     torch.cuda.empty_cache()
     self.position = { 'split': split, 'epoch:' : epoch }
 
@@ -154,7 +154,7 @@ class Trainer:
 
   # training building blocks
 
-  def train(self,training_loader, epoch):
+  def train(self, training_loader, epoch):
     self.model.train()
 
     def run (next):
@@ -165,7 +165,7 @@ class Trainer:
         loss.backward()
         self.optimizer.step()
         next(self.batch_size)
-        total_loss += loss.item()
+      total_loss += loss.item()
       return total_loss
 
     total_loss = long_operation(run, max=len(training_loader) * self.batch_size, message=f'Epoch {epoch+1} training  ', ending_message=lambda l, t: f'loss: {l / len(training_loader):.6f} [{seconds_to_time(t)}]')
@@ -182,7 +182,7 @@ class Trainer:
           next(self.batch_size)
           total_loss += loss.item()
         return total_loss
-    
+
       total_loss = long_operation(run, max=len(validation_loader) * self.batch_size, message=f'Epoch {epoch+1} validation', ending_message=lambda l, t: f'loss: {l / len(validation_loader):.6f} [{seconds_to_time(t)}]')
     return total_loss / len(validation_loader)
 
@@ -201,11 +201,12 @@ class Trainer:
         for batch_idx, (input, target) in enumerate(self.test_loader):
           output, loss = self.calc(input, target)
           next(self.batch_size)
-          for index, (output, target) in enumerate(zip(output, target)):
-            outputs.append(output)
-            targets.append(target)
+        for index, (output, target) in enumerate(zip(output, target)):
+          outputs.append(output)
+          targets.append(target)
           total_loss += loss.item()
         return total_loss
+      
       total_loss = long_operation(run, max=len(self.test_loader) * self.batch_size, message='Testing ')
 
     self.print_test_summary(outputs, targets, total_loss)
@@ -228,7 +229,7 @@ class Trainer:
     test_size = len(self.dataset) - (self.training_loader_size + self.validation_loader_size) * self.split
     if self.limit:
       test_size = (test_size * self.limit) // self.split
-    
+
     leftover = len(self.dataset) - (self.training_loader_size + self.validation_loader_size) * self.split - test_size
 
     datasets = random_split(self.dataset, [self.training_loader_size, self.validation_loader_size] * self.split + [test_size, leftover])
@@ -243,9 +244,8 @@ class Trainer:
   def generate_dataloader (self, dataset):
     num_workers = int(self.options.get('num_workers', 0))
     pin_memory = num_workers > 0 and self.device.type == 'cpu'
-    batch_size = int(self.options.get('batch_size', BATCH_SIZE))
 
-    return DataLoader(dataset, batch_size=batch_size, shuffle=True, num_workers=num_workers, pin_memory=pin_memory, persistent_workers=self.persistent_workers)
+    return DataLoader(dataset, batch_size=self.batch_size, shuffle=True, num_workers=num_workers, pin_memory=pin_memory, persistent_workers=self.persistent_workers)
 
   # preloading
 
@@ -256,7 +256,7 @@ class Trainer:
     self.preload_loader(validation_loader, 'Preloading validation set')
     self.dataset.finish_partial_preloading()
     print(f'Preloading time: {seconds_to_time(time.time() - preload_start_time)}')
-  
+
   def preload_loader (self, loader, message):
     dataset = loader.dataset
     def run (next):
@@ -362,7 +362,7 @@ class Trainer:
       model_folder_ending = self.model_folder.split('/')[-1]
       os.makedirs(os.path.join(self.backup_folder, model_folder_ending), exist_ok=True)
       os.system(f'cp -r {self.model_folder}/* {os.path.join(self.backup_folder, model_folder_ending)}')
-  
+
   @staticmethod
   def from_checkpoint(dataset, model, checkpoint_file, options={}):
     checkpoint = torch.load(checkpoint_file)
@@ -377,7 +377,7 @@ class Trainer:
     trainer.best_validation_loss = checkpoint['best_validation_loss']
     trainer.best_model = checkpoint['best_model']
     trainer.checkpoint = checkpoint['name']
-    
+
     # doing the part of the pretraining that is different from the normal pretraining
     trainer.pretraining()
     trainer.optimizer.load_state_dict(checkpoint['optimizer'])
@@ -386,7 +386,7 @@ class Trainer:
     trainer.test_loader = trainer.generate_dataloader(torch.utils.data.Subset(dataset, checkpoint['test_loader']))
 
     return trainer
-  
+
   @staticmethod
   def last_checkpoint(model_folder):
     return max([os.path.join(model_folder, 'checkpoints', file) for file in os.listdir(os.path.join(model_folder, 'checkpoints'))], key=os.path.getctime)

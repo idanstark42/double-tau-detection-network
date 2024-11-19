@@ -39,7 +39,7 @@ class MainModel (nn.Module):
         x = self.post_processing(x)
     
     return x
-  
+
   def parameter_counts(self):
     convulational_params = sum(p.numel() for p in self.conv_layers.parameters() if p.requires_grad)
     linear_params = sum(p.numel() for p in self.linear_layers.parameters() if p.requires_grad)
@@ -125,7 +125,7 @@ class MainModel (nn.Module):
         nn.Linear(256 * 17 ** 2, 4)
       ])
     }
-
+  
   def jet_ssd_min_long_model(self):
     return {
       'conv_layers': nn.ModuleList([
@@ -150,7 +150,7 @@ class MainModel (nn.Module):
         nn.Linear(512 * 17 ** 2, 4)
       ])
     }
-  
+
   def jet_ssd_min_model_alt(self):
     return {
       'conv_layers': nn.ModuleList([
@@ -176,7 +176,7 @@ class MainModel (nn.Module):
         nn.Linear(512 * 9 ** 2, 4)
       ])
     }
-  
+
   def jet_ssd_min_model_alt_narrowing(self):
     return {
       'conv_layers': nn.ModuleList([
