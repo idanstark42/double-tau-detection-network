@@ -20,7 +20,7 @@ class ModelVisualizer:
     target_positions = [Position(target[0], target[1]) for target in targets] + [Position(target[2], target[3]) for target in targets]
     self.distances_histogram(output_positions, target_positions, plt.gca())
     if output_folder:
-      os.mkaedirs(output_folder, exist_ok=True)
+      os.makedirs(output_folder, exist_ok=True)
       plt.savefig(os.path.join(output_folder, 'distances_histogram.png'))
     plt.show()
 
