@@ -28,11 +28,12 @@ class ModelVisualizer:
     random_targets = [targets[index] for index in random_indeces]
     sample_event_index = np.random.randint(len(events))
 
-    fig, axs = plt.subplots(1, 4, figsize=(16, 4))
+    fig, axs = plt.subplots(1, 5, figsize=(4, 4))
     self.arrows_on_eta_phi_plot(random_outputs, random_targets, axs[0], color='blue')
     self.sample_event_plot(events[sample_event_index], targets[sample_event_index], outputs[sample_event_index], axs[1])
     self.distances_histogram(outputs, targets, axs[2])
     self.distances_by_pt_plot(outputs, targets, events, axs[3])
+    self.distances_by_channel_plot(outputs, targets, events, axs[4])
     plt.savefig(output_file)
     plt.show()
 
@@ -101,4 +102,16 @@ class ModelVisualizer:
     pts = [pt(event) for event in events]
     ax.scatter(pts, distances, s=2)
     ax.set_xlabel('pt')
+    ax.set_ylabel('distance')
+
+  def distances_by_channel_plot (self, starts, ends, events, ax):
+    def distance (start, end):
+      start = Position(start[0], start[1])
+      end = Position(end[0], end[1])
+      return start.distance(end)
+
+    distances = [distance(start, end) for start, end in zip(starts, ends)]
+    channels = [event.mc_channel_number for event in events]
+    ax.scatter(channels, distances, s=2)
+    ax.set_xlabel('channel')
     ax.set_ylabel('distance')
