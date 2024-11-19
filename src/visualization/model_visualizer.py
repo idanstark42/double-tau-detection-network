@@ -56,7 +56,7 @@ class ModelVisualizer:
     self.distances_histogram(output_positions, target_positions, axs[2])
     self.distances_by_pt_plot(output_positions, target_positions, events, axs[3])
     self.plot_reconstruction_rate_by(output_positions, target_positions, events, lambda event: event.mc_channel_number, 'channnel', None, ax=axs[4])
-    self.plot_distance_by_channel_histogram(output_positions, target_positions, events, axs[5])
+    self.distances_by_channel_plot(output_positions, target_positions, events, axs[5])
 
     random_position_indices = np.random.choice(len(output_positions), ARROWS_NUMBER, replace=False)
     random_output_positions = [output_positions[index] for index in random_position_indices]
