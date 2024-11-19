@@ -136,9 +136,9 @@ class ModelVisualizer:
     hist = [0] * HISTOGRAM_BINS
     bin_sizes = [0] * HISTOGRAM_BINS
     for output, target, field_value in zip(outputs, targets, field_values):
-      reconstruction_success = output.distance(target) < 0.2
       bin_index = int((field_value - min(field_values)) / (max(field_values) - min(field_values)) * HISTOGRAM_BINS)
-      hist[bin_index] += 1 if reconstruction_success else 0
+      bin_index = min(HISTOGRAM_BINS - 1, max(0, bin_index))
+      hist[bin_index] += 1 if output.distance(target) < 0.2 else 0
       bin_sizes[bin_index] += 1
     
     hist = [100 * hist[i] / bin_sizes[i] if bin_sizes[i] != 0 else 0 for i in range(HISTOGRAM_BINS)]
