@@ -108,7 +108,7 @@ class DatasetVisualizer:
 
   def draw_histogram (self, fields, field_configs, result, config, output_file):
     if len(fields) == 1:
-      plt.hist(result[fields[0]], bins=HISTOGRAM_BINS, edgecolor='black', density=True, range=field_configs[0].get('xlim', None))
+      plt.hist(result[fields[0]], bins=HISTOGRAM_BINS, edgecolor='black', alpha=0, density=True, range=field_configs[0].get('xlim', None))
       plt.title(f'events by {fields[0]}')
       plt.xlabel(fields[0])
       plt.ylabel('events density')
@@ -126,7 +126,7 @@ class DatasetVisualizer:
       for index, field in enumerate(fields):
         hist = np.array(result[field]).flatten().tolist()
         ax = axes[index] if len(fields) > 1 else axes
-        ax.hist(hist, bins=HISTOGRAM_BINS, edgecolor='black', density=True, range=field_configs[index].get('xlim', None))
+        ax.hist(hist, bins=HISTOGRAM_BINS, edgecolor='black', alpha=0, density=True, range=field_configs[index].get('xlim', None))
         ax.set_title(f'events by {field}')
         ax.set_xlabel(field)
         ax.set_ylabel('events density')
