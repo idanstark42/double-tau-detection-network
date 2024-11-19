@@ -41,8 +41,7 @@ class ModelVisualizer:
     plt.savefig(output_file)
     plt.show()
 
-  def plot_results (self, outputs, targets, test_loader, dataset, output_file):
-    events = [dataset.get_event(test_loader.dataset.indices[index]) for index in range(len(test_loader.dataset))]
+  def plot_results (self, outputs, targets, events, output_file):
     sample_event_index = np.random.randint(len(events))
 
     fig, axs = plt.subplots(1, 5, figsize=(20, 4))
