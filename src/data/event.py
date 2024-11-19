@@ -29,22 +29,22 @@ class Event:
 
   def normalize (self):
     # normalize clusters
-    normalizable_clusters_fields_values = np.array([[getattr(cluster, field) for cluster in self.clusters] for field in FIELDS_TO_NORMALIZE['clusters']]).T
-    normalized_cluster_fields_values = self.clusters_scaler.fit_transform(normalizable_clusters_fields_values)
+    # normalizable_clusters_fields_values = np.array([[getattr(cluster, field) for cluster in self.clusters] for field in FIELDS_TO_NORMALIZE['clusters']]).T
+    # normalized_cluster_fields_values = self.clusters_scaler.fit_transform(normalizable_clusters_fields_values)
     max_energy = max([cluster.cal_e for cluster in self.clusters])
     for index, cluster in enumerate(self.clusters):
       cluster.cal_e /= max_energy
-      for field in FIELDS_TO_NORMALIZE['clusters']:
-        setattr(cluster, field, normalized_cluster_fields_values[index][FIELDS_TO_NORMALIZE['clusters'].index(field)])
+      # for field in FIELDS_TO_NORMALIZE['clusters']:
+        # setattr(cluster, field, normalized_cluster_fields_values[index][FIELDS_TO_NORMALIZE['clusters'].index(field)])
     
     # normalize tracks
-    normalizable_tracks_fields_values = np.array([[getattr(track, field) for track in self.tracks] for field in FIELDS_TO_NORMALIZE['tracks']]).T
-    normalized_track_fields_values = self.tracks_scaler.fit_transform(normalizable_tracks_fields_values)
+    # normalizable_tracks_fields_values = np.array([[getattr(track, field) for track in self.tracks] for field in FIELDS_TO_NORMALIZE['tracks']]).T
+    # normalized_track_fields_values = self.tracks_scaler.fit_transform(normalizable_tracks_fields_values)
     max_pt = max([track.pt for track in self.tracks])
     for index, track in enumerate(self.tracks):
       track.pt /= max_pt
-      for field in FIELDS_TO_NORMALIZE['tracks']:
-        setattr(track, field, normalized_track_fields_values[index][FIELDS_TO_NORMALIZE['tracks'].index(field)])
+      # for field in FIELDS_TO_NORMALIZE['tracks']:
+        # setattr(track, field, normalized_track_fields_values[index][FIELDS_TO_NORMALIZE['tracks'].index(field)])
 
   def calculate_and_cache (self, key, calculation):
     if key not in self._calculateion_cache:
