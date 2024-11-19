@@ -244,9 +244,8 @@ class Trainer:
   def generate_dataloader (self, dataset):
     num_workers = int(self.options.get('num_workers', 0))
     pin_memory = num_workers > 0 and self.device.type == 'cpu'
-    batch_size = int(self.options.get('batch_size', BATCH_SIZE))
 
-    return DataLoader(dataset, batch_size=batch_size, shuffle=True, num_workers=num_workers, pin_memory=pin_memory, persistent_workers=self.persistent_workers)
+    return DataLoader(dataset, batch_size=self.batch_size, shuffle=True, num_workers=num_workers, pin_memory=pin_memory, persistent_workers=self.persistent_workers)
 
   # preloading
 
