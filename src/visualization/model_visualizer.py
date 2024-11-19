@@ -1,109 +1,3 @@
-# import matplotlib.pyplot as plt
-# import matplotlib.patches as patches
-# import numpy as np
-
-# from data.position import Position
-# from .event_visualizer import EventVisualizer
-# from settings import PHI_RANGE, ETA_RANGE, JET_SIZE, MAP_2D_TICKS, ARROWS_NUMBER
-
-# phi_range_size = abs(PHI_RANGE[1] - PHI_RANGE[0])
-
-# class ModelVisualizer:
-#   def __init__(self, model):
-#     self.model = model
-  
-#   def show_losses(self, losses, output_file):
-#     plt.plot([loss[0] for loss in losses], label='Train Loss')
-#     plt.plot([loss[1] for loss in losses], label='Validation Loss')
-#     plt.xlabel('Epoch')
-#     plt.ylabel('Loss')
-#     plt.yscale('log')
-#     plt.legend()
-#     plt.savefig(output_file)
-#     plt.show()
-
-#   def plot_results (self, outputs, targets, events, output_file):
-#     random_indeces = np.random.choice(len(events), ARROWS_NUMBER, replace=False)
-#     random_outputs = [outputs[index] for index in random_indeces]
-#     random_targets = [targets[index] for index in random_indeces]
-#     sample_event_index = np.random.randint(len(events))
-
-#     fig, axs = plt.subplots(1, 5, figsize=(4, 4))
-#     self.arrows_on_eta_phi_plot(random_outputs, random_targets, axs[0], color='blue')
-#     self.sample_event_plot(events[sample_event_index], targets[sample_event_index], outputs[sample_event_index], axs[1])
-#     self.distances_histogram(outputs, targets, axs[2])
-#     self.distances_by_pt_plot(outputs, targets, events, axs[3])
-#     self.distances_by_channel_plot(outputs, targets, events, axs[4])
-#     plt.savefig(output_file)
-#     plt.show()
-
-#   def arrows_on_eta_phi_plot (self, starts, ends, ax, **kwargs):
-#     def arrow_with_color (eta, phi, deta, dphi, **kwargs):
-#       distance_normalized = min(1, max(0, 0.5 + 0.5 * np.linalg.norm([deta, dphi]) / 2))
-#       color = (distance_normalized, 0, 1 - distance_normalized, 0.6)
-#       ax.arrow(eta, phi, deta, dphi, head_width=0.1, head_length=0.1, fc=color, ec=color, **kwargs)
-
-#     for start, end in zip(starts, ends):
-#       start = Position(start[0], start[1])
-#       end = Position(end[0], end[1])
-#       if abs(start.phi - end.phi) > phi_range_size / 2:
-#         deta = end.eta - start.eta
-#         dphi = end.phi - start.phi + (phi_range_size if start.phi > end.phi else -phi_range_size)
-#         arrow_with_color(start.eta, start.phi, deta, dphi, **kwargs)
-#         arrow_with_color(end.eta - phi_range_size, end.phi, deta, dphi, **kwargs)
-#       else:
-#         arrow_with_color(start.eta, start.phi, end.eta - start.eta, end.phi - start.phi, **kwargs)
-
-#     ax.set_xlabel('eta')
-#     ax.set_ylabel('phi')
-#     ax.set_xlim(ETA_RANGE[0], ETA_RANGE[1])
-#     ax.set_ylim(PHI_RANGE[0], PHI_RANGE[1])
-#     ax.set_xticks([round((ETA_RANGE[0] + i * (ETA_RANGE[1] - ETA_RANGE[0]) / MAP_2D_TICKS) * 10) / 10 for i in range(MAP_2D_TICKS + 1)], [round((ETA_RANGE[0] + i * (ETA_RANGE[1] - ETA_RANGE[0]) / MAP_2D_TICKS) * 10) / 10 for i in range(MAP_2D_TICKS + 1)])
-#     ax.set_yticks([round((PHI_RANGE[0] + i * (PHI_RANGE[1] - PHI_RANGE[0]) / MAP_2D_TICKS) * 10) / 10 for i in range(MAP_2D_TICKS + 1)], [round((PHI_RANGE[0] + i * (PHI_RANGE[1] - PHI_RANGE[0]) / MAP_2D_TICKS) * 10) / 10 for i in range(MAP_2D_TICKS + 1)])
-
-
-#   def sample_event_plot (self, event, target, output, ax):
-#     EventVisualizer(event).density_map(show_truth=False, ax=ax)
-#     circle_width = JET_SIZE / (ETA_RANGE[1] - ETA_RANGE[0])
-#     circle_height = JET_SIZE / (PHI_RANGE[1] - PHI_RANGE[0])
-#     for i in range(0, len(target), 2):
-#       print(f'target {i}: {target[i]}, {target[i+1]}')
-#       ax.add_patch(patches.Ellipse(Position(target[i], target[i+1]).relative(), circle_width, circle_height, color='red', fill=False))
-#     for i in range(0, len(output), 2):
-#       print(f'output {i}: {output[i]}, {output[i+1]}')
-#       ax.add_patch(patches.Ellipse(Position(output[i], output[i+1]).relative(), circle_width, circle_height, color='blue', fill=False))
-    
-#     ax.set_xlim(0, 1)
-#     ax.set_ylim(0, 1)
-
-#   def distances_histogram (self, starts, ends, ax):
-#     def distance (start, end):
-#       start = Position(start[0], start[1])
-#       end = Position(end[0], end[1])
-#       return start.distance(end)
-
-#     distances = [distance(start, end) for start, end in zip(starts, ends)]
-#     percent_of_distances_unser_0_2 = len([distance for distance in distances if distance < 0.2]) / len(distances)
-#     ax.hist(distances, bins=100)
-#     ax.set_xlabel('distance')
-#     ax.set_ylabel(f'count ({percent_of_distances_unser_0_2 * 100:.2f}% under 0.2)')
-
-#   def distances_by_pt_plot (self, starts, ends, events, ax):
-#     def distance (start, end):
-#       start = Position(start[0], start[1])
-#       end = Position(end[0], end[1])
-#       return start.distance(end)
-
-#     def pt (event):
-#       # sum of event.true_four_momentum().pt for all taus in the event
-#       return sum([momentum.p_t for momentum in event.true_four_momentum()])
-
-#     distances = [distance(start, end) for start, end in zip(starts, ends)]
-#     pts = [pt(event) for event in events]
-#     ax.scatter(pts, distances, s=2)
-#     ax.set_xlabel('pt')
-#     ax.set_ylabel('distance')
-
 import matplotlib.pyplot as plt
 import matplotlib.patches as patches
 import os
@@ -160,7 +54,7 @@ class ModelVisualizer:
     target_positions = [Position(target[0], target[1]) for target in targets] + [Position(target[2], target[3]) for target in targets]
     self.distances_histogram(output_positions, target_positions, axs[2])
     self.distances_by_pt_plot(output_positions, target_positions, events, axs[3])
-    self.distances_by_channel_plot(output_positions, target_positions, events, axs[4])
+    self.plot_reconstruction_rate_by(output_positions, target_positions, events, lambda event: event.mc_channel_number, 'channnel', None, ax=axs[4])
 
     random_position_indices = np.random.choice(len(output_positions), ARROWS_NUMBER, replace=False)
     random_output_positions = [output_positions[index] for index in random_position_indices]
@@ -252,7 +146,7 @@ class ModelVisualizer:
     ax.set_ylabel('distance')
 
 
-  def plot_reconstruction_rate_by (self, outputs, targets, events, get, label, output_file):
+  def plot_reconstruction_rate_by (self, outputs, targets, events, get, label, output_file, ax=None):
     field_values = [get(event) for event in events] * 2
     
     def load_hist(next):
@@ -269,10 +163,16 @@ class ModelVisualizer:
 
     hist = long_operation(load_hist, max=len(outputs), message='Calculating histogram values')  
 
-    plt.bar(range(HISTOGRAM_BINS), hist)
-    plt.xlabel(label)
-    plt.ylabel('reconstruction rate (%)')
-    plt.xticks([0, int(HISTOGRAM_BINS / 2), HISTOGRAM_BINS], [round(min(field_values), 2), round((min(field_values) + max(field_values)) / 2, 2), round(max(field_values), 2)])
-    if output_file:
-      plt.savefig(output_file)
-    plt.show()
+    if ax is None:
+      plt.bar(range(HISTOGRAM_BINS), hist)
+      plt.xlabel(label)
+      plt.ylabel('reconstruction rate (%)')
+      plt.xticks([0, int(HISTOGRAM_BINS / 2), HISTOGRAM_BINS], [round(min(field_values), 2), round((min(field_values) + max(field_values)) / 2, 2), round(max(field_values), 2)])
+      if output_file:
+        plt.savefig(output_file)
+      plt.show()
+    else:
+      ax.bar(range(HISTOGRAM_BINS), hist)
+      ax.set_xlabel(label)
+      ax.set_ylabel('reconstruction rate (%)')
+      ax.set_xticks([0, int(HISTOGRAM_BINS / 2), HISTOGRAM_BINS], [round(min(field_values), 2), round((min(field_values) + max(field_values)) / 2, 2), round(max(field_values), 2)])
