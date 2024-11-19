@@ -40,7 +40,8 @@ if __name__ == '__main__':
 
   if command == 'eval':
     model_file = modelfolder_path(params.get('weights', 'model_' + str(round(time.time() * 1000))))
-    evaluate(dataset, module, model_file, params)
+    output_flie = modelfolder_path(params.get('output', 'output'))
+    evaluate(dataset, module, model_file, output_flie, params)
     exit()
 
   if command == 'detect':
