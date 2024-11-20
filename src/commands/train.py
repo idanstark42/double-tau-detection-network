@@ -299,7 +299,7 @@ class Trainer:
     print(f'Validation set size:              {sum([len(loader.dataset) if loader else self.validation_loader_size for loader in self.validation_loaders])}')
     print(f'Test set size:                    {len(self.test_loader.dataset)}')
     print(f'Split:                            {self.split}')
-    print('Limit:                            ' + (f'{self.limit} [{(self.limit / self.split * 10):.2f}]' if self.limit else 'none'))
+    print('Limit:                            ' + (f'{self.limit} [{int(100 * self.limit / self.split)}%]' if self.limit else 'none'))
     print(f'Batch Size:                       {self.batch_size}')
     print(f'Epochs:                           {self.epochs}')
     print()
