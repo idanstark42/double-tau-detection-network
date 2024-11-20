@@ -270,6 +270,7 @@ class Trainer:
             masses[mass] += 1
         dataset[index]
         next(1)
+    breakpoint()
     long_operation(run, max=len(dataset), message=message)
 
     if self.preloading_output == 'mass':
