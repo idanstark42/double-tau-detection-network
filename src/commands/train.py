@@ -265,7 +265,7 @@ class Trainer:
     def run (next):
       for index in range(len(dataset)):
         if self.preloading_output == 'mass':
-          mass = dataset.get_event(index).mass_by_channel_number()
+          mass = self.dataset.get_event(dataset.indices[index]).mass_by_channel_number()
           if mass in masses:
             masses[mass] += 1
         dataset[index]
