@@ -222,7 +222,7 @@ class DatasetVisualizer:
     'track_pt': {
       'callback': lambda event: { 'track pt': [track.pt for track in event.tracks] },
       'fields': ['track pt'],
-      'config': { 'track pt': { 'xlim': [0, 10000] } }
+      'config': { 'track pt': { 'xlim': [0, 0.4] } }
     },
     'track_eta_phi': {
       'callback': lambda event: { 'track η': [track.position().eta for track in event.tracks], 'track φ': [track.position().phi for track in event.tracks] },
