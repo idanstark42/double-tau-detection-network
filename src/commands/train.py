@@ -329,7 +329,8 @@ class Trainer:
     if self.use_xla or self.use_cuda:
       outputs = [output.cpu() for output in outputs]
       targets = [target.cpu() for target in targets]
-    ModelVisualizer(self.model).plot_results(outputs, targets, self.test_loader, self.dataset, os.path.join(self.model_folder, 'graphs.png'))
+    events = [self.dataset.get_event(index) for index in self.test_loader.dataset.indices]
+    ModelVisualizer(self.model).plot_results(outputs, targets, events, os.path.join(self.model_folder, 'graphs.png'))
 
   def print_summary (self):
     print()
