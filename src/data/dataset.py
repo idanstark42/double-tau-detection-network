@@ -24,15 +24,15 @@ class EventsDataset (Dataset):
     self.normalize_energy = normalize_energy
     self.preloading = False
     self.load()
-    self.cluster_channels_count = 1
-    self.track_channels_count = 1
+    self.cluster_channels_count = 2
+    self.track_channels_count = 2
     self.input_channels = self.cluster_channels_count + self.track_channels_count
 
   def cluster_channels (self, cluster):
-    return [cluster.momentum().p_t]
+    return [cluster.momentum().p_t, 1]
 
   def track_channels (self, track):
-    return [track.pt]
+    return [track.pt, 1]
 
   def get_event(self, index):
     if self.cache_type == 'events' and index in self.cache:
