@@ -183,12 +183,14 @@ class DatasetVisualizer:
       'fields': ['Cluster']
     },
     'cluster_cal_e': {
-      'callback': lambda event: { 'Cluster Energy [MeV]': [cluster.cal_e for cluster in event.clusters] },
-      'fields': ['Cluster Energy [MeV]'],
+      'callback': lambda event: { 'Cluster Energy [GeV]': [cluster.cal_e / 1000 for cluster in event.clusters] },
+      'fields': ['Cluster Energy [GeV]'],
+      'config': { 'Cluster Energy [GeV]': { 'xlim': [0, 50] } }
     },
     'cluster_pt': {
-      'callback': lambda event: { 'Cluster pT [MeV]': [cluster.momentum().p_t for cluster in event.clusters] },
-      'fields': ['Cluster pT [MeV]'],
+      'callback': lambda event: { 'Cluster pT [GeV]': [cluster.momentum().p_t / 1000 for cluster in event.clusters] },
+      'fields': ['Cluster pT [GeV]'],
+      'config': { 'Cluster pT [GeV]': { 'xlim': [0, 50] } }
     },
     'cluster_eta_phi': {
       'callback': lambda event: { 'Cluster η': [cluster.position().eta for cluster in event.clusters], 'Cluster φ': [cluster.position().phi for cluster in event.clusters] },
@@ -196,16 +198,16 @@ class DatasetVisualizer:
       'type': '2d'
     },
     'cluster_count_vs_cal_e': {
-      'callback': lambda event: { 'Clusters': [len(event.clusters)], 'Cluster Energy [MeV]': [cluster.cal_e for cluster in event.clusters] },
-      'fields': ['Clusters', 'Cluster Energy [MeV]'],
+      'callback': lambda event: { 'Clusters': [len(event.clusters)], 'Cluster Energy [GeV]': [cluster.cal_e / 1000 for cluster in event.clusters] },
+      'fields': ['Clusters', 'Cluster Energy [GeV]'],
       'type': '2d',
-      'config': { 'Cluster Energy [MeV]': { 'cross': 'follower' }, 'Clusters': { 'cross': 'leader' } }
+      'config': { 'Cluster Energy [GeV]': { 'cross': 'follower', 'xlim': [0, 50] }, 'Clusters': { 'cross': 'leader' } }
     },
     'cluster_count_vs_pt': {
-      'callback': lambda event: { 'Clusters': [len(event.clusters)], 'pT': [cluster.momentum().p_t / 1000 for cluster in event.clusters] },
-      'fields': ['Clusters', 'pT'],
+      'callback': lambda event: { 'Clusters': [len(event.clusters)], 'Cluster pT [GeV]': [cluster.momentum().p_t / 1000 for cluster in event.clusters] },
+      'fields': ['Clusters', 'Cluster pT [GeV]'],
       'type': '2d',
-      'config': { 'pT': { 'cross': 'follower' }, 'Clusters': { 'cross': 'leader' } }
+      'config': { 'Cluster pT [GeV]': { 'cross': 'follower', 'xlim': [0, 50] }, 'Clusters': { 'cross': 'leader' } }
     },
     'cluster_count_vs_pileup': {
       'callback': lambda event: { 'Clusters': [len(event.clusters)], 'Pileup': [event.average_interactions_per_crossing] },
@@ -219,8 +221,9 @@ class DatasetVisualizer:
       'fields': ['Tracks']
     },
     'track_pt': {
-      'callback': lambda event: { 'Track pT [MeV]': [track.pt for track in event.tracks] },
-      'fields': ['Track pT [MeV]'],
+      'callback': lambda event: { 'Track pT [GeV]': [track.pt / 1000 for track in event.tracks] },
+      'fields': ['Track pT [GeV]'],
+      'config': { 'Track pT [GeV]': { 'xlim': [0, 50] } }
     },
     'track_eta_phi': {
       'callback': lambda event: { 'Track η': [track.position().eta for track in event.tracks], 'Track φ': [track.position().phi for track in event.tracks] },
@@ -228,10 +231,10 @@ class DatasetVisualizer:
       'type': '2d'
     },
     'track_count_vs_pt': {
-      'callback': lambda event: { 'Tracks': [len(event.tracks)], 'pT [MeV]': [track.pt for track in event.tracks] },
-      'fields': ['Tracks', 'pT [MeV]'],
+      'callback': lambda event: { 'Tracks': [len(event.tracks)], 'Track pT [GeV]': [track.pt / 1000 for track in event.tracks] },
+      'fields': ['Tracks', 'pT [GeV]'],
       'type': '2d',
-      'config': { 'pT [MeV]': { 'cross': 'follower' }, 'Tracks': { 'cross': 'leader' } }
+      'config': { 'Track pT [GeV]': { 'cross': 'follower', 'xlim': [0, 50] }, 'Tracks': { 'cross': 'leader' } }
     },
     'track_count_vs_pileup': {
       'callback': lambda event: { 'Tracks': [len(event.tracks)], 'Pileup': [event.average_interactions_per_crossing] },
