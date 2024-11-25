@@ -1,5 +1,4 @@
 from matplotlib import pyplot as plt
-import matplotlib
 import os
 from time import time
 
@@ -36,7 +35,7 @@ DATASET_HISTOGRAMS = [
 def generate_graphs (dataset, module, params):
   # disable plt.show() to avoid blocking the execution.
   # plt.show = lambda: None
-  matplotlib.use('Agg')
+  plt.ioff()
 
   events_count = int(params.get('sample-events', 4))
 
