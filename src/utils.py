@@ -1,6 +1,9 @@
 import os
 from time import time
 from progress.bar import IncrementalBar
+import matplotlib.pyplot as plt
+from matplotlib.colors import ListedColormap
+import numpy as np
 
 from settings import DATA_DIR, MODELS_DIR
 
@@ -64,3 +67,9 @@ def datafile_path (name):
 def modelfolder_path (name):
   # go to parent directory of this file, then go to the models directory and add pth suffix
   return os.path.join(os.path.dirname(os.path.dirname(__file__)), MODELS_DIR, name)
+
+def transparent_cmap (cmap_name):
+    base_cmap = plt.cm.get_cmap(cmap_name)
+    colors = base_cmap(np.arange(base_cmap.N))
+    colors[:, -1] = np.linspace(0, 1, base_cmap.N)  # Gradual transparency
+    return ListedColormap(colors)
