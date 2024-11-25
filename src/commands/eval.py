@@ -15,7 +15,7 @@ def evaluate (dataset, module, model_file, output_folder, params):
   print('2. Running model')
   outputs = run_model(module, inputs, batch_size)
   print('3. Visualizing results')
-  visualizer = ModelVisualizer(module)
+  visualizer = ModelVisualizer(module, show=False)
   visualizer.show_reconstruction_rate_stats(outputs, targets, events, output_folder)
   print('4. Done')
 
