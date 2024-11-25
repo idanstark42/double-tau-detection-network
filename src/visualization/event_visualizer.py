@@ -8,14 +8,13 @@ class EventVisualizer:
     self.event = event
     self.resolution = resolution
     self.show = show
-    print('EventVisualizer. show:', show, 'resolution:', resolution)
 
   def density_map (self, show_truth=True, ax=None, output_file=None):
     clusters_points = [cluster.position().relative() for cluster in self.event.clusters]
     tracks_points = [track.position().relative() for track in self.event.tracks]
     truth_points = [truth.visible_position().relative() for truth in self.event.truths]
 
-    self.map([clusters_points, tracks_points], scatter=(truth_points if show_truth else None), ax=ax, output_file=output_file, configs=[{'cmap': 'Blues'}, {'cmap': 'Oranges'}])
+    self.map([clusters_points, tracks_points], scatter=(truth_points if show_truth else None), ax=ax, output_file=output_file, configs=[{'cmap': 'Blues', 'alpha': 0.5}, {'cmap': 'Oranges', 'alpha': 0.5}])
 
   def momentum_map (self, show_truth=True, ax=None, output_file=None):
     cluster_points = [cluster.position().relative() for cluster in self.event.clusters]
@@ -25,7 +24,7 @@ class EventVisualizer:
     clusters_momentum = [cluster.momentum().p_t for cluster in self.event.clusters]
     tracks_momentum = [track.momentum().p_t for track in self.event.tracks]
 
-    self.map([cluster_points, track_points], weights=[clusters_momentum, tracks_momentum], scatter=(truth_points if show_truth else None), ax=ax, output_file=output_file, configs=[{'cmap': 'Blues'}, {'cmap': 'Oranges'}])
+    self.map([cluster_points, track_points], weights=[clusters_momentum, tracks_momentum], scatter=(truth_points if show_truth else None), ax=ax, output_file=output_file, configs=[{'cmap': 'Blues', 'alpha': 0.5}, {'cmap': 'Oranges', 'alpha': 0.5}])
 
   def tracks_by_pt_histogram (self, ax=None, output_file=None):
     self.histogram([track.pt for track in self.event.tracks], ax=ax, label='Tracks', output_file=output_file)
