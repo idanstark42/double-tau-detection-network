@@ -107,8 +107,8 @@ class ModelVisualizer:
 
   def distances_histogram (self, starts, ends, ax):
     distances = [start.distance(end) for start, end in zip(starts, ends)]
-    ax.hist(distances, bins=HISTOGRAM_BINS, edgecolor='black', density=True)
-    ax.set_title('Distances Histogram')
+    ax.hist(distances, bins=HISTOGRAM_BINS, edgecolor='black', histtype='step', density=True)
+    ax.set_title('Distances')
     ax.set_xlabel('Distance')
     ax.set_ylabel('Density')
 

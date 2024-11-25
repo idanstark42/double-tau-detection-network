@@ -183,14 +183,12 @@ class DatasetVisualizer:
       'fields': ['Cluster']
     },
     'cluster_cal_e': {
-      'callback': lambda event: { 'Calorimeter Energy': [cluster.cal_e / 1000 for cluster in event.clusters] },
-      'fields': ['Calorimeter Energy'],
-      'config': { 'Calorimeter Energy': { 'xlim': [0, 0.5] } }
+      'callback': lambda event: { 'Cluster Energy [MeV]': [cluster.cal_e for cluster in event.clusters] },
+      'fields': ['Cluster Energy [MeV]'],
     },
     'cluster_pt': {
-      'callback': lambda event: { 'Cluster pt [GeV]': [cluster.momentum().p_t / 1000 for cluster in event.clusters] },
-      'fields': ['Cluster pt [GeV]'],
-      'config': { 'Cluster pt [GeV]': { 'xlim': [0, 0.4] } }
+      'callback': lambda event: { 'Cluster pT [MeV]': [cluster.momentum().p_t for cluster in event.clusters] },
+      'fields': ['Cluster pT [MeV]'],
     },
     'cluster_eta_phi': {
       'callback': lambda event: { 'Cluster η': [cluster.position().eta for cluster in event.clusters], 'Cluster φ': [cluster.position().phi for cluster in event.clusters] },
@@ -198,16 +196,16 @@ class DatasetVisualizer:
       'type': '2d'
     },
     'cluster_count_vs_cal_e': {
-      'callback': lambda event: { 'Clusters': [len(event.clusters)], 'Calorimeter Energy': [cluster.cal_e for cluster in event.clusters] },
-      'fields': ['Clusters', 'Calorimeter Energy'],
+      'callback': lambda event: { 'Clusters': [len(event.clusters)], 'Cluster Energy [MeV]': [cluster.cal_e for cluster in event.clusters] },
+      'fields': ['Clusters', 'Cluster Energy [MeV]'],
       'type': '2d',
-      'config': { 'Calorimeter Energy': { 'xlim': [0, 0.5], 'cross': 'follower' }, 'Clusters': { 'cross': 'leader' } }
+      'config': { 'Cluster Energy [MeV]': { 'cross': 'follower' }, 'Clusters': { 'cross': 'leader' } }
     },
     'cluster_count_vs_pt': {
       'callback': lambda event: { 'Clusters': [len(event.clusters)], 'pT': [cluster.momentum().p_t / 1000 for cluster in event.clusters] },
       'fields': ['Clusters', 'pT'],
       'type': '2d',
-      'config': { 'pT': { 'xlim': [0, 0.4], 'cross': 'follower' }, 'Clusters': { 'cross': 'leader' } }
+      'config': { 'pT': { 'cross': 'follower' }, 'Clusters': { 'cross': 'leader' } }
     },
     'cluster_count_vs_pileup': {
       'callback': lambda event: { 'Clusters': [len(event.clusters)], 'Pileup': [event.average_interactions_per_crossing] },
@@ -221,9 +219,8 @@ class DatasetVisualizer:
       'fields': ['Tracks']
     },
     'track_pt': {
-      'callback': lambda event: { 'Track pT [GeV]': [track.pt / 1000 for track in event.tracks] },
-      'fields': ['Track pT [GeV]'],
-      'config': { 'Track pT [GeV]': { 'xlim': [0, 0.4] } }
+      'callback': lambda event: { 'Track pT [MeV]': [track.pt for track in event.tracks] },
+      'fields': ['Track pT [MeV]'],
     },
     'track_eta_phi': {
       'callback': lambda event: { 'Track η': [track.position().eta for track in event.tracks], 'Track φ': [track.position().phi for track in event.tracks] },
@@ -231,10 +228,10 @@ class DatasetVisualizer:
       'type': '2d'
     },
     'track_count_vs_pt': {
-      'callback': lambda event: { 'Tracks': [len(event.tracks)], 'pT [GeV]': [track.pt / 1000 for track in event.tracks] },
-      'fields': ['Tracks', 'pT [GeV]'],
+      'callback': lambda event: { 'Tracks': [len(event.tracks)], 'pT [MeV]': [track.pt for track in event.tracks] },
+      'fields': ['Tracks', 'pT [MeV]'],
       'type': '2d',
-      'config': { 'pT [GeV]': { 'xlim': [0, 0.4], 'cross': 'follower' }, 'Tracks': { 'cross': 'leader' } }
+      'config': { 'pT [MeV]': { 'cross': 'follower' }, 'Tracks': { 'cross': 'leader' } }
     },
     'track_count_vs_pileup': {
       'callback': lambda event: { 'Tracks': [len(event.tracks)], 'Pileup': [event.average_interactions_per_crossing] },
