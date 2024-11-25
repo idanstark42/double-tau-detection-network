@@ -56,5 +56,6 @@ def generate_graphs (dataset, module, params):
     return
   
   print('2. Generating model graphs')
+  weights = params.get('weights', '')
   weigts_file = os.path.join(MODELS_DIR, weights)
   evaluate(dataset, module, weigts_file, model_folder, params)

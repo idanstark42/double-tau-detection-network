@@ -16,6 +16,10 @@ class Event:
     self.tracks = [Track(track, tracks_fields) for track in tracks if track['valid']]
     self.truths = [Truth(truth, truthTaus_fields) for truth in truth if truth['valid']]
 
+    # if the clusters are a string, print the string
+    if isinstance(clusters, str):
+      print(clusters)
+
     self.clusters = [cluster for cluster in self.clusters if cluster.position().in_range()]
     self.tracks = [track for track in self.tracks if track.position().in_range()]
     self.truths = [truth for truth in self.truths if truth.visible_position().in_range()]
