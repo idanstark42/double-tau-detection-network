@@ -35,7 +35,6 @@ DATASET_HISTOGRAMS = [
 def generate_graphs (dataset, module, params):
   # disable plt.show() to avoid blocking the execution.
   # plt.show = lambda: None
-  plt.ioff()
 
   events_count = int(params.get('sample-events', 4))
 
