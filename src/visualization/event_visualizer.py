@@ -50,9 +50,9 @@ class EventVisualizer:
     print(kwargs['label'] if 'label' in kwargs else '')
     print(values)
     if ax:
-      ax.hist(values, bins=HISTOGRAM_BINS, edgecolor='black', histtype='step', alpha=0, **kwargs)
+      ax.hist(values, bins=HISTOGRAM_BINS, edgecolor='black', histtype='step', **kwargs)
     else:
-      plt.hist(values, bins=HISTOGRAM_BINS, edgecolor='black', histtype='step', alpha=0, **kwargs)
+      plt.hist(values, bins=HISTOGRAM_BINS, edgecolor='black', histtype='step', **kwargs)
       if output_file:
         plt.savefig(output_file)
       plt.show()
