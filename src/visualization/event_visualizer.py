@@ -8,6 +8,7 @@ class EventVisualizer:
     self.event = event
     self.resolution = resolution
     self.show = show
+    print('EventVisualizer. show:', show, 'resolution:', resolution)
 
   def density_map (self, show_truth=True, ax=None, output_file=None):
     clusters_points = [cluster.position().relative() for cluster in self.event.clusters]
