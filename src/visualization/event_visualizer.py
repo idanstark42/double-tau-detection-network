@@ -16,7 +16,7 @@ class EventVisualizer:
     tracks_points = [track.position().relative() for track in self.event.tracks]
     truth_points = [truth.visible_position().relative() for truth in self.event.truths]
 
-    self.map([clusters_points, tracks_points], scatter=(truth_points if show_truth else None), ax=ax, output_file=output_file, configs=[{'cmap': 'Blues', 'alpha': 0.5, 'norm': LogNorm()}, {'cmap': transparent_cmap('Oranges'), 'alpha': 0.5, 'norm': LogNorm()}])
+    self.map([clusters_points, tracks_points], scatter=(truth_points if show_truth else None), ax=ax, output_file=output_file, configs=[{'cmap': 'Blues', 'alpha': 0.5}, {'cmap': transparent_cmap('Oranges'), 'alpha': 0.5}])
 
   def momentum_map (self, show_truth=True, ax=None, output_file=None):
     cluster_points = [cluster.position().relative() for cluster in self.event.clusters]
@@ -67,6 +67,8 @@ class EventVisualizer:
         ax.hist2d(*zip(*map), bins=self.resolution, range=[[0, 1], [0, 1]], **(configs[index] if configs else {}))
       else:
         ax.hist2d(*zip(*map), bins=self.resolution, range=[[0, 1], [0, 1]], weights=weights[index], **(configs[index] if configs else {}))
+      # colorbar
+      plt.colorbar(ax.collections[-1], ax=ax)
 
     if output_file and independent:
       plt.savefig(output_file)
