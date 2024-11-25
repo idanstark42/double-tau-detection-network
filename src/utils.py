@@ -32,13 +32,13 @@ def long_operation (operation, ending_message=False, **kwargs):
   start = time()
   def next (step=1):
     bar.next(min(step, bar.max - bar.index))
-    percentage = (bar.index + 1) / bar.max
+    percentage = bar.index / bar.max
     elapsed = time() - start
     if elapsed > 5:
       remaining = (1 - percentage) * elapsed / percentage
-      bar.suffix = f'{bar.index + 1}/{bar.max} [{percentage * 100:.1f}%%] {seconds_to_time(remaining)}'
+      bar.suffix = f'{bar.index}/{bar.max} [{percentage * 100:.1f}%%] {seconds_to_time(remaining)}'
     else:
-      bar.suffix = f'{bar.index + 1}/{bar.max} [{percentage * 100:.1f}%%]'
+      bar.suffix = f'{bar.index}/{bar.max} [{percentage * 100:.1f}%%]'
 
   bar.start()
 
