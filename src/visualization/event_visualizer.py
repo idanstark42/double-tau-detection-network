@@ -50,9 +50,9 @@ class EventVisualizer:
 
   def histogram (self, values, ax=None, output_file=None, **kwargs):
     if ax:
-      ax.hist(values, bins=HISTOGRAM_BINS, edgecolor='black', **kwargs)
+      ax.hist(values, bins=HISTOGRAM_BINS, edgecolor='black', histtype='step', **kwargs)
     else:
-      plt.hist(values, bins=HISTOGRAM_BINS, edgecolor='black', **kwargs)
+      plt.hist(values, bins=HISTOGRAM_BINS, edgecolor='black', histtype='step', **kwargs)
       if output_file:
         plt.savefig(output_file)
       self.show_if_should()
