@@ -54,8 +54,7 @@ class EventVisualizer:
       plt.hist(values, bins=HISTOGRAM_BINS, edgecolor='black', histtype='step', alpha=0, **kwargs)
       if output_file:
         plt.savefig(output_file)
-      if self.show:
-        plt.show()
+      self.show_if_should()
 
   def map (self, maps, weights=None, scatter=None, output_file=None, ax=None, configs=None):
     independent = ax == None
@@ -83,5 +82,11 @@ class EventVisualizer:
     if output_file:
       plt.savefig(output_file)
 
-    if independent and self.show:
+    if independent:
+      self.show_if_should()
+
+  def show_if_should (self):
+    if self.show:
       plt.show()
+    else:
+      plt.close()

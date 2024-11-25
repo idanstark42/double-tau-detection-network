@@ -24,8 +24,7 @@ class DatasetVisualizer:
     axes[0].set_title('Flips')
     axes[1].hist(rotations, bins=HISTOGRAM_BINS, edgecolor='black')
     axes[1].set_title('Phi Rotations')
-    if self.show:
-      plt.show()
+    self.show_if_should()
 
   def sample_random_events (self, count, output_folder):
     random_indeces = np.random.choice(len(self.dataset), count, replace=False)
@@ -120,8 +119,7 @@ class DatasetVisualizer:
         plt.xscale('log')
       if output_file:
         plt.savefig(output_file)
-      if self.show:
-        plt.show()
+      self.show_if_should()
       return
 
     if config.get('type', 'side-by-side') == 'side-by-side':
@@ -137,8 +135,7 @@ class DatasetVisualizer:
           ax.set_xscale('log')
       if output_file:
         plt.savefig(output_file)
-      if self.show:
-        plt.show()
+      self.show_if_should()
       return
 
     if config.get('type', 'side-by-side') == '2d' and len(fields) == 2:
@@ -157,8 +154,7 @@ class DatasetVisualizer:
       plt.ylabel(fields[1])
       if output_file:
         plt.savefig(output_file)
-      if self.show:
-        plt.show()
+      self.show_if_should()
       return
 
     raise Exception('Unknown histogram type')
@@ -280,3 +276,9 @@ class DatasetVisualizer:
       'type': 'side-by-side'
     }
   }
+  
+  def show_if_should (self):
+    if self.show:
+      plt.show()
+    else:
+      plt.close()
