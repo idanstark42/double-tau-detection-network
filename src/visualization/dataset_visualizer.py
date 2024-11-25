@@ -174,13 +174,13 @@ class DatasetVisualizer:
 
   histogram_fields = {
     'pileup': {
-      'callback': lambda event: { 'pileup': [event.average_interactions_per_crossing] },
-      'fields': ['pileup']
+      'callback': lambda event: { 'Pileup': [event.average_interactions_per_crossing] },
+      'fields': ['Pileup']
     },
 
     'cluster_count': {
-      'callback': lambda event: { 'cluster count': [len(event.clusters)] },
-      'fields': ['cluster count']
+      'callback': lambda event: { 'Cluster': [len(event.clusters)] },
+      'fields': ['Cluster']
     },
     'cluster_cal_e': {
       'callback': lambda event: { 'Calorimeter Energy': [cluster.cal_e for cluster in event.clusters] },
@@ -188,68 +188,68 @@ class DatasetVisualizer:
       'config': { 'Calorimeter Energy': { 'xlim': [0, 0.5] } }
     },
     'cluster_pt': {
-      'callback': lambda event: { 'cluster pt': [cluster.momentum().p_t for cluster in event.clusters] },
-      'fields': ['cluster pt'],
-      'config': { 'cluster pt': { 'xlim': [0, 0.4] } }
+      'callback': lambda event: { 'Cluster pt [GeV]': [cluster.momentum().p_t for cluster in event.clusters] },
+      'fields': ['Cluster pt [GeV]'],
+      'config': { 'Cluster pt [GeV]': { 'xlim': [0, 0.4] } }
     },
     'cluster_eta_phi': {
-      'callback': lambda event: { 'cluster η': [cluster.position().eta for cluster in event.clusters], 'cluster φ': [cluster.position().phi for cluster in event.clusters] },
-      'fields': ['cluster η', 'cluster φ'],
+      'callback': lambda event: { 'Cluster η': [cluster.position().eta for cluster in event.clusters], 'Cluster φ': [cluster.position().phi for cluster in event.clusters] },
+      'fields': ['Cluster η', 'Cluster φ'],
       'type': '2d'
     },
     'cluster_count_vs_cal_e': {
-      'callback': lambda event: { 'amount': [len(event.clusters)], 'Calorimeter Energy': [cluster.cal_e for cluster in event.clusters] },
-      'fields': ['amount', 'Calorimeter Energy'],
+      'callback': lambda event: { 'Clusters': [len(event.clusters)], 'Calorimeter Energy': [cluster.cal_e for cluster in event.clusters] },
+      'fields': ['Clusters', 'Calorimeter Energy'],
       'type': '2d',
-      'config': { 'Calorimeter Energy': { 'xlim': [0, 0.5], 'cross': 'follower' }, 'amount': { 'cross': 'leader' } }
+      'config': { 'Calorimeter Energy': { 'xlim': [0, 0.5], 'cross': 'follower' }, 'Clusters': { 'cross': 'leader' } }
     },
     'cluster_count_vs_pt': {
-      'callback': lambda event: { 'amount': [len(event.clusters)], 'pT': [cluster.momentum().p_t for cluster in event.clusters] },
-      'fields': ['amount', 'pT'],
+      'callback': lambda event: { 'Clusters': [len(event.clusters)], 'pT': [cluster.momentum().p_t for cluster in event.clusters] },
+      'fields': ['Clusters', 'pT'],
       'type': '2d',
-      'config': { 'pT': { 'xlim': [0, 0.4], 'cross': 'follower' }, 'amount': { 'cross': 'leader' } }
+      'config': { 'pT': { 'xlim': [0, 0.4], 'cross': 'follower' }, 'Clusters': { 'cross': 'leader' } }
     },
     'cluster_count_vs_pileup': {
-      'callback': lambda event: { 'amount': [len(event.clusters)], 'pileup': [event.average_interactions_per_crossing] },
-      'fields': ['amount', 'pileup'],
+      'callback': lambda event: { 'Clusters': [len(event.clusters)], 'Pileup': [event.average_interactions_per_crossing] },
+      'fields': ['Clusters', 'Pileup'],
       'type': '2d',
-      'config': { 'pileup': { 'cross': 'follower' }, 'amount': { 'cross': 'leader' } }
+      'config': { 'Pileup': { 'cross': 'follower' }, 'Clusters': { 'cross': 'leader' } }
     },
 
     'track_count': {
-      'callback': lambda event: { 'track count': [len(event.tracks)] },
-      'fields': ['track count']
+      'callback': lambda event: { 'Tracks': [len(event.tracks)] },
+      'fields': ['Tracks']
     },
     'track_pt': {
-      'callback': lambda event: { 'track pt': [track.pt for track in event.tracks] },
-      'fields': ['track pt'],
-      'config': { 'track pt': { 'xlim': [0, 0.4] } }
+      'callback': lambda event: { 'Track pT [GeV]': [track.pt for track in event.tracks] },
+      'fields': ['Track pT [GeV]'],
+      'config': { 'Track pT [GeV]': { 'xlim': [0, 0.4] } }
     },
     'track_eta_phi': {
-      'callback': lambda event: { 'track η': [track.position().eta for track in event.tracks], 'track φ': [track.position().phi for track in event.tracks] },
-      'fields': ['track η', 'track φ'],
+      'callback': lambda event: { 'Track η': [track.position().eta for track in event.tracks], 'Track φ': [track.position().phi for track in event.tracks] },
+      'fields': ['Track η', 'Track φ'],
       'type': '2d'
     },
     'track_count_vs_pt': {
-      'callback': lambda event: { 'amount': [len(event.tracks)], 'pT': [track.pt for track in event.tracks] },
-      'fields': ['amount', 'pT'],
+      'callback': lambda event: { 'Tracks': [len(event.tracks)], 'pT [GeV]': [track.pt for track in event.tracks] },
+      'fields': ['Tracks', 'pT [GeV]'],
       'type': '2d',
-      'config': { 'pT': { 'xlim': [0, 0.4], 'cross': 'follower' }, 'amount': { 'cross': 'leader' } }
+      'config': { 'pT [GeV]': { 'xlim': [0, 0.4], 'cross': 'follower' }, 'Tracks': { 'cross': 'leader' } }
     },
     'track_count_vs_pileup': {
-      'callback': lambda event: { 'amount': [len(event.tracks)], 'pileup': [event.average_interactions_per_crossing] },
-      'fields': ['amount', 'pileup'],
+      'callback': lambda event: { 'Tracks': [len(event.tracks)], 'Pileup': [event.average_interactions_per_crossing] },
+      'fields': ['Tracks', 'Pileup'],
       'type': '2d',
-      'config': { 'pileup': { 'cross': 'follower' }, 'amount': { 'cross': 'leader' } }
+      'config': { 'Pileup': { 'cross': 'follower' }, 'Tracks': { 'cross': 'leader' } }
     },
 
     'truth_count': {
-      'callback': lambda event: { 'truth count': [len(event.truths)] },
-      'fields': ['truth count']
+      'callback': lambda event: { 'Truth τ Count': [len(event.truths)] },
+      'fields': ['Truth τ Count']
     },
     'x_pt': {
-      'callback': lambda event: { 'X pT': [event.total_visible_four_momentum().p_t] },
-      'fields': ['X pT']
+      'callback': lambda event: { 'X pT [GeV]': [event.total_visible_four_momentum().p_t] },
+      'fields': ['X pT [GeV]']
     },
     'x_eta_phi': {
       'callback': lambda event: { 'X η': [event.total_visible_four_momentum().eta], 'X φ': [event.total_visible_four_momentum().phi] },
@@ -262,12 +262,12 @@ class DatasetVisualizer:
       'valid': lambda event: len(event.truths) == 2
     },
     'leading_tau_pt': {
-      'callback': lambda event: { 'leading τ pT': [event.leading_pt()] },
-      'fields': ['leading τ pT']
+      'callback': lambda event: { 'Leading τ pT [GeV]': [event.leading_pt()] },
+      'fields': ['Leading τ pT [GeV]']
     },
     'subleading_tau_pt': {
-      'callback': lambda event: { 'subleading τ pT': [event.subleading_pt()] },
-      'fields': ['subleading τ pT']
+      'callback': lambda event: { 'Subleading τ pT [GeV]': [event.subleading_pt()] },
+      'fields': ['Subleading τ pT [GeV]']
     },
 
     'normlization_factors': {

@@ -12,6 +12,7 @@ from commands.proliferate import proliferate
 from commands.merge import merge
 from commands.generate_graphs import generate_graphs
 from commands.config import config
+from commands.checkpoint import checkpoint
 
 def main (args):
   if isinstance(args, str):
@@ -59,6 +60,10 @@ def main (args):
 
   if command == 'generate-graphs':
     generate_graphs(dataset, module, params)
+
+  if command == 'checkpoint':
+    subcommand = args[1]
+    checkpoint(subcommand, dataset, module, params)
 
   if command == 'show':
     scope = args[1]
