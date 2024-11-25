@@ -173,4 +173,4 @@ class Event:
     return self.calculate_and_cache('subleading_pt', lambda: min([truth.visible_momentum().p_t for truth in self.truths]))
   
   def mass_by_channel_number (self):
-    return self.calculate_and_cache('mass_by_channel_number', lambda: f'{int(20 + 10 * (self.mc_channel_number - CHANNEL_START))} GeV')
+    return self.calculate_and_cache('mass_by_channel_number', lambda: f'{int(20 + 10 * (self.mc_channel_number - CHANNEL_START)) / 1000} GeV')
