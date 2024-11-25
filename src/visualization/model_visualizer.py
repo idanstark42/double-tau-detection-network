@@ -25,15 +25,15 @@ class ModelVisualizer:
       plt.savefig(os.path.join(output_folder, 'distances_histogram.png'))
     self.show_if_should()
 
-    self.plot_reconstruction_rate_by(output_positions, target_positions, events, lambda event: event.total_visible_four_momentum().p_t, 'X pT [GeV]', os.path.join(output_folder, 'reconstruction_rate_by_pt.png'))
+    self.plot_reconstruction_rate_by(output_positions, target_positions, events, lambda event: event.total_visible_four_momentum().p_t / 1000, 'X pT [GeV]', os.path.join(output_folder, 'reconstruction_rate_by_pt.png'))
     self.plot_reconstruction_rate_by(output_positions, target_positions, events, lambda event: event.total_visible_four_momentum().eta, 'X η', os.path.join(output_folder, 'reconstruction_rate_by_eta.png'))
     self.plot_reconstruction_rate_by(output_positions, target_positions, events, lambda event: event.total_visible_four_momentum().phi, 'X φ', os.path.join(output_folder, 'reconstruction_rate_by_phi.png'))
-    self.plot_reconstruction_rate_by(output_positions, target_positions, events, lambda event: event.total_visible_four_momentum().m, 'X mass [GeV]', os.path.join(output_folder, 'reconstruction_rate_by_m.png'))
+    self.plot_reconstruction_rate_by(output_positions, target_positions, events, lambda event: event.total_visible_four_momentum().m / 1000, 'X mass [GeV]', os.path.join(output_folder, 'reconstruction_rate_by_m.png'))
 
     self.plot_reconstruction_rate_by(output_positions, target_positions, events, lambda event: event.average_interactions_per_crossing, 'average interactions per crossing', os.path.join(output_folder, 'reconstruction_rate_by_interactions.png'))
     events = [event for event in events if len(event.truths) >= 2]
     self.plot_reconstruction_rate_by(output_positions, target_positions, events, lambda event: event.angular_distance_between_taus(), 'ΔR', os.path.join(output_folder, 'reconstruction_rate_by_angular_distance.png'))
-    self.plot_reconstruction_rate_by(output_positions, target_positions, events, lambda event: event.mass_by_channel_number(), 'Theoretical X mass [GeV]', os.path.join(output_folder, 'reconstruction_rate_by_mc_channel_number.png'))
+    self.plot_reconstruction_rate_by(output_positions, target_positions, events, lambda event: event.mass_by_channel_number() / 1000, 'Theoretical X mass [GeV]', os.path.join(output_folder, 'reconstruction_rate_by_mc_channel_number.png'))
   
   def show_losses(self, losses, output_file):
     plt.plot([loss[0] for loss in losses], label='Train Loss')
@@ -162,8 +162,11 @@ class ModelVisualizer:
     def load_hist(next):
       hist = [0] * HISTOGRAM_BINS
       bin_sizes = [0] * HISTOGRAM_BINS
+      range = max(field_values) - min(field_values)
+      if range == 0:
+        raise ValueError('The range of the field values is 0')
       for output, target, field_value in zip(outputs, targets, field_values):
-        bin_index = int((field_value - min(field_values)) / (max(field_values) - min(field_values)) * HISTOGRAM_BINS)
+        bin_index = int((field_value - min(field_values)) / range * HISTOGRAM_BINS)
         bin_index = min(HISTOGRAM_BINS - 1, max(0, bin_index))
         hist[bin_index] += 1 if output.distance(target) < 0.2 else 0
         bin_sizes[bin_index] += 1
@@ -171,7 +174,12 @@ class ModelVisualizer:
       
       return [100 * hist[i] / bin_sizes[i] if bin_sizes[i] != 0 else 0 for i in range(HISTOGRAM_BINS)]
 
-    hist = long_operation(load_hist, max=len(outputs), message='Calculating histogram values')  
+    try:
+      hist = long_operation(load_hist, max=len(outputs), message='Calculating histogram values')  
+    except ValueError as e:
+      print(e)
+      print(f'Skipping histogram for {label}')
+      return
 
     if ax is None:
       plt.step(range(HISTOGRAM_BINS), hist, edgecolor='black')

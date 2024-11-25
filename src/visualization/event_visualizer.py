@@ -29,7 +29,7 @@ class EventVisualizer:
     self.map([cluster_points, track_points], weights=[clusters_momentum, tracks_momentum], scatter=(truth_points if show_truth else None), ax=ax, title='Clusters and Tracks pT density by η and φ', output_file=output_file, configs=[{'label': 'Clusters Momentum', 'cmap': 'Blues', 'alpha': 0.5, 'norm': LogNorm()}, {'label': 'Tracks Momentum', 'cmap': 'Oranges', 'alpha': 0.5, 'norm': LogNorm()}])
 
   def tracks_by_pt_histogram (self, ax=None, output_file=None, title_addition=''):
-    self.histogram([track.pt for track in self.event.tracks], ax=ax, title=f'Tracks by pT {title_addition}', x_label='pT [GeV]', yl_label='Density', output_file=output_file)
+    self.histogram([track.pt / 1000 for track in self.event.tracks], ax=ax, title=f'Tracks by pT {title_addition}', x_label='pT [GeV]', yl_label='Density', output_file=output_file)
 
   def tracks_by_eta_histogram (self, ax=None, output_file=None, title_addition=''):
     self.histogram([track.position().eta for track in self.event.tracks], ax=ax, title=f'Tracks by η {title_addition}', x_label='η', yl_label='Density', output_file=output_file)
@@ -38,10 +38,10 @@ class EventVisualizer:
     self.histogram([track.position().phi for track in self.event.tracks], ax=ax, title=f'Tracks by φ {title_addition}', x_label='φ', yl_label='Density', output_file=output_file)
 
   def clusters_by_pt_histogram (self, ax=None, output_file=None, title_addition=''):
-    self.histogram([cluster.momentum().p_t for cluster in self.event.clusters], ax=ax, title=f'Clusters by pT {title_addition}', x_label='pT [GeV]', yl_label='Density', output_file=output_file)
+    self.histogram([cluster.momentum().p_t / 1000 for cluster in self.event.clusters], ax=ax, title=f'Clusters by pT {title_addition}', x_label='pT [GeV]', yl_label='Density', output_file=output_file)
 
   def clusters_by_cal_e_histogram (self, ax=None, output_file=None, title_addition=''):
-    self.histogram([cluster.cal_e for cluster in self.event.clusters], ax=ax, title=f'Clusters by Calorimeter Energy {title_addition}', x_label='Calorimeter Energy [GeV]', yl_label='Density', output_file=output_file)
+    self.histogram([cluster.cal_e / 1000 for cluster in self.event.clusters], ax=ax, title=f'Clusters by Calorimeter Energy {title_addition}', x_label='Calorimeter Energy [GeV]', yl_label='Density', output_file=output_file)
 
   def clusters_by_eta_histogram (self, ax=None, output_file=None, title_addition=''):
     self.histogram([cluster.position().eta for cluster in self.event.clusters], ax=ax, title=f'Clusters by η {title_addition}', x_label='η', yl_label='Density', output_file=output_file)

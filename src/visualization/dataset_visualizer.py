@@ -183,12 +183,12 @@ class DatasetVisualizer:
       'fields': ['Cluster']
     },
     'cluster_cal_e': {
-      'callback': lambda event: { 'Calorimeter Energy': [cluster.cal_e for cluster in event.clusters] },
+      'callback': lambda event: { 'Calorimeter Energy': [cluster.cal_e / 1000 for cluster in event.clusters] },
       'fields': ['Calorimeter Energy'],
       'config': { 'Calorimeter Energy': { 'xlim': [0, 0.5] } }
     },
     'cluster_pt': {
-      'callback': lambda event: { 'Cluster pt [GeV]': [cluster.momentum().p_t for cluster in event.clusters] },
+      'callback': lambda event: { 'Cluster pt [GeV]': [cluster.momentum().p_t / 1000 for cluster in event.clusters] },
       'fields': ['Cluster pt [GeV]'],
       'config': { 'Cluster pt [GeV]': { 'xlim': [0, 0.4] } }
     },
@@ -204,7 +204,7 @@ class DatasetVisualizer:
       'config': { 'Calorimeter Energy': { 'xlim': [0, 0.5], 'cross': 'follower' }, 'Clusters': { 'cross': 'leader' } }
     },
     'cluster_count_vs_pt': {
-      'callback': lambda event: { 'Clusters': [len(event.clusters)], 'pT': [cluster.momentum().p_t for cluster in event.clusters] },
+      'callback': lambda event: { 'Clusters': [len(event.clusters)], 'pT': [cluster.momentum().p_t / 1000 for cluster in event.clusters] },
       'fields': ['Clusters', 'pT'],
       'type': '2d',
       'config': { 'pT': { 'xlim': [0, 0.4], 'cross': 'follower' }, 'Clusters': { 'cross': 'leader' } }
@@ -221,7 +221,7 @@ class DatasetVisualizer:
       'fields': ['Tracks']
     },
     'track_pt': {
-      'callback': lambda event: { 'Track pT [GeV]': [track.pt for track in event.tracks] },
+      'callback': lambda event: { 'Track pT [GeV]': [track.pt / 1000 for track in event.tracks] },
       'fields': ['Track pT [GeV]'],
       'config': { 'Track pT [GeV]': { 'xlim': [0, 0.4] } }
     },
@@ -231,7 +231,7 @@ class DatasetVisualizer:
       'type': '2d'
     },
     'track_count_vs_pt': {
-      'callback': lambda event: { 'Tracks': [len(event.tracks)], 'pT [GeV]': [track.pt for track in event.tracks] },
+      'callback': lambda event: { 'Tracks': [len(event.tracks)], 'pT [GeV]': [track.pt / 1000 for track in event.tracks] },
       'fields': ['Tracks', 'pT [GeV]'],
       'type': '2d',
       'config': { 'pT [GeV]': { 'xlim': [0, 0.4], 'cross': 'follower' }, 'Tracks': { 'cross': 'leader' } }
@@ -248,7 +248,7 @@ class DatasetVisualizer:
       'fields': ['Truth τ Count']
     },
     'x_pt': {
-      'callback': lambda event: { 'X pT [GeV]': [event.total_visible_four_momentum().p_t] },
+      'callback': lambda event: { 'X pT [GeV]': [event.total_visible_four_momentum().p_t / 1000] },
       'fields': ['X pT [GeV]']
     },
     'x_eta_phi': {
@@ -262,11 +262,11 @@ class DatasetVisualizer:
       'valid': lambda event: len(event.truths) == 2
     },
     'leading_tau_pt': {
-      'callback': lambda event: { 'Leading τ pT [GeV]': [event.leading_pt()] },
+      'callback': lambda event: { 'Leading τ pT [GeV]': [event.leading_pt() / 1000] },
       'fields': ['Leading τ pT [GeV]']
     },
     'subleading_tau_pt': {
-      'callback': lambda event: { 'Subleading τ pT [GeV]': [event.subleading_pt()] },
+      'callback': lambda event: { 'Subleading τ pT [GeV]': [event.subleading_pt() / 1000] },
       'fields': ['Subleading τ pT [GeV]']
     },
 
