@@ -110,9 +110,9 @@ class DatasetVisualizer:
   def draw_histogram (self, fields, field_configs, result, config, output_file):
     if len(fields) == 1:
       plt.hist(result[fields[0]], bins=HISTOGRAM_BINS, edgecolor='black', histtype='step', density=True, range=field_configs[0].get('xlim', None))
-      plt.title(f'events by {fields[0]}')
+      plt.title(f'Events by {fields[0]}')
       plt.xlabel(fields[0])
-      plt.ylabel('events density')
+      plt.ylabel('Density')
       if 'xlim' in field_configs[0]:
         plt.xlim(field_configs[0]['xlim'])
       if config.get('x-log', False):
@@ -128,9 +128,9 @@ class DatasetVisualizer:
         hist = np.array(result[field]).flatten().tolist()
         ax = axes[index] if len(fields) > 1 else axes
         ax.hist(hist, bins=HISTOGRAM_BINS, edgecolor='black', alpha=0, density=True, range=field_configs[index].get('xlim', None))
-        ax.set_title(f'events by {field}')
+        ax.set_title(f'Events by {field}')
         ax.set_xlabel(field)
-        ax.set_ylabel('events density')
+        ax.set_ylabel('Density')
         if config.get('x-log', False):
           ax.set_xscale('log')
       if output_file:
@@ -149,7 +149,7 @@ class DatasetVisualizer:
 
       plt.hist2d(hist_x, hist_y, bins=HISTOGRAM_BINS, cmap='Blues', density=True, range=[field_configs[0].get('xlim', None), field_configs[1].get('xlim', None)], norm=colors.LogNorm())
       plt.colorbar()
-      plt.title(f'events by {fields[0]} and {fields[1]}')
+      plt.title(f'Events by {fields[0]} and {fields[1]}')
       plt.xlabel(fields[0])
       plt.ylabel(fields[1])
       if output_file:

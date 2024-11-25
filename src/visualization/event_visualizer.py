@@ -64,7 +64,7 @@ class EventVisualizer:
         plt.savefig(output_file)
       self.show_if_should()
 
-  def map (self, maps, weights=None, scatter=None, output_file=None, ax=None, configs=None):
+  def map (self, maps, weights=None, scatter=None, output_file=None, ax=None, title=None, configs=None):
     independent = ax == None
     if independent:
       fig, ax = plt.subplots()
@@ -79,6 +79,10 @@ class EventVisualizer:
       else:
         ax.hist2d(*zip(*map), bins=self.resolution, range=[[0, 1], [0, 1]], weights=weights[index], **config)
       
+      # title
+      if title:
+        ax.set_title(title)
+
       # colorbar
       colorbar = plt.colorbar(ax.collections[-1], ax=ax)
       if label:
@@ -93,8 +97,8 @@ class EventVisualizer:
     # set the axis to show the full eta and phi range
     ax.set_xticks([i / MAP_2D_TICKS for i in range(MAP_2D_TICKS + 1)], [round((ETA_RANGE[0] + i * (ETA_RANGE[1] - ETA_RANGE[0]) / MAP_2D_TICKS) * 10) / 10 for i in range(MAP_2D_TICKS + 1)])
     ax.set_yticks([i / MAP_2D_TICKS for i in range(MAP_2D_TICKS + 1)], [round((PHI_RANGE[0] + i * (PHI_RANGE[1] - PHI_RANGE[0]) / MAP_2D_TICKS) * 10) / 10 for i in range(MAP_2D_TICKS + 1)])
-    ax.set_ylabel('phi')
-    ax.set_xlabel('eta')
+    ax.set_ylabel('φ')
+    ax.set_xlabel('η')
 
     if output_file:
       plt.savefig(output_file)

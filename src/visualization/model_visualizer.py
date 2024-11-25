@@ -25,19 +25,20 @@ class ModelVisualizer:
       plt.savefig(os.path.join(output_folder, 'distances_histogram.png'))
     self.show_if_should()
 
-    self.plot_reconstruction_rate_by(output_positions, target_positions, events, lambda event: event.total_visible_four_momentum().p_t, 'X pT', os.path.join(output_folder, 'reconstruction_rate_by_pt.png'))
+    self.plot_reconstruction_rate_by(output_positions, target_positions, events, lambda event: event.total_visible_four_momentum().p_t, 'X pT [GeV]', os.path.join(output_folder, 'reconstruction_rate_by_pt.png'))
     self.plot_reconstruction_rate_by(output_positions, target_positions, events, lambda event: event.total_visible_four_momentum().eta, 'X η', os.path.join(output_folder, 'reconstruction_rate_by_eta.png'))
     self.plot_reconstruction_rate_by(output_positions, target_positions, events, lambda event: event.total_visible_four_momentum().phi, 'X φ', os.path.join(output_folder, 'reconstruction_rate_by_phi.png'))
-    self.plot_reconstruction_rate_by(output_positions, target_positions, events, lambda event: event.total_visible_four_momentum().m, 'X m', os.path.join(output_folder, 'reconstruction_rate_by_m.png'))
+    self.plot_reconstruction_rate_by(output_positions, target_positions, events, lambda event: event.total_visible_four_momentum().m, 'X mass [GeV]', os.path.join(output_folder, 'reconstruction_rate_by_m.png'))
 
     self.plot_reconstruction_rate_by(output_positions, target_positions, events, lambda event: event.average_interactions_per_crossing, 'average interactions per crossing', os.path.join(output_folder, 'reconstruction_rate_by_interactions.png'))
     events = [event for event in events if len(event.truths) >= 2]
-    self.plot_reconstruction_rate_by(output_positions, target_positions, events, lambda event: event.angular_distance_between_taus(), 'clusters count', os.path.join(output_folder, 'reconstruction_rate_by_clusters_count.png'))
-    self.plot_reconstruction_rate_by(output_positions, target_positions, events, lambda event: event.mc_channel_number, 'X mass', os.path.join(output_folder, 'reconstruction_rate_by_mc_channel_number.png'))
+    self.plot_reconstruction_rate_by(output_positions, target_positions, events, lambda event: event.angular_distance_between_taus(), 'ΔR', os.path.join(output_folder, 'reconstruction_rate_by_angular_distance.png'))
+    self.plot_reconstruction_rate_by(output_positions, target_positions, events, lambda event: event.mass_by_channel_number(), 'Theoretical X mass [GeV]', os.path.join(output_folder, 'reconstruction_rate_by_mc_channel_number.png'))
   
   def show_losses(self, losses, output_file):
     plt.plot([loss[0] for loss in losses], label='Train Loss')
     plt.plot([loss[1] for loss in losses], label='Validation Loss')
+    plt.title('Model Loss Over Epochs')
     plt.xlabel('Epoch')
     plt.ylabel('Loss')
     plt.yscale('log')
@@ -83,6 +84,7 @@ class ModelVisualizer:
       else:
         arrow_with_color(start.eta, start.phi, end.eta - start.eta, end.phi - start.phi, **kwargs)
 
+    ax.set_title('Arrows on η and φ')
     ax.set_xlabel('eta')
     ax.set_ylabel('phi')
     ax.set_xlim(ETA_RANGE[0], ETA_RANGE[1])
@@ -99,22 +101,24 @@ class ModelVisualizer:
     for i in range(0, len(output), 2):
       ax.add_patch(patches.Ellipse(Position(output[i], output[i+1]).relative(), circle_width, circle_height, color='blue', fill=False))
     
+    ax.set_title('Sample Event')
     ax.set_xlim(0, 1)
     ax.set_ylim(0, 1)
 
   def distances_histogram (self, starts, ends, ax):
     distances = [start.distance(end) for start, end in zip(starts, ends)]
-    percent_of_distances_unser_0_2 = len([distance for distance in distances if distance < 0.2]) / len(distances)
-    ax.hist(distances, bins=HISTOGRAM_BINS, edgecolor='black')
-    ax.set_xlabel('distance')
-    ax.set_ylabel(f'count ({percent_of_distances_unser_0_2 * 100:.2f}% under 0.2)')
+    ax.hist(distances, bins=HISTOGRAM_BINS, edgecolor='black', density=True)
+    ax.set_title('Distances Histogram')
+    ax.set_xlabel('Distance')
+    ax.set_ylabel('Density')
 
   def distances_by_pt_plot (self, starts, ends, events, ax):
     distances = [start.distance(end) for start, end in zip(starts, ends)]
     pts = [event.total_visible_four_momentum().p_t for event in events] * 2
     ax.scatter(pts, distances, s=1)
-    ax.set_xlabel('pt')
-    ax.set_ylabel('distance')
+    ax.set_title('Distances by pT')
+    ax.set_xlabel('pT [GeV]')
+    ax.set_ylabel('Distance')
   
   def parameters_histogram (self, output_file):
     def get_params(next):
@@ -132,8 +136,11 @@ class ModelVisualizer:
     convulational_params, linear_params = self.model.parameter_counts()
     parametrers = long_operation(get_params, max=convulational_params + linear_params, message='Loading parameters')
     
-    plt.hist(parametrers, bins=HISTOGRAM_BINS, edgecolor='black')
+    plt.hist(parametrers, bins=HISTOGRAM_BINS, edgecolor='black', density=True)
     plt.yscale('log')
+    plt.title('Parameters Histogram')
+    plt.xlabel('Parameter Value')
+    plt.ylabel('Density')
     plt.savefig(output_file)
     self.show_if_should()
 
@@ -143,10 +150,11 @@ class ModelVisualizer:
     channels = { f'{20 + 10 * i} GeV': [d for event_index, d in enumerate(distances) if events[event_index].mc_channel_number == CHANNEL_START + i] for i in range(5) }
     for channel in channels:
       print(channel, len(channels[channel]))
-      ax.hist(channels[channel], bins=HISTOGRAM_BINS, histtype='step', label=channel, alpha=0.5, linewidth=2)
+      ax.hist(channels[channel], bins=HISTOGRAM_BINS, histtype='step', label=channel, alpha=0.5, linewidth=2, density=True)
     ax.legend()
-    ax.set_xlabel('distance')
-    ax.set_ylabel('count')
+    ax.set_title('Distances by Channel')
+    ax.set_xlabel('Distance')
+    ax.set_ylabel('Density')
 
   def plot_reconstruction_rate_by (self, outputs, targets, events, get, label, output_file, ax=None):
     field_values = [get(event) for event in events] * 2
@@ -166,17 +174,19 @@ class ModelVisualizer:
     hist = long_operation(load_hist, max=len(outputs), message='Calculating histogram values')  
 
     if ax is None:
-      plt.bar(range(HISTOGRAM_BINS), hist, edgecolor='black')
+      plt.step(range(HISTOGRAM_BINS), hist, edgecolor='black')
+      plt.title(f'Reconstruction Rate by {label}')
       plt.xlabel(label)
-      plt.ylabel('reconstruction rate (%)')
+      plt.ylabel('Reconstruction Rate (%)')
       plt.xticks([0, int(HISTOGRAM_BINS / 2), HISTOGRAM_BINS], [round(min(field_values), 2), round((min(field_values) + max(field_values)) / 2, 2), round(max(field_values), 2)])
       if output_file:
         plt.savefig(output_file)
       self.show_if_should()
     else:
-      ax.bar(range(HISTOGRAM_BINS), hist)
+      ax.step(range(HISTOGRAM_BINS), hist, edgecolor='black')
+      ax.set_title(f'Reconstruction Rate by {label}')
       ax.set_xlabel(label)
-      ax.set_ylabel('reconstruction rate (%)')
+      ax.set_ylabel('Reconstruction Rate (%)')
       ax.set_xticks([0, int(HISTOGRAM_BINS / 2), HISTOGRAM_BINS], [round(min(field_values), 2), round((min(field_values) + max(field_values)) / 2, 2), round(max(field_values), 2)])
 
   def show_if_should (self):
