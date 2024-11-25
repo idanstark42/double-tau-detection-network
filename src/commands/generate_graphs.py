@@ -48,7 +48,7 @@ def generate_graphs (dataset, module, params):
   os.makedirs(model_folder, exist_ok=True)
 
   print('1. Generating dataset graphs')
-  dataset_visualizer = DatasetVisualizer(dataset, show=True)
+  dataset_visualizer = DatasetVisualizer(dataset, show=False)
   dataset_visualizer.sample_random_events(events_count, events_folder)
   dataset_visualizer.multiple_histograms(DATASET_HISTOGRAMS, dataset_folder)
 
