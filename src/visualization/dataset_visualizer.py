@@ -109,7 +109,7 @@ class DatasetVisualizer:
 
   def draw_histogram (self, fields, field_configs, result, config, output_file):
     if len(fields) == 1:
-      plt.hist(result[fields[0]], bins=HISTOGRAM_BINS, edgecolor='black', alpha=0, density=True, range=field_configs[0].get('xlim', None))
+      plt.hist(result[fields[0]], bins=HISTOGRAM_BINS, edgecolor='black', histtype='step', density=True, range=field_configs[0].get('xlim', None))
       plt.title(f'events by {fields[0]}')
       plt.xlabel(fields[0])
       plt.ylabel('events density')
@@ -183,9 +183,9 @@ class DatasetVisualizer:
       'fields': ['cluster count']
     },
     'cluster_cal_e': {
-      'callback': lambda event: { 'cluster cal_E': [cluster.cal_e for cluster in event.clusters] },
-      'fields': ['cluster cal_E'],
-      'config': { 'cluster cal_E': { 'xlim': [0, 0.5] } }
+      'callback': lambda event: { 'Calorimeter Energy': [cluster.cal_e for cluster in event.clusters] },
+      'fields': ['Calorimeter Energy'],
+      'config': { 'Calorimeter Energy': { 'xlim': [0, 0.5] } }
     },
     'cluster_pt': {
       'callback': lambda event: { 'cluster pt': [cluster.momentum().p_t for cluster in event.clusters] },
@@ -198,10 +198,10 @@ class DatasetVisualizer:
       'type': '2d'
     },
     'cluster_count_vs_cal_e': {
-      'callback': lambda event: { 'amount': [len(event.clusters)], 'cal_E': [cluster.cal_e for cluster in event.clusters] },
-      'fields': ['amount', 'cal_E'],
+      'callback': lambda event: { 'amount': [len(event.clusters)], 'Calorimeter Energy': [cluster.cal_e for cluster in event.clusters] },
+      'fields': ['amount', 'Calorimeter Energy'],
       'type': '2d',
-      'config': { 'cal_E': { 'xlim': [0, 0.5], 'cross': 'follower' }, 'amount': { 'cross': 'leader' } }
+      'config': { 'Calorimeter Energy': { 'xlim': [0, 0.5], 'cross': 'follower' }, 'amount': { 'cross': 'leader' } }
     },
     'cluster_count_vs_pt': {
       'callback': lambda event: { 'amount': [len(event.clusters)], 'pT': [cluster.momentum().p_t for cluster in event.clusters] },
