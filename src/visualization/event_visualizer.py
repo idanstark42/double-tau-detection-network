@@ -4,9 +4,10 @@ from numpy import pi
 from settings import MAP_2D_TICKS, ETA_RANGE, PHI_RANGE, HISTOGRAM_BINS
 
 class EventVisualizer:
-  def __init__ (self, event, resolution = 100):
+  def __init__ (self, event, resolution = 100, show=True):
     self.event = event
     self.resolution = resolution
+    self.show = show
 
   def density_map (self, show_truth=True, ax=None, output_file=None):
     clusters_points = [cluster.position().relative() for cluster in self.event.clusters]
@@ -53,7 +54,8 @@ class EventVisualizer:
       plt.hist(values, bins=HISTOGRAM_BINS, edgecolor='black', histtype='step', alpha=0, **kwargs)
       if output_file:
         plt.savefig(output_file)
-      plt.show()
+      if self.show:
+        plt.show()
 
   def map (self, maps, weights=None, scatter=None, output_file=None, ax=None, configs=None):
     independent = ax == None
@@ -81,5 +83,5 @@ class EventVisualizer:
     if output_file:
       plt.savefig(output_file)
 
-    if independent:
+    if independent and self.show:
       plt.show()

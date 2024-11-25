@@ -7,8 +7,9 @@ from settings import HISTOGRAM_BINS, MAX_HISTOGRAM_SIZE
 from utils import long_operation, python_name_from_dtype_name
 
 class DatasetVisualizer:
-  def __init__ (self, dataset):
+  def __init__ (self, dataset, show=True):
     self.dataset = dataset
+    self.show = show
 
   def print_fields (self):
     for field in self.dataset.dataset_fields:
@@ -23,7 +24,8 @@ class DatasetVisualizer:
     axes[0].set_title('Flips')
     axes[1].hist(rotations, bins=HISTOGRAM_BINS, edgecolor='black')
     axes[1].set_title('Phi Rotations')
-    plt.show()
+    if self.show:
+      plt.show()
 
   def sample_random_events (self, count, output_folder):
     random_indeces = np.random.choice(len(self.dataset), count, replace=False)
@@ -31,7 +33,7 @@ class DatasetVisualizer:
     print(f'Sampling {count} random events to {output_folder}')
     for i in random_indeces:
       event = self.dataset.get_event(i)
-      visualizer = EventVisualizer(event)
+      visualizer = EventVisualizer(event, show=self.show)
       visualizer.density_map(output_file=os.path.join(output_folder, f'event_{i}_density_map.png'))
       visualizer.momentum_map(output_file=os.path.join(output_folder, f'event_{i}_momentum_map.png'))
       visualizer.tracks_by_pt_histogram(output_file=os.path.join(output_folder, f'event_{i}_tracks_by_pt_histogram.png'))
@@ -118,7 +120,8 @@ class DatasetVisualizer:
         plt.xscale('log')
       if output_file:
         plt.savefig(output_file)
-      plt.show()
+      if self.show:
+        plt.show()
       return
 
     if config.get('type', 'side-by-side') == 'side-by-side':
@@ -134,7 +137,8 @@ class DatasetVisualizer:
           ax.set_xscale('log')
       if output_file:
         plt.savefig(output_file)
-      plt.show()
+      if self.show:
+        plt.show()
       return
 
     if config.get('type', 'side-by-side') == '2d' and len(fields) == 2:
@@ -153,7 +157,8 @@ class DatasetVisualizer:
       plt.ylabel(fields[1])
       if output_file:
         plt.savefig(output_file)
-      plt.show()
+      if self.show:
+        plt.show()
       return
 
     raise Exception('Unknown histogram type')

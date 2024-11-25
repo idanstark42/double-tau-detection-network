@@ -11,8 +11,9 @@ from utils import long_operation
 phi_range_size = abs(PHI_RANGE[1] - PHI_RANGE[0])
 
 class ModelVisualizer:
-  def __init__(self, model):
+  def __init__(self, model, show=True):
     self.model = model
+    self.show = show
 
   def show_reconstruction_rate_stats (self, outputs, targets, events, output_folder):
     # like these lines only flat:
@@ -22,7 +23,8 @@ class ModelVisualizer:
     if output_folder:
       os.makedirs(output_folder, exist_ok=True)
       plt.savefig(os.path.join(output_folder, 'distances_histogram.png'))
-    plt.show()
+    if self.show:
+      plt.show()
 
     self.plot_reconstruction_rate_by(output_positions, target_positions, events, lambda event: event.total_visible_four_momentum().p_t, 'X pT', os.path.join(output_folder, 'reconstruction_rate_by_pt.png'))
     self.plot_reconstruction_rate_by(output_positions, target_positions, events, lambda event: event.total_visible_four_momentum().eta, 'X η', os.path.join(output_folder, 'reconstruction_rate_by_eta.png'))
@@ -43,7 +45,8 @@ class ModelVisualizer:
     plt.legend()
     if output_file:
       plt.savefig(output_file)
-    plt.show()
+    if self.show:
+      plt.show()
 
   def plot_results (self, outputs, targets, events, output_file):
     sample_event_index = np.random.randint(len(events))
@@ -65,7 +68,8 @@ class ModelVisualizer:
     self.arrows_on_eta_phi_plot(random_output_positions, random_target_positions, axs[0], color='blue')
 
     plt.savefig(output_file)
-    plt.show()
+    if self.show:
+      plt.show()
 
   def arrows_on_eta_phi_plot (self, starts, ends, ax, **kwargs):
     def arrow_with_color (eta, phi, deta, dphi, **kwargs):
@@ -134,7 +138,8 @@ class ModelVisualizer:
     plt.hist(parametrers, bins=HISTOGRAM_BINS, edgecolor='black')
     plt.yscale('log')
     plt.savefig(output_file)
-    plt.show()
+    if self.show:
+      plt.show()
 
   def distances_by_channel_plot (self, starts, ends, events, ax):
     events = events * 2
@@ -171,7 +176,8 @@ class ModelVisualizer:
       plt.xticks([0, int(HISTOGRAM_BINS / 2), HISTOGRAM_BINS], [round(min(field_values), 2), round((min(field_values) + max(field_values)) / 2, 2), round(max(field_values), 2)])
       if output_file:
         plt.savefig(output_file)
-      plt.show()
+      if self.show:
+        plt.show()
     else:
       ax.bar(range(HISTOGRAM_BINS), hist)
       ax.set_xlabel(label)

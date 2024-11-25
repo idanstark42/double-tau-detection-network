@@ -34,7 +34,7 @@ DATASET_HISTOGRAMS = [
 
 def generate_graphs (dataset, module, params):
   # disable plt.show() to avoid blocking the execution.
-  plt.show = lambda: None
+  # plt.show = lambda: None
 
   events_count = int(params.get('sample-events', 4))
 
@@ -48,7 +48,7 @@ def generate_graphs (dataset, module, params):
   os.makedirs(model_folder, exist_ok=True)
 
   print('1. Generating dataset graphs')
-  dataset_visualizer = DatasetVisualizer(dataset)
+  dataset_visualizer = DatasetVisualizer(dataset, show=False)
   dataset_visualizer.sample_random_events(events_count, events_folder)
   dataset_visualizer.multiple_histograms(DATASET_HISTOGRAMS, dataset_folder)
 
