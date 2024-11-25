@@ -232,7 +232,7 @@ class DatasetVisualizer:
     },
     'track_count_vs_pt': {
       'callback': lambda event: { 'Tracks': [len(event.tracks)], 'Track pT [GeV]': [track.pt / 1000 for track in event.tracks] },
-      'fields': ['Tracks', 'pT [GeV]'],
+      'fields': ['Tracks', 'Track pT [GeV]'],
       'type': '2d',
       'config': { 'Track pT [GeV]': { 'cross': 'follower', 'xlim': [0, 50] }, 'Tracks': { 'cross': 'leader' } }
     },
