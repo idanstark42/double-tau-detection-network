@@ -47,12 +47,10 @@ class EventVisualizer:
     self.histogram([cluster.position().phi for cluster in self.event.clusters], ax=ax, label='Clusters', output_file=output_file)
 
   def histogram (self, values, ax=None, output_file=None, **kwargs):
-    print(kwargs['label'] if 'label' in kwargs else '')
-    print(values)
     if ax:
-      ax.hist(values, bins=HISTOGRAM_BINS, edgecolor='black', **kwargs)
+      ax.hist(values, bins=HISTOGRAM_BINS, edgecolor='black', histtype='step', alpha=0, **kwargs)
     else:
-      plt.hist(values, bins=HISTOGRAM_BINS, edgecolor='black', **kwargs)
+      plt.hist(values, bins=HISTOGRAM_BINS, edgecolor='black', histtype='step', alpha=0, **kwargs)
       if output_file:
         plt.savefig(output_file)
       plt.show()
