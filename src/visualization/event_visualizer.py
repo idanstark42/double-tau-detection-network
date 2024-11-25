@@ -25,7 +25,7 @@ class EventVisualizer:
     clusters_momentum = [cluster.momentum().p_t for cluster in self.event.clusters]
     tracks_momentum = [track.momentum().p_t for track in self.event.tracks]
 
-    self.map([cluster_points, track_points], weights=[clusters_momentum, tracks_momentum], scatter=(truth_points if show_truth else None), ax=ax, output_file=output_file, configs=[{'cmap': 'Blues', 'alpha': 1}, {'cmap': transparent_cmap('Oranges'), 'alpha': 0.5}])
+    self.map([cluster_points, track_points], weights=[clusters_momentum, tracks_momentum], scatter=(truth_points if show_truth else None), ax=ax, output_file=output_file, configs=[{'cmap': 'Blues', 'alpha': 1, 'norm': 'log'}, {'cmap': transparent_cmap('Oranges'), 'alpha': 0.5, 'norm': 'log'}])
 
   def tracks_by_pt_histogram (self, ax=None, output_file=None):
     self.histogram([track.pt for track in self.event.tracks], ax=ax, label='Tracks', output_file=output_file)
