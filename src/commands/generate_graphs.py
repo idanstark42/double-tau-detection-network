@@ -5,8 +5,7 @@ from time import time
 from .eval import evaluate
 
 from visualization.dataset_visualizer import DatasetVisualizer
-
-from settings import GRAPHS_DIR
+from settings import GRAPHS_DIR, MODELS_DIR
 
 DATASET_HISTOGRAMS = [
   'pileup',
@@ -57,6 +56,5 @@ def generate_graphs (dataset, module, params):
     return
   
   print('2. Generating model graphs')
-  weights = params.get('weights', '')
-  weigts_file = os.path.join(model_folder, weights)
+  weigts_file = os.path.join(MODELS_DIR, weights)
   evaluate(dataset, module, weigts_file, model_folder, params)
