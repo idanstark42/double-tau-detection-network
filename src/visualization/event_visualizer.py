@@ -47,6 +47,8 @@ class EventVisualizer:
     self.histogram([cluster.position().phi for cluster in self.event.clusters], ax=ax, label='Clusters', output_file=output_file)
 
   def histogram (self, values, ax=None, output_file=None, **kwargs):
+    print(kwargs['label'] if 'label' in kwargs else '')
+    print(values)
     if ax:
       ax.hist(values, bins=HISTOGRAM_BINS, edgecolor='black', histtype='step', alpha=0, **kwargs)
     else:
@@ -60,6 +62,7 @@ class EventVisualizer:
     if independent:
       fig, ax = plt.subplots()
     for index, map in enumerate(maps):
+      print(configs[index] if configs else {})
       if weights == None or weights[index] == None:
         ax.hist2d(*zip(*map), bins=self.resolution, range=[[0, 1], [0, 1]], **(configs[index] if configs else {}))
       else:
