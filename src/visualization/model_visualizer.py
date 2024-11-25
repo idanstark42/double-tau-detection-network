@@ -162,11 +162,11 @@ class ModelVisualizer:
     def load_hist(next):
       hist = [0] * HISTOGRAM_BINS
       bin_sizes = [0] * HISTOGRAM_BINS
-      range = max(field_values) - min(field_values)
-      if range == 0:
+      field_range = max(field_values) - min(field_values)
+      if field_range == 0:
         raise ValueError('The range of the field values is 0')
       for output, target, field_value in zip(outputs, targets, field_values):
-        bin_index = int((field_value - min(field_values)) / range * HISTOGRAM_BINS)
+        bin_index = int((field_value - min(field_values)) / field_range * HISTOGRAM_BINS)
         bin_index = min(HISTOGRAM_BINS - 1, max(0, bin_index))
         hist[bin_index] += 1 if output.distance(target) < 0.2 else 0
         bin_sizes[bin_index] += 1
