@@ -182,7 +182,7 @@ class ModelVisualizer:
       return
 
     if ax is None:
-      plt.step(range(HISTOGRAM_BINS), hist, edgecolor='black')
+      plt.step(range(HISTOGRAM_BINS), hist, color='black')
       plt.title(f'Reconstruction Rate by {label}')
       plt.xlabel(label)
       plt.ylabel('Reconstruction Rate (%)')
@@ -191,7 +191,7 @@ class ModelVisualizer:
         plt.savefig(output_file)
       self.show_if_should()
     else:
-      ax.step(range(HISTOGRAM_BINS), hist, edgecolor='black')
+      ax.step(range(HISTOGRAM_BINS), hist, color='black')
       ax.set_title(f'Reconstruction Rate by {label}')
       ax.set_xlabel(label)
       ax.set_ylabel('Reconstruction Rate (%)')
