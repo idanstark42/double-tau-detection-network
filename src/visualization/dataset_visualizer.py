@@ -281,4 +281,4 @@ class DatasetVisualizer:
     if self.show:
       plt.show()
     else:
-      plt.close()
+      plt.clf()

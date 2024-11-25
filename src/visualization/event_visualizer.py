@@ -61,7 +61,6 @@ class EventVisualizer:
     if independent:
       fig, ax = plt.subplots()
     for index, map in enumerate(maps):
-      print(configs[index] if configs else {})
       if weights == None or weights[index] == None:
         ax.hist2d(*zip(*map), bins=self.resolution, range=[[0, 1], [0, 1]], **(configs[index] if configs else {}))
       else:
@@ -89,4 +88,4 @@ class EventVisualizer:
     if self.show:
       plt.show()
     else:
-      plt.close()
+      plt.clf()
