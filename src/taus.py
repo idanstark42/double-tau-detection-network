@@ -60,6 +60,7 @@ def main (args):
 
   if command == 'generate-graphs':
     generate_graphs(dataset, module, params)
+    return
 
   if command == 'checkpoint':
     subcommand = args[1]
