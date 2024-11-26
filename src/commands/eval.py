@@ -20,7 +20,7 @@ def evaluate (dataset, module, model_file, output_folder, params):
   visualizer = ModelVisualizer(module, show=False)
   visualizer.show_reconstruction_rate_stats(outputs, targets, events, output_folder)
   sample_event_index = int(params.get('sample_event', np.random.randint(0, len(events))))
-  visualizer.sample_event_plot(events[sample_event_index], targets[sample_event_index], outputs[sample_event_index], os.path.join(output_folder, 'sample_event.png'))
+  visualizer.sample_event_plot(events[sample_event_index], targets[sample_event_index], outputs[sample_event_index], output_file=os.path.join(output_folder, 'sample_event.png'))
   print('4. Done')
 
 def load_data (dataset, n):
