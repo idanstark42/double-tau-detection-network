@@ -19,6 +19,9 @@ class ModelVisualizer:
     # like these lines only flat:
     output_positions = [Position(output[0], output[1]) for output in outputs] + [Position(output[2], output[3]) for output in outputs]
     target_positions = [Position(target[0], target[1]) for target in targets] + [Position(target[2], target[3]) for target in targets]
+
+    print('reconstruction rate:', sum([output.distance(target) < 0.2 for output, target in zip(output_positions, target_positions)]) / len(output_positions))
+
     self.distances_histogram(output_positions, target_positions, plt.gca())
     if output_folder:
       os.makedirs(output_folder, exist_ok=True)
