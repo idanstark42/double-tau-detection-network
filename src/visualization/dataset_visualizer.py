@@ -201,13 +201,13 @@ class DatasetVisualizer:
       'callback': lambda event: { 'Clusters': [len(event.clusters)], 'Cluster Energy [GeV]': [cluster.cal_e / 1000 for cluster in event.clusters] },
       'fields': ['Clusters', 'Cluster Energy [GeV]'],
       'type': '2d',
-      'config': { 'Cluster Energy [GeV]': { 'cross': 'follower', 'xlim': [0, 50] }, 'Clusters': { 'cross': 'leader' } }
+      'config': { 'Cluster Energy [GeV]': { 'cross': 'leader', 'xlim': [0, 50] }, 'Clusters': { 'cross': 'follower' } }
     },
     'cluster_count_vs_pt': {
       'callback': lambda event: { 'Clusters': [len(event.clusters)], 'Cluster pT [GeV]': [cluster.momentum().p_t / 1000 for cluster in event.clusters] },
       'fields': ['Clusters', 'Cluster pT [GeV]'],
       'type': '2d',
-      'config': { 'Cluster pT [GeV]': { 'cross': 'follower', 'xlim': [0, 50] }, 'Clusters': { 'cross': 'leader' } }
+      'config': { 'Cluster pT [GeV]': { 'cross': 'leader', 'xlim': [0, 50] }, 'Clusters': { 'cross': 'follower' } }
     },
     'cluster_count_vs_pileup': {
       'callback': lambda event: { 'Clusters': [len(event.clusters)], 'Pileup': [event.average_interactions_per_crossing] },
@@ -234,7 +234,7 @@ class DatasetVisualizer:
       'callback': lambda event: { 'Tracks': [len(event.tracks)], 'Track pT [GeV]': [track.pt / 1000 for track in event.tracks] },
       'fields': ['Tracks', 'Track pT [GeV]'],
       'type': '2d',
-      'config': { 'Track pT [GeV]': { 'cross': 'follower', 'xlim': [0, 50] }, 'Tracks': { 'cross': 'leader' } }
+      'config': { 'Track pT [GeV]': { 'cross': 'leader', 'xlim': [0, 50] }, 'Tracks': { 'cross': 'follower' } }
     },
     'track_count_vs_pileup': {
       'callback': lambda event: { 'Tracks': [len(event.tracks)], 'Pileup': [event.average_interactions_per_crossing] },
