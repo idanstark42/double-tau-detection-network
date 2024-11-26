@@ -14,7 +14,7 @@ def checkpoint (subcommand, dataset, model, params):
 
   if subcommand == 'extract':
     # extract the model and save it to the output file
-    output_file = modelfolder_path(params.get('output', 'checkpoint_extracted_model_' + checkpoint_data['name']))
+    output_file = modelfolder_path(params.get('output', 'checkpoint_extracted_model_' + checkpoint_data['name'] + '.pth'))
     os.makedirs(os.path.dirname(output_file), exist_ok=True)
     torch.save(model.state_dict(), output_file)
     return
