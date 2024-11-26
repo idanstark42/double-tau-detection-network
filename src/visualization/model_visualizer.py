@@ -55,7 +55,7 @@ class ModelVisualizer:
 
     fig, axs = plt.subplots(1, 5, figsize=(20, 4))
     fig.tight_layout(pad=2.0)
-    self.sample_event_plot(events[sample_event_index], targets[sample_event_index], outputs[sample_event_index], axs[1])
+    self.sample_event_plot(events[sample_event_index], targets[sample_event_index], outputs[sample_event_index], ax=axs[1])
     
     # each output and target is a list of four values, two for each tau. Each tau has an eta and a phi
     output_positions = [Position(output[0], output[1]) for output in outputs] + [Position(output[2], output[3]) for output in outputs]
@@ -95,7 +95,10 @@ class ModelVisualizer:
     ax.set_xticks([round((ETA_RANGE[0] + i * (ETA_RANGE[1] - ETA_RANGE[0]) / MAP_2D_TICKS) * 10) / 10 for i in range(MAP_2D_TICKS + 1)], [round((ETA_RANGE[0] + i * (ETA_RANGE[1] - ETA_RANGE[0]) / MAP_2D_TICKS) * 10) / 10 for i in range(MAP_2D_TICKS + 1)])
     ax.set_yticks([round((PHI_RANGE[0] + i * (PHI_RANGE[1] - PHI_RANGE[0]) / MAP_2D_TICKS) * 10) / 10 for i in range(MAP_2D_TICKS + 1)], [round((PHI_RANGE[0] + i * (PHI_RANGE[1] - PHI_RANGE[0]) / MAP_2D_TICKS) * 10) / 10 for i in range(MAP_2D_TICKS + 1)])
 
-  def sample_event_plot (self, event, target, output, ax):
+  def sample_event_plot (self, event, target, output, ax=None, output_file=None):
+    independent = ax is None
+    if ax is None:
+      fig, ax = plt.subplots()
     EventVisualizer(event).density_map(show_truth=False, ax=ax)
     circle_width = JET_SIZE / (ETA_RANGE[1] - ETA_RANGE[0])
     circle_height = JET_SIZE / (PHI_RANGE[1] - PHI_RANGE[0])
@@ -107,6 +110,10 @@ class ModelVisualizer:
     ax.set_title('Sample Event')
     ax.set_xlim(0, 1)
     ax.set_ylim(0, 1)
+
+    if independent:
+      plt.savefig(output_file)
+      self.show_if_should()
 
   def distances_histogram (self, starts, ends, ax):
     distances = [start.distance(end) for start, end in zip(starts, ends)]

@@ -1,4 +1,6 @@
 import torch
+import numpy as np
+import os
 
 from visualization.model_visualizer import ModelVisualizer
 from utils import long_operation
@@ -17,6 +19,8 @@ def evaluate (dataset, module, model_file, output_folder, params):
   print('3. Visualizing results')
   visualizer = ModelVisualizer(module, show=False)
   visualizer.show_reconstruction_rate_stats(outputs, targets, events, output_folder)
+  sample_event_index = int(params.get('sample_event', np.random.randint(0, len(events))))
+  visualizer.sample_event_plot(events[sample_event_index], targets[sample_event_index], outputs[sample_event_index], os.path.join(output_folder, 'sample_event.png'))
   print('4. Done')
 
 def load_data (dataset, n):
