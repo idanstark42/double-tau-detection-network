@@ -96,8 +96,9 @@ class ModelVisualizer:
     ax.set_yticks([round((PHI_RANGE[0] + i * (PHI_RANGE[1] - PHI_RANGE[0]) / MAP_2D_TICKS) * 10) / 10 for i in range(MAP_2D_TICKS + 1)], [round((PHI_RANGE[0] + i * (PHI_RANGE[1] - PHI_RANGE[0]) / MAP_2D_TICKS) * 10) / 10 for i in range(MAP_2D_TICKS + 1)])
 
   def sample_event_plot (self, event, target, output, ax=None, output_file=None):
-    independent = ax is None
-    if ax is None:
+    print('Sample Event Plot')
+    independent = ax == None
+    if independent:
       fig, ax = plt.subplots()
     EventVisualizer(event).density_map(show_truth=False, ax=ax)
     circle_width = JET_SIZE / (ETA_RANGE[1] - ETA_RANGE[0])
