@@ -47,13 +47,14 @@ def generate_graphs (dataset, module, params):
   os.makedirs(events_folder, exist_ok=True)
   os.makedirs(model_folder, exist_ok=True)
 
-  print('1. Generating dataset graphs')
-  dataset.normalize_energy = False
-  dataset_visualizer = DatasetVisualizer(dataset, show=False)
-  dataset_visualizer.sample_random_events(events_count, events_folder)
-  dataset_visualizer.multiple_histograms(DATASET_HISTOGRAMS, dataset_folder)
+  if params.get('skip', '') != 'dataset':
+    print('1. Generating dataset graphs')
+    dataset.normalize_energy = False
+    dataset_visualizer = DatasetVisualizer(dataset, show=False)
+    dataset_visualizer.sample_random_events(events_count, events_folder)
+    dataset_visualizer.multiple_histograms(DATASET_HISTOGRAMS, dataset_folder)
 
-  if params.get('weights', '') == '':
+  if params.get('weights', '') == '' or params.get('skip', '') == 'model':
     return
   
   print('2. Generating model graphs')

@@ -65,6 +65,7 @@ def main (args):
   if command == 'checkpoint':
     subcommand = args[1]
     checkpoint(subcommand, dataset, module, params)
+    return
 
   if command == 'show':
     scope = args[1]
