@@ -189,10 +189,12 @@ class ModelVisualizer:
       y, errs = long_operation(load_hist, max=len(outputs), message='Calculating histogram values')  
     except ValueError as e:
       print(e)
+      print(field_values)
       print(f'Skipping histogram for {label}')
       return
     except TypeError as e:
       print(e)
+      print(field_values)
       print(f'Skipping histogram for {label}')
       return
 
@@ -209,7 +211,6 @@ class ModelVisualizer:
       ax.errorbar(x, y, yerr=errs, color='black', fmt='o')
       ax.set_xlabel(label)
       ax.set_ylabel('Reconstruction Rate')
-      ax.set_xticks([0, int(HISTOGRAM_BINS / 2), HISTOGRAM_BINS], [round(min(field_values), 2), round((min(field_values) + max(field_values)) / 2, 2), round(max(field_values), 2)])
 
   def show_if_should (self):
     if self.show:
