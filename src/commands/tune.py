@@ -1,4 +1,4 @@
-from ray import tune
+from ray import tune, init
 import os
 
 from commands.train import train
@@ -16,6 +16,7 @@ def tune_hyperparameters (dataset, model, model_folder, options):
     submodel_folder = os.path.join(model_folder, '-'.join([f"{key}({value})" for key, value in config.items()]))
     return train(dataset, model, submodel_folder, { **options, **config, })
 
+  init(local_mode=True)
   # Start the hyperparameter search
   analysis = tune.run(train_model, config=search_space)
 

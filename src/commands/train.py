@@ -22,6 +22,7 @@ def train(dataset, model, model_folder, options={}):
   else:
     trainer = Trainer(dataset, model, model_folder, options)
   trainer.train_model()
+  return trainer.test_loss
 
 class Trainer:
 
@@ -211,6 +212,7 @@ class Trainer:
       total_loss = long_operation(run, max=len(self.test_loader) * self.batch_size, message='Testing ')
 
     self.print_test_summary(outputs, targets, total_loss)
+    return total_loss / len(self.test_loader)
 
   # proess initialization
 
