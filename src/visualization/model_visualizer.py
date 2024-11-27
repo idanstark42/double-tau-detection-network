@@ -189,12 +189,10 @@ class ModelVisualizer:
       y, errs = long_operation(load_hist, max=len(outputs), message='Calculating histogram values')  
     except ValueError as e:
       print(e)
-      print(field_values)
       print(f'Skipping histogram for {label}')
       return
     except TypeError as e:
       print(e)
-      print(field_values)
       print(f'Skipping histogram for {label}')
       return
 
