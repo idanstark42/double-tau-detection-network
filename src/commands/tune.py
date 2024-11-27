@@ -6,8 +6,8 @@ from commands.train import train
 
 def tune_hyperparameters (dataset, model, model_folder, options):
   search_space = {
-    "learning_rate": np.logspace(-5, -1, num=10),
-    "weight_decay": np.logspace(-5, -1, num=10),
+    "learning_rate": np.logspace(-5, -1, num=5),
+    "weight_decay": np.logspace(-5, -1, num=5),
     "batch_size": np.array([32, 64, 128, 256, 512])
   }
 
