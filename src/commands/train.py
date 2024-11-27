@@ -44,6 +44,7 @@ class Trainer:
     self.saving_mode = self.options.get('saving_mode', 'none')
     self.cache_type = self.options.get('cache', 'events')
     self.checkpoint = False
+    self.visualize = self.options.get('visualize', 'true') == 'true'
 
     self.split = int(self.options.get('split', '1'))
     self.limit = int(self.options.get('limit')) if self.options.get('limit') and self.split != 1 else None
@@ -328,6 +329,8 @@ class Trainer:
 
   def print_test_summary (self, outputs, targets, total_loss):
     print(f'\nTest set average loss: {total_loss / len(self.test_loader):.4f}\n')
+    if not self.visualize:
+      return
     if self.use_xla or self.use_cuda:
       outputs = [output.cpu() for output in outputs]
       targets = [target.cpu() for target in targets]

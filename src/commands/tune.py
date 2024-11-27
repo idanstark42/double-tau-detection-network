@@ -20,7 +20,7 @@ def tune_hyperparameters (dataset, model, model_folder, options):
   def train_model (config):
     config = { key: value for key, value in zip(search_space.keys(), config) }
     submodel_folder = os.path.join(model_folder, '-'.join([f"{key}({value})" for key, value in config.items()]))
-    return train(dataset, model, submodel_folder, { **options, **config, })
+    return train(dataset, model, submodel_folder, { **options, **config, 'visualize': False, 'epochs': 10 })
   
   print("Creating grid search space.")
   grid = np.array(np.meshgrid(*search_space.values())).T.reshape(-1, len(search_space))
