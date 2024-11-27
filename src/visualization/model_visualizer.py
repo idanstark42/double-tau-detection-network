@@ -191,6 +191,10 @@ class ModelVisualizer:
       print(e)
       print(f'Skipping histogram for {label}')
       return
+    except TypeError as e:
+      print(e)
+      print(f'Skipping histogram for {label}')
+      return
 
     if ax is None:
       plt.scatter(x, y, color='black')
