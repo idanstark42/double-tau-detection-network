@@ -166,7 +166,7 @@ class ModelVisualizer:
     def load_hist(next):
       hist = [0] * HISTOGRAM_BINS
       bin_sizes = [0] * HISTOGRAM_BINS
-      if len(field_values) == 0 or not isinstance(field_values[0], (int, float)):
+      if len(field_values) == 0 or not isinstance(field_values[0], (int, float, np.int64, np.float64, np.float32, np.int32)):
         raise ValueError('The field values are not numbers')
       field_range = max(field_values) - min(field_values)
       if field_range == 0:
