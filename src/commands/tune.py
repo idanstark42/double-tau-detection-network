@@ -18,7 +18,7 @@ def tune_hyperparameters (dataset, model, model_folder, options):
 
   # Define the training function
   def train_model (config):
-    print(config)
+    config = { key: value for key, value in zip(search_space.keys(), config) }
     submodel_folder = os.path.join(model_folder, '-'.join([f"{key}({value})" for key, value in config.items()]))
     return train(dataset, model, submodel_folder, { **options, **config, })
   
