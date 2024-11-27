@@ -12,13 +12,16 @@ class Event:
   def __init__ (self, event, clusters, tracks, truth, event_fields, clusters_fields, tracks_fields, truthTaus_fields, normalize_fields=False, normalize_energy=True):
     self.average_interactions_per_crossing = event[0]
     self.mc_channel_number = event[1] if len(event) > 1 else 0
+
+
+    # if the clusters are a string, print the string
+    if isinstance(clusters[0], str):
+      print(clusters[0])
+
     self.clusters = [Cluster(cluster, clusters_fields) for cluster in clusters if cluster['valid']]
     self.tracks = [Track(track, tracks_fields) for track in tracks if track['valid']]
     self.truths = [Truth(truth, truthTaus_fields) for truth in truth if truth['valid']]
 
-    # if the clusters are a string, print the string
-    if isinstance(clusters, str):
-      print(clusters)
 
     self.clusters = [cluster for cluster in self.clusters if cluster.position().in_range()]
     self.tracks = [track for track in self.tracks if track.position().in_range()]
