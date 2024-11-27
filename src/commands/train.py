@@ -202,9 +202,9 @@ class Trainer:
         for batch_idx, (input, target) in enumerate(self.test_loader):
           output, loss = self.calc(input, target)
           next(self.batch_size)
-        for index, (output, target) in enumerate(zip(output, target)):
-          outputs.append(output)
-          targets.append(target)
+          for index, (output, target) in enumerate(zip(output, target)):
+            outputs.append(output)
+            targets.append(target)
           total_loss += loss.item()
         return total_loss
       

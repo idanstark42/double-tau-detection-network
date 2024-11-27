@@ -41,7 +41,6 @@ class ModelVisualizer:
   def show_losses(self, losses, output_file):
     plt.plot([loss[0] for loss in losses], label='Train Loss')
     plt.plot([loss[1] for loss in losses], label='Validation Loss')
-    plt.title('Model Loss Over Epochs')
     plt.xlabel('Epoch')
     plt.ylabel('Loss')
     plt.yscale('log')
@@ -87,7 +86,6 @@ class ModelVisualizer:
       else:
         arrow_with_color(start.eta, start.phi, end.eta - start.eta, end.phi - start.phi, **kwargs)
 
-    ax.set_title('Arrows on η and φ')
     ax.set_xlabel('eta')
     ax.set_ylabel('phi')
     ax.set_xlim(ETA_RANGE[0], ETA_RANGE[1])
@@ -108,7 +106,6 @@ class ModelVisualizer:
     for i in range(0, len(output), 2):
       ax.add_patch(patches.Ellipse(Position(output[i], output[i+1]).relative(), circle_width, circle_height, color='blue', fill=False))
     
-    ax.set_title('Sample Event')
     ax.set_xlim(0, 1)
     ax.set_ylim(0, 1)
 
@@ -119,7 +116,6 @@ class ModelVisualizer:
   def distances_histogram (self, starts, ends, ax):
     distances = [start.distance(end) for start, end in zip(starts, ends)]
     ax.hist(distances, bins=HISTOGRAM_BINS, edgecolor='black', histtype='step', density=True)
-    ax.set_title('Distances')
     ax.set_xlabel('Distance')
     ax.set_ylabel('Density')
 
@@ -127,7 +123,6 @@ class ModelVisualizer:
     distances = [start.distance(end) for start, end in zip(starts, ends)]
     pts = [event.total_visible_four_momentum().p_t for event in events] * 2
     ax.scatter(pts, distances, s=1)
-    ax.set_title('Distances by pT')
     ax.set_xlabel('pT [GeV]')
     ax.set_ylabel('Distance')
   
@@ -149,7 +144,6 @@ class ModelVisualizer:
     
     plt.hist(parametrers, bins=HISTOGRAM_BINS, edgecolor='black', density=True)
     plt.yscale('log')
-    plt.title('Parameters Histogram')
     plt.xlabel('Parameter Value')
     plt.ylabel('Density')
     plt.savefig(output_file)
@@ -163,7 +157,6 @@ class ModelVisualizer:
       print(channel, len(channels[channel]))
       ax.hist(channels[channel], bins=HISTOGRAM_BINS, histtype='step', label=channel, alpha=0.5, linewidth=2, density=True)
     ax.legend()
-    ax.set_title('Distances by Channel')
     ax.set_xlabel('Distance')
     ax.set_ylabel('Density')
 
@@ -185,29 +178,33 @@ class ModelVisualizer:
         bin_sizes[bin_index] += 1
         next()
       
-      return [100 * hist[i] / bin_sizes[i] if bin_sizes[i] != 0 else 0 for i in range(HISTOGRAM_BINS)]
+      values = [hist[i] / bin_sizes[i] if bin_sizes[i] != 0 else 0 for i in range(HISTOGRAM_BINS)]
+      errors = [np.sqrt(value * (1 - value) / bin_size) if bin_size != 0 else 0 for value, bin_size in zip(values, bin_sizes)]
+      return values, errors
 
     try:
-      hist = long_operation(load_hist, max=len(outputs), message='Calculating histogram values')  
+      min_field_value = min(field_values)
+      field_values_range = max(field_values) - min_field_value
+      x = [min_field_value + field_values_range * i / HISTOGRAM_BINS for i in range(HISTOGRAM_BINS)]
+      y, errs = long_operation(load_hist, max=len(outputs), message='Calculating histogram values')  
     except ValueError as e:
       print(e)
       print(f'Skipping histogram for {label}')
       return
 
     if ax is None:
-      plt.step(range(HISTOGRAM_BINS), hist, color='black')
-      plt.title(f'Reconstruction Rate by {label}')
+      plt.scatter(x, y, color='black')
+      plt.errorbar(x, y, yerr=errs, color='black')
       plt.xlabel(label)
-      plt.ylabel('Reconstruction Rate (%)')
-      plt.xticks([0, int(HISTOGRAM_BINS / 2), HISTOGRAM_BINS], [round(min(field_values), 2), round((min(field_values) + max(field_values)) / 2, 2), round(max(field_values), 2)])
+      plt.ylabel('Reconstruction Rate')
       if output_file:
         plt.savefig(output_file)
       self.show_if_should()
     else:
-      ax.step(range(HISTOGRAM_BINS), hist, color='black')
-      ax.set_title(f'Reconstruction Rate by {label}')
+      ax.scatter(x, y, color='black')
+      ax.errorbar(x, y, yerr=errs, color='black')
       ax.set_xlabel(label)
-      ax.set_ylabel('Reconstruction Rate (%)')
+      ax.set_ylabel('Reconstruction Rate')
       ax.set_xticks([0, int(HISTOGRAM_BINS / 2), HISTOGRAM_BINS], [round(min(field_values), 2), round((min(field_values) + max(field_values)) / 2, 2), round(max(field_values), 2)])
 
   def show_if_should (self):

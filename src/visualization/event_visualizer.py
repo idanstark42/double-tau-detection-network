@@ -52,12 +52,10 @@ class EventVisualizer:
   def histogram (self, values, title, x_label, yl_label, ax=None, output_file=None, **kwargs):
     if ax:
       ax.hist(values, bins=HISTOGRAM_BINS, edgecolor='black', histtype='step', density=True, **kwargs)
-      ax.set_title(title)
       ax.set_xlabel(x_label)
       ax.set_ylabel(yl_label)
     else:
       plt.hist(values, bins=HISTOGRAM_BINS, edgecolor='black', histtype='step', density=True, **kwargs)
-      plt.title(title)
       plt.xlabel(x_label)
       plt.ylabel(yl_label)
       if output_file:
@@ -79,10 +77,6 @@ class EventVisualizer:
       else:
         ax.hist2d(*zip(*map), bins=self.resolution, range=[[0, 1], [0, 1]], weights=weights[index], **config)
       
-      # title
-      if title:
-        ax.set_title(title)
-
       # colorbar
       colorbar = plt.colorbar(ax.collections[-1], ax=ax)
       if label:
