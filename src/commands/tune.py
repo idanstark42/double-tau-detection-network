@@ -1,7 +1,7 @@
 from ray import tune
 import os
 
-from src.commands.train import train
+from commands.train import train
 
 def tune_hyperparameters (dataset, model, model_folder, options):
   # Define the search space
