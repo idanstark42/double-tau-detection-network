@@ -194,7 +194,7 @@ class ModelVisualizer:
 
     if ax is None:
       plt.scatter(x, y, color='black')
-      plt.errorbar(x, y, yerr=errs, color='black')
+      plt.errorbar(x, y, yerr=errs, color='black', fmt='o')
       plt.xlabel(label)
       plt.ylabel('Reconstruction Rate')
       if output_file:
@@ -202,7 +202,7 @@ class ModelVisualizer:
       self.show_if_should()
     else:
       ax.scatter(x, y, color='black')
-      ax.errorbar(x, y, yerr=errs, color='black')
+      ax.errorbar(x, y, yerr=errs, color='black', fmt='o')
       ax.set_xlabel(label)
       ax.set_ylabel('Reconstruction Rate')
       ax.set_xticks([0, int(HISTOGRAM_BINS / 2), HISTOGRAM_BINS], [round(min(field_values), 2), round((min(field_values) + max(field_values)) / 2, 2), round(max(field_values), 2)])
