@@ -177,7 +177,7 @@ class ModelVisualizer:
         bin_sizes[bin_index] += 1
         next()
       
-      return [100 * hist[i] / bin_sizes[i] if bin_sizes[i] != 0 else 0 for i in range(HISTOGRAM_BINS)]
+      return [hist[i] / bin_sizes[i] if bin_sizes[i] != 0 else 0 for i in range(HISTOGRAM_BINS)]
 
     try:
       hist = long_operation(load_hist, max=len(outputs), message='Calculating histogram values')  
@@ -190,7 +190,7 @@ class ModelVisualizer:
       plt.step(range(HISTOGRAM_BINS), hist, color='black')
       plt.title(f'Reconstruction Rate by {label}')
       plt.xlabel(label)
-      plt.ylabel('Reconstruction Rate (%)')
+      plt.ylabel('Reconstruction Rate')
       plt.xticks([0, int(HISTOGRAM_BINS / 2), HISTOGRAM_BINS], [round(min(field_values), 2), round((min(field_values) + max(field_values)) / 2, 2), round(max(field_values), 2)])
       if output_file:
         plt.savefig(output_file)
@@ -199,7 +199,7 @@ class ModelVisualizer:
       ax.step(range(HISTOGRAM_BINS), hist, color='black')
       ax.set_title(f'Reconstruction Rate by {label}')
       ax.set_xlabel(label)
-      ax.set_ylabel('Reconstruction Rate (%)')
+      ax.set_ylabel('Reconstruction Rate')
       ax.set_xticks([0, int(HISTOGRAM_BINS / 2), HISTOGRAM_BINS], [round(min(field_values), 2), round((min(field_values) + max(field_values)) / 2, 2), round(max(field_values), 2)])
 
   def show_if_should (self):
