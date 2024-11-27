@@ -1,6 +1,6 @@
 import numpy as np
 import os
-from math import Infinity
+from math import inf as Infinity
 
 from commands.train import train
 
