@@ -213,7 +213,7 @@ class Trainer:
       total_loss = long_operation(run, max=len(self.test_loader) * self.batch_size, message='Testing ')
 
     self.print_test_summary(outputs, targets, total_loss)
-    return total_loss / len(self.test_loader)
+    self.test_loss = total_loss / len(self.test_loader)
 
   # proess initialization
 
@@ -329,13 +329,11 @@ class Trainer:
 
   def print_test_summary (self, outputs, targets, total_loss):
     print(f'\nTest set average loss: {total_loss / len(self.test_loader):.4f}\n')
-    if not self.visualize:
-      return
-    if self.use_xla or self.use_cuda:
-      outputs = [output.cpu() for output in outputs]
-      targets = [target.cpu() for target in targets]
-    events = [self.dataset.get_event(index) for index in self.test_loader.dataset.indices]
-    ModelVisualizer(self.model).plot_results(outputs, targets, events, os.path.join(self.model_folder, 'graphs.png'))
+    # if self.use_xla or self.use_cuda:
+    #   outputs = [output.cpu() for output in outputs]
+    #   targets = [target.cpu() for target in targets]
+    # events = [self.dataset.get_event(index) for index in self.test_loader.dataset.indices]
+    # ModelVisualizer(self.model, show=self.visualize).plot_results(outputs, targets, events, os.path.join(self.model_folder, 'graphs.png'))
 
   def print_summary (self):
     print()
