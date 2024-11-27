@@ -6,7 +6,7 @@ from utils import datafile_path, modelfolder_path
 
 from commands.show import show
 from commands.train import train
-from commands.tune import tune
+from commands.tune import tune_hyperparameters
 from commands.eval import evaluate
 from commands.detect import detect
 from commands.proliferate import proliferate
@@ -81,7 +81,7 @@ def main (args):
   
   if command == 'tune':
     folder = modelfolder_path(params.get('folder', 'model_' + str(round(time.time() * 1000))))
-    tune(dataset, module, folder, params)
+    tune_hyperparameters(dataset, module, folder, params)
     return
 
   if command == 'eval':
