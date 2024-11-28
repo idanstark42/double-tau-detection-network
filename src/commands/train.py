@@ -331,16 +331,7 @@ class Trainer:
     print(f'\nTest set average loss: {total_loss / len(self.test_loader):.4f}\n')
 
   def print_summary (self):
-    print()
-    print('Done')
-    print()
-    print(f'Time: {seconds_to_time(time.time() - self.start_time)}')
-    print(f'(trainig: {seconds_to_time(sum([self.epoch_start_times[i + 1] - self.epoch_start_times[i] for i in range(len(self.epoch_start_times) - 1)]))}, testing: {seconds_to_time(time.time() - self.test_start_time)})')
-    print(f'Average Epoch Time: {seconds_to_time(sum([self.epoch_start_times[i + 1] - self.epoch_start_times[i] for i in range(len(self.epoch_start_times) - 1)]) / len(self.epoch_start_times))}')
     print(f'Best Validation Loss: {self.best_validation_loss}')
-
-    # Plot the losses as a function of epoch
-    ModelVisualizer(self.model).show_losses(self.losses, os.path.join(self.model_folder, 'losses.png'))
 
   # io operations
 
