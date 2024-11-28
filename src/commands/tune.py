@@ -30,7 +30,7 @@ def tune_hyperparameters (dataset, model, model_folder, options):
   losses = []
   print("Starting grid search.")
   for config in grid:
-    loss = (config, train_model(config))
+    loss = train_model(config)
     losses.append((loss, config))
     if loss < best_loss:
       best_loss = loss
