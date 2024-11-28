@@ -180,7 +180,7 @@ class ModelVisualizer:
       
       values = [hist[i] / bin_sizes[i] if bin_sizes[i] != 0 else 0 for i in range(HISTOGRAM_BINS)]
       errors = [np.sqrt(value * (1 - value) / bin_size) if bin_size != 0 else 0 for value, bin_size in zip(values, bin_sizes)]
-      return values, errors
+      return [value for value, bin_size in zip(values, bin_sizes) if bin_size != 0], [error for error, bin_size in zip(errors, bin_sizes) if bin_size != 0]
 
     try:
       min_field_value = min(field_values)
