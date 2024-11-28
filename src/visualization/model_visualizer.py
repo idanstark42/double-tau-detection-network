@@ -28,14 +28,14 @@ class ModelVisualizer:
       plt.savefig(os.path.join(output_folder, 'distances_histogram.png'))
     self.show_if_should()
 
-    self.plot_reconstruction_rate_by(output_positions, target_positions, events, lambda event: event.total_visible_four_momentum().p_t / 1000, 'X pT [GeV]', os.path.join(output_folder, 'reconstruction_rate_by_pt.png'))
+    self.plot_reconstruction_rate_by(output_positions, target_positions, events, lambda event: event.total_visible_four_momentum().p_t / 1000, 'X pT [GeV]', os.path.join(output_folder, 'reconstruction_rate_by_pt.png'), x_range=(100, 150))
     self.plot_reconstruction_rate_by(output_positions, target_positions, events, lambda event: event.total_visible_four_momentum().eta, 'X η', os.path.join(output_folder, 'reconstruction_rate_by_eta.png'))
     self.plot_reconstruction_rate_by(output_positions, target_positions, events, lambda event: event.total_visible_four_momentum().phi, 'X φ', os.path.join(output_folder, 'reconstruction_rate_by_phi.png'))
-    self.plot_reconstruction_rate_by(output_positions, target_positions, events, lambda event: event.total_visible_four_momentum().m / 1000, 'X mass [GeV]', os.path.join(output_folder, 'reconstruction_rate_by_m.png'))
+    self.plot_reconstruction_rate_by(output_positions, target_positions, events, lambda event: event.total_visible_four_momentum().m / 1000, 'X mass [GeV]', os.path.join(output_folder, 'reconstruction_rate_by_m.png'), x_range=(0, 80))
 
     self.plot_reconstruction_rate_by(output_positions, target_positions, events, lambda event: event.average_interactions_per_crossing, 'average interactions per crossing', os.path.join(output_folder, 'reconstruction_rate_by_interactions.png'))
     events = [event for event in events if len(event.truths) >= 2]
-    self.plot_reconstruction_rate_by(output_positions, target_positions, events, lambda event: event.angular_distance_between_taus(), 'ΔR', os.path.join(output_folder, 'reconstruction_rate_by_angular_distance.png'))
+    self.plot_reconstruction_rate_by(output_positions, target_positions, events, lambda event: event.angular_distance_between_taus(), 'ΔR', os.path.join(output_folder, 'reconstruction_rate_by_angular_distance.png'), x_range=(0, 1))
     self.plot_reconstruction_rate_by(output_positions, target_positions, events, lambda event: event.mass_by_channel_number(), 'Theoretical X mass [GeV]', os.path.join(output_folder, 'reconstruction_rate_by_mc_channel_number.png'))
   
   def show_losses(self, losses, output_file):
@@ -160,41 +160,39 @@ class ModelVisualizer:
     ax.set_xlabel('Distance')
     ax.set_ylabel('Density')
 
-  def plot_reconstruction_rate_by (self, outputs, targets, events, get, label, output_file, ax=None):
+  def plot_reconstruction_rate_by (self, outputs, targets, events, get, label, output_file, ax=None, x_range=None, bins=HISTOGRAM_BINS):
     field_values = [get(event) for event in events] * 2
+
+    if len(field_values) == 0 or not isinstance(field_values[0], (int, float, np.int64, np.float64, np.float32, np.int32)):
+      print(f'Skipping histogram for {label}. Field values are not numbers.')
+      return
+    
+    field_range = max(field_values) - min(field_values)
+    if field_range == 0:
+      print(f'Skipping histogram for {label}. Field range is 0.')
+      return
+    
+    if x_range is None:
+      min_field_value = min(field_values)
+      x_range = (min_field_value, min_field_value + field_range)
+    
+    x = np.linspace(x_range[0], x_range[1], bins)
     
     def load_hist(next):
-      hist = [0] * HISTOGRAM_BINS
-      bin_sizes = [0] * HISTOGRAM_BINS
-      if len(field_values) == 0 or not isinstance(field_values[0], (int, float, np.int64, np.float64, np.float32, np.int32)):
-        raise ValueError('The field values are not numbers')
-      field_range = max(field_values) - min(field_values)
-      if field_range == 0:
-        raise ValueError('The range of the field values is 0')
+      hist = [0] * len(x)
+      bin_sizes = [0] * len(x)
       for output, target, field_value in zip(outputs, targets, field_values):
-        bin_index = int((field_value - min(field_values)) / field_range * HISTOGRAM_BINS)
-        bin_index = min(HISTOGRAM_BINS - 1, max(0, bin_index))
-        hist[bin_index] += 1 if output.distance(target) < 0.2 else 0
-        bin_sizes[bin_index] += 1
+        bin_index = int((field_value - x_range[0]) / (x_range[1] - x_range[0]) * len(x))
+        if 0 <= bin_index and bin_index < len(x):
+          hist[bin_index] += 1 if output.distance(target) < 0.2 else 0
+          bin_sizes[bin_index] += 1
         next()
       
-      values = [hist[i] / bin_sizes[i] if bin_sizes[i] != 0 else 0 for i in range(HISTOGRAM_BINS)]
+      values = [hist[i] / bin_sizes[i] if bin_sizes[i] != 0 else 0 for i in range(len(x))]
       errors = [np.sqrt(value * (1 - value) / bin_size) if bin_size != 0 else 0 for value, bin_size in zip(values, bin_sizes)]
       return [value for value, bin_size in zip(values, bin_sizes) if bin_size != 0], [error for error, bin_size in zip(errors, bin_sizes) if bin_size != 0]
 
-    try:
-      min_field_value = min(field_values)
-      field_values_range = max(field_values) - min_field_value
-      x = [min_field_value + field_values_range * i / HISTOGRAM_BINS for i in range(HISTOGRAM_BINS)]
-      y, errs = long_operation(load_hist, max=len(outputs), message='Calculating histogram values')  
-    except ValueError as e:
-      print(e)
-      print(f'Skipping histogram for {label}')
-      return
-    except TypeError as e:
-      print(e)
-      print(f'Skipping histogram for {label}')
-      return
+    y, errs = long_operation(load_hist, max=len(outputs), message='Calculating histogram values')  
 
     if ax is None:
       plt.scatter(x, y, color='black')
