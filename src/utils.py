@@ -80,4 +80,4 @@ def scatter_histogram (values, ax, bins, range=None):
   y, bin_edges = np.histogram(values, bins=bins, density=True, range=range)
   x = (bin_edges[:-1] + bin_edges[1:]) / 2
   ax.scatter(x, y, s=1)
-  ax.errobar(x, y, yerr=np.sqrt(y * (1 - y) / len(values)), xerr=[(bin_edges[1] - bin_edges[0]) / 2] * len(x), fmt='o', color='black')
+  ax.errorbar(x, y, yerr=np.sqrt(y * (1 - y) / len(values)), xerr=[(bin_edges[1] - bin_edges[0]) / 2] * len(x), fmt='o', color='black')
