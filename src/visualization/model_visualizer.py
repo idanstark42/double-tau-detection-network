@@ -6,7 +6,7 @@ import numpy as np
 from data.position import Position
 from .event_visualizer import EventVisualizer
 from settings import PHI_RANGE, ETA_RANGE, JET_SIZE, MAP_2D_TICKS, ARROWS_NUMBER, HISTOGRAM_BINS, CHANNEL_START
-from utils import long_operation
+from utils import long_operation, scatter_histogram
 
 phi_range_size = abs(PHI_RANGE[1] - PHI_RANGE[0])
 
@@ -115,7 +115,7 @@ class ModelVisualizer:
 
   def distances_histogram (self, starts, ends, ax):
     distances = [start.distance(end) for start, end in zip(starts, ends)]
-    ax.hist(distances, bins=HISTOGRAM_BINS, edgecolor='black', histtype='step', density=True)
+    scatter_histogram(distances, ax, bins=HISTOGRAM_BINS)
     ax.set_xlabel('Distance')
     ax.set_ylabel('Density')
 

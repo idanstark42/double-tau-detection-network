@@ -4,7 +4,7 @@ import os
 
 from .event_visualizer import EventVisualizer
 from settings import HISTOGRAM_BINS, MAX_HISTOGRAM_SIZE
-from utils import long_operation, python_name_from_dtype_name
+from utils import long_operation, python_name_from_dtype_name, scatter_histogram
 
 class DatasetVisualizer:
   def __init__ (self, dataset, show=True):
@@ -107,7 +107,8 @@ class DatasetVisualizer:
 
   def draw_histogram (self, fields, field_configs, result, config, output_file):
     if len(fields) == 1:
-      plt.hist(result[fields[0]], bins=HISTOGRAM_BINS, edgecolor='black', histtype='step', density=True, range=field_configs[0].get('xlim', None))
+      fig, ax = plt.subplots()
+      scatter_histogram(result[fields[0]], ax, HISTOGRAM_BINS, range=field_configs[0].get('xlim', None))
       plt.xlabel(fields[0])
       plt.ylabel('Density')
       if 'xlim' in field_configs[0]:
@@ -124,7 +125,7 @@ class DatasetVisualizer:
       for index, field in enumerate(fields):
         hist = np.array(result[field]).flatten().tolist()
         ax = axes[index] if len(fields) > 1 else axes
-        ax.hist(hist, bins=HISTOGRAM_BINS, edgecolor='black', alpha=0, density=True, range=field_configs[index].get('xlim', None))
+        scatter_histogram(hist, ax, HISTOGRAM_BINS, range=field_configs[index].get('xlim', None))
         ax.set_xlabel(field)
         ax.set_ylabel('Density')
         if config.get('x-log', False):

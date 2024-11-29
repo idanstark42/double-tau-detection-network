@@ -4,7 +4,7 @@ from numpy import pi
 import matplotlib.patches as patches
 
 from settings import MAP_2D_TICKS, ETA_RANGE, PHI_RANGE, HISTOGRAM_BINS, JET_SIZE
-from utils import transparent_cmap
+from utils import scatter_histogram
 
 from data.position import Position
 
@@ -54,11 +54,12 @@ class EventVisualizer:
 
   def histogram (self, values, title, x_label, yl_label, ax=None, output_file=None, **kwargs):
     if ax:
-      ax.hist(values, bins=HISTOGRAM_BINS, edgecolor='black', histtype='step', density=True, **kwargs)
+      scatter_histogram(values, ax, HISTOGRAM_BINS)
       ax.set_xlabel(x_label)
       ax.set_ylabel(yl_label)
     else:
-      plt.hist(values, bins=HISTOGRAM_BINS, edgecolor='black', histtype='step', density=True, **kwargs)
+      fig, ax = plt.subplots()
+      scatter_histogram(values, ax, HISTOGRAM_BINS)
       plt.xlabel(x_label)
       plt.ylabel(yl_label)
       if output_file:
