@@ -190,9 +190,9 @@ class ModelVisualizer:
       
       values = [hist[i] / bin_sizes[i] if bin_sizes[i] != 0 else 0 for i in range(len(x))]
       errors = [np.sqrt(value * (1 - value) / bin_size) if bin_size != 0 else 0 for value, bin_size in zip(values, bin_sizes)]
-      return [value for value, bin_size in zip(values, bin_sizes) if bin_size != 0], [error for error, bin_size in zip(errors, bin_sizes) if bin_size != 0]
+      return [x_value for x_value, bin_size in zip(x, bin_sizes) if bin_size != 0], [value for value, bin_size in zip(values, bin_sizes) if bin_size != 0], [error for error, bin_size in zip(errors, bin_sizes) if bin_size != 0]
 
-    y, errs = long_operation(load_hist, max=len(outputs), message='Calculating histogram values')  
+    x, y, errs = long_operation(load_hist, max=len(outputs), message='Calculating histogram values')  
 
     if ax is None:
       plt.scatter(x, y, color='black')
