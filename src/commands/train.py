@@ -221,8 +221,8 @@ class Trainer:
     self.use_cuda = torch.cuda.is_available()
     if self.use_cuda:
       # spawen start method to avoid error
-      torch.multiprocessing.set_start_method('spawn')
-      torch.multiprocessing.set_sharing_strategy('file_system')
+      # torch.multiprocessing.set_start_method('spawn')
+      # torch.multiprocessing.set_sharing_strategy('file_system')
       self.model = self.model.cuda()
     self.device = torch.device('cuda' if self.use_cuda else 'cpu')
 
