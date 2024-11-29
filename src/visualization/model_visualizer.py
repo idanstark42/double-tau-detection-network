@@ -196,7 +196,7 @@ class ModelVisualizer:
 
     if ax is None:
       plt.scatter(x, y, color='black')
-      plt.errorbar(x, y, yerr=errs, color='black', fmt='o')
+      plt.errorbar(x, y, yerr=errs, xerr=[(x[1] - x[0]) / 2] * len(x), color='black', fmt='o')
       plt.xlabel(label)
       plt.ylabel('Reconstruction Rate')
       if output_file:
@@ -204,7 +204,7 @@ class ModelVisualizer:
       self.show_if_should()
     else:
       ax.scatter(x, y, color='black')
-      ax.errorbar(x, y, yerr=errs, color='black', fmt='o')
+      ax.errorbar(x, y, yerr=errs, xerr=[(x[1] - x[0]) / 2] * len(x), color='black', fmt='o')
       ax.set_xlabel(label)
       ax.set_ylabel('Reconstruction Rate')
 
