@@ -2,7 +2,7 @@ import numpy as np
 import os
 from math import inf as Infinity
 
-from commands.train import train
+from commands.train import Trainer
 
 def tune_hyperparameters (dataset, model, model_folder, options):
   search_space = {
@@ -16,11 +16,17 @@ def tune_hyperparameters (dataset, model, model_folder, options):
   for key, values in search_space.items():
     print(f"  {key}: {values}")
 
+  trainer = Trainer(dataset, model, model_folder, options)
+
   # Define the training function
   def train_model (config):
     config = { key: value for key, value in zip(search_space.keys(), config) }
     submodel_folder = os.path.join(model_folder, '-'.join([f"{key}({value})" for key, value in config.items()]))
-    return train(dataset, model, submodel_folder, { **options, **config, 'visualize': False, 'epochs': 10 })
+    trainer.options = { **trainer.options, **config, 'model_folder': submodel_folder }
+    trainer.load_options()
+    trainer.load_initial_state()
+    trainer.train_model()
+    return trainer.test_loss
   
   print("Creating grid search space.")
   grid = np.array(np.meshgrid(*search_space.values())).T.reshape(-1, len(search_space))
