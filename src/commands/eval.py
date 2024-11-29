@@ -10,7 +10,7 @@ def evaluate (dataset, module, model_file, output_folder, params):
   batch_size = int(params.get('batch_size', BATCH_SIZE))
   module.eval()
   print()
-  print('1. Loading data')
+  print('1. Loading data. n=' + str(n))
   events, inputs, targets = load_data(dataset, n)
   print('2. Running model')
   outputs = run_model(module, inputs, batch_size)
