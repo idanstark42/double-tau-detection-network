@@ -1,9 +1,12 @@
 from matplotlib import pyplot as plt
 from matplotlib.colors import LogNorm
 from numpy import pi
+import matplotlib.patches as patches
 
-from settings import MAP_2D_TICKS, ETA_RANGE, PHI_RANGE, HISTOGRAM_BINS
+from settings import MAP_2D_TICKS, ETA_RANGE, PHI_RANGE, HISTOGRAM_BINS, JET_SIZE
 from utils import transparent_cmap
+
+from data.position import Position
 
 class EventVisualizer:
   def __init__ (self, event, resolution = 100, show=True):
@@ -87,7 +90,10 @@ class EventVisualizer:
 
 
     if scatter != None:
-      ax.scatter(*zip(*scatter), s=30, c='black', marker='x')
+      circle_width = JET_SIZE / (ETA_RANGE[1] - ETA_RANGE[0])
+      circle_height = JET_SIZE / (PHI_RANGE[1] - PHI_RANGE[0])
+      for point in scatter:
+        ax.add_patch(patches.Ellipse(Position(point[0], point[1]).relative(), circle_width, circle_height, color='red', fill=False))
     # set the axis to show the full eta and phi range
     ax.set_xticks([i / MAP_2D_TICKS for i in range(MAP_2D_TICKS + 1)], [round((ETA_RANGE[0] + i * (ETA_RANGE[1] - ETA_RANGE[0]) / MAP_2D_TICKS) * 10) / 10 for i in range(MAP_2D_TICKS + 1)])
     ax.set_yticks([i / MAP_2D_TICKS for i in range(MAP_2D_TICKS + 1)], [round((PHI_RANGE[0] + i * (PHI_RANGE[1] - PHI_RANGE[0]) / MAP_2D_TICKS) * 10) / 10 for i in range(MAP_2D_TICKS + 1)])
