@@ -113,9 +113,9 @@ class DatasetVisualizer:
       plt.ylabel('Density')
       if 'xlim' in field_configs[0]:
         plt.xlim(field_configs[0]['xlim'])
-      if config.get('x-log', False):
+      if field_configs[0].get('x-log', False):
         plt.xscale('log')
-      if config.get('y-log', False):
+      if field_configs[0].get('y-log', False):
         plt.yscale('log')
       if output_file:
         plt.savefig(output_file)
@@ -130,9 +130,9 @@ class DatasetVisualizer:
         scatter_histogram(hist, ax, HISTOGRAM_BINS, range=field_configs[index].get('xlim', None), type=field_configs[index].get('type', 'percentage'))
         ax.set_xlabel(field)
         ax.set_ylabel('Density')
-        if config.get('x-log', False):
+        if field_configs[index].get('x-log', False):
           ax.set_xscale('log')
-        if config.get('y-log', False):
+        if field_configs[index].get('y-log', False):
           ax.set_yscale('log')
       if output_file:
         plt.savefig(output_file)
