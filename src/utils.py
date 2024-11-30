@@ -74,10 +74,17 @@ def transparent_cmap (cmap_name):
     colors[:, -1] = np.linspace(0, 1, base_cmap.N)  # Gradual transparency
     return ListedColormap(colors)
 
-def scatter_histogram (values, ax, bins, range=None):
+def scatter_histogram (values, ax, bins, range=None, type='none'):
+  density = type == 'density'
+  normalize = type == 'percentage'
+  
   if range == None:
     range = (min(values), max(values))
-  y, bin_edges = np.histogram(values, bins=bins, density=True, range=range)
+  y, bin_edges = np.histogram(values, bins=bins, density=density, range=range)
   x = (bin_edges[:-1] + bin_edges[1:]) / 2
+  if normalize:
+    y /= sum(y)
   ax.scatter(x, y, s=1)
   ax.errorbar(x, y, yerr=np.sqrt(y * (1 - y) / len(values)), xerr=[(bin_edges[1] - bin_edges[0]) / 2] * len(x), fmt='o', color='black')
+  if normalize:
+    ax.set_ylim(0, 1)

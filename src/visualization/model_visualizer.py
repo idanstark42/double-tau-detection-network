@@ -115,7 +115,7 @@ class ModelVisualizer:
 
   def distances_histogram (self, starts, ends, ax):
     distances = [start.distance(end) for start, end in zip(starts, ends)]
-    scatter_histogram(distances, ax, bins=HISTOGRAM_BINS)
+    scatter_histogram(distances, ax, bins=HISTOGRAM_BINS, type='percentage')
     ax.set_xlabel('Distance')
     ax.set_ylabel('Density')
 
@@ -199,6 +199,7 @@ class ModelVisualizer:
       plt.errorbar(x, y, yerr=errs, xerr=[(x[1] - x[0]) / 2] * len(x), color='black', fmt='o')
       plt.xlabel(label)
       plt.ylabel('Reconstruction Rate')
+      plt.ylim(0, 1)
       if output_file:
         plt.savefig(output_file)
       self.show_if_should()
@@ -207,6 +208,7 @@ class ModelVisualizer:
       ax.errorbar(x, y, yerr=errs, xerr=[(x[1] - x[0]) / 2] * len(x), color='black', fmt='o')
       ax.set_xlabel(label)
       ax.set_ylabel('Reconstruction Rate')
+      ax.set_ylim(0, 1)
 
   def show_if_should (self):
     if self.show:

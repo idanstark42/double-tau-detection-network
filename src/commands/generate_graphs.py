@@ -25,6 +25,7 @@ DATASET_HISTOGRAMS = [
   'track_count_vs_pileup',
 
   'truth_count',
+  'x_m',
   'x_pt',
   'x_eta_phi',
   'taus_delta_r',

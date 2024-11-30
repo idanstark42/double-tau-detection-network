@@ -54,7 +54,7 @@ class EventVisualizer:
 
   def histogram (self, values, title, x_label, y_label, ax=None, output_file=None, range=None, ylog=False):
     if ax:
-      scatter_histogram(values, ax, HISTOGRAM_BINS, range)
+      scatter_histogram(values, ax, HISTOGRAM_BINS, range, type='percentage')
       ax.set_title(title)
       if ylog:
         ax.set_yscale('log')
@@ -62,7 +62,7 @@ class EventVisualizer:
       ax.set_ylabel(y_label)
     else:
       fig, ax = plt.subplots()
-      scatter_histogram(values, ax, HISTOGRAM_BINS, range)
+      scatter_histogram(values, ax, HISTOGRAM_BINS, range, type='percentage')
       plt.title(title)
       if ylog:
         plt.yscale('log')

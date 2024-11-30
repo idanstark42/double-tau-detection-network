@@ -108,7 +108,7 @@ class DatasetVisualizer:
   def draw_histogram (self, fields, field_configs, result, config, output_file):
     if len(fields) == 1:
       fig, ax = plt.subplots()
-      scatter_histogram(result[fields[0]], ax, HISTOGRAM_BINS, range=field_configs[0].get('xlim', None))
+      scatter_histogram(result[fields[0]], ax, HISTOGRAM_BINS, range=field_configs[0].get('xlim', None), type=field_configs[0].get('type', 'percentage'))
       plt.xlabel(fields[0])
       plt.ylabel('Density')
       if 'xlim' in field_configs[0]:
@@ -127,7 +127,7 @@ class DatasetVisualizer:
       for index, field in enumerate(fields):
         hist = np.array(result[field]).flatten().tolist()
         ax = axes[index] if len(fields) > 1 else axes
-        scatter_histogram(hist, ax, HISTOGRAM_BINS, range=field_configs[index].get('xlim', None))
+        scatter_histogram(hist, ax, HISTOGRAM_BINS, range=field_configs[index].get('xlim', None), type=field_configs[index].get('type', 'percentage'))
         ax.set_xlabel(field)
         ax.set_ylabel('Density')
         if config.get('x-log', False):
@@ -246,6 +246,10 @@ class DatasetVisualizer:
     'truth_count': {
       'callback': lambda event: { 'Truth τ Count': [len(event.truths)] },
       'fields': ['Truth τ Count']
+    },
+    'x_m': {
+      'callback': lambda event: { 'X Mass [GeV]': [event.total_visible_four_momentum().m / 1000] },
+      'fields': ['X Mass [GeV]']
     },
     'x_pt': {
       'callback': lambda event: { 'X pT [GeV]': [event.total_visible_four_momentum().p_t / 1000] },
