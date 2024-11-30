@@ -115,6 +115,8 @@ class DatasetVisualizer:
         plt.xlim(field_configs[0]['xlim'])
       if config.get('x-log', False):
         plt.xscale('log')
+      if config.get('y-log', False):
+        plt.yscale('log')
       if output_file:
         plt.savefig(output_file)
       self.show_if_should()
@@ -130,6 +132,8 @@ class DatasetVisualizer:
         ax.set_ylabel('Density')
         if config.get('x-log', False):
           ax.set_xscale('log')
+        if config.get('y-log', False):
+          ax.set_yscale('log')
       if output_file:
         plt.savefig(output_file)
       self.show_if_should()
@@ -181,12 +185,12 @@ class DatasetVisualizer:
     'cluster_cal_e': {
       'callback': lambda event: { 'Cluster Energy [GeV]': [cluster.cal_e / 1000 for cluster in event.clusters] },
       'fields': ['Cluster Energy [GeV]'],
-      'config': { 'Cluster Energy [GeV]': { 'xlim': [0, 50] } }
+      'config': { 'Cluster Energy [GeV]': { 'y-log': True } }
     },
     'cluster_pt': {
       'callback': lambda event: { 'Cluster pT [GeV]': [cluster.momentum().p_t / 1000 for cluster in event.clusters] },
       'fields': ['Cluster pT [GeV]'],
-      'config': { 'Cluster pT [GeV]': { 'xlim': [0, 50] } }
+      'config': { 'Cluster pT [GeV]': { 'y-log': True } }
     },
     'cluster_eta_phi': {
       'callback': lambda event: { 'Cluster η': [cluster.position().eta for cluster in event.clusters], 'Cluster φ': [cluster.position().phi for cluster in event.clusters] },
@@ -219,7 +223,7 @@ class DatasetVisualizer:
     'track_pt': {
       'callback': lambda event: { 'Track pT [GeV]': [track.pt / 1000 for track in event.tracks] },
       'fields': ['Track pT [GeV]'],
-      'config': { 'Track pT [GeV]': { 'xlim': [0, 50] } }
+      'config': { 'Track pT [GeV]': { 'y-log': True } }
     },
     'track_eta_phi': {
       'callback': lambda event: { 'Track η': [track.position().eta for track in event.tracks], 'Track φ': [track.position().phi for track in event.tracks] },
