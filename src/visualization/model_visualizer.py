@@ -98,7 +98,7 @@ class ModelVisualizer:
     independent = ax == None
     if independent:
       fig, ax = plt.subplots()
-    EventVisualizer(event).density_map(show_truth=False, ax=ax)
+    EventVisualizer(event).momentum_map(show_truth=False, ax=ax)
     circle_width = JET_SIZE / (ETA_RANGE[1] - ETA_RANGE[0])
     circle_height = JET_SIZE / (PHI_RANGE[1] - PHI_RANGE[0])
     for i in range(0, len(target), 2):
