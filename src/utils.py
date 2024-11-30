@@ -86,5 +86,3 @@ def scatter_histogram (values, ax, bins, range=None, type='none'):
     y = y / len(values)
   ax.scatter(x, y, s=1)
   ax.errorbar(x, y, yerr=np.sqrt(y * (1 - y) / len(values)), xerr=[(bin_edges[1] - bin_edges[0]) / 2] * len(x), fmt='o', color='black')
-  if normalize:
-    ax.set_ylim(0, 1)
