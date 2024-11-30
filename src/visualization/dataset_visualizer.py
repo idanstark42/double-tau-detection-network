@@ -249,7 +249,8 @@ class DatasetVisualizer:
     },
     'x_m': {
       'callback': lambda event: { 'X Mass [GeV]': [event.total_visible_four_momentum().m / 1000] },
-      'fields': ['X Mass [GeV]']
+      'fields': ['X Mass [GeV]'],
+      'config': { 'X Mass [GeV]': { 'xlim': [0, 50] } }
     },
     'x_pt': {
       'callback': lambda event: { 'X pT [GeV]': [event.total_visible_four_momentum().p_t / 1000] },
