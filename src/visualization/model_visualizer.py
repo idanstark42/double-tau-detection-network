@@ -178,8 +178,6 @@ class ModelVisualizer:
     
     x = np.linspace(x_range[0], x_range[1], bins)
 
-    breakpoint()
-    
     def load_hist(next):
       hist = [0] * len(x)
       bin_sizes = [0] * len(x)

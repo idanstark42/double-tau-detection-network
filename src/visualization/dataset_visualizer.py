@@ -74,6 +74,8 @@ class DatasetVisualizer:
     
     histograms_data = long_operation(load, max=len(indicies), message='Loading data for histograms')
 
+    breakpoint()
+
     for i, field in enumerate(fields):
       self.draw_histogram(histograms_data['fields'][i], histograms_data['configs'][i], histograms_data['histograms'][i], self.histogram_fields[field], os.path.join(output_folder, f'{field}.png'))
 
