@@ -74,8 +74,6 @@ class DatasetVisualizer:
     
     histograms_data = long_operation(load, max=len(indicies), message='Loading data for histograms')
 
-    breakpoint()
-
     for i, field in enumerate(fields):
       self.draw_histogram(histograms_data['fields'][i], histograms_data['configs'][i], histograms_data['histograms'][i], self.histogram_fields[field], os.path.join(output_folder, f'{field}.png'))
 
@@ -250,7 +248,7 @@ class DatasetVisualizer:
       'fields': ['Truth τ Count']
     },
     'x_m': {
-      'callback': lambda event: { 'X Mass [GeV]': [event.total_visible_four_momentum().m / 1000] },
+      'callback': lambda event: { 'X Mass [GeV]': [event.x_mass() / 1000] },
       'fields': ['X Mass [GeV]'],
       'config': { 'X Mass [GeV]': { 'xlim': [0, 50] } }
     },

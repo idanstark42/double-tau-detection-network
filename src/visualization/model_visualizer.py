@@ -22,21 +22,21 @@ class ModelVisualizer:
 
     print('reconstruction rate:', sum([output.distance(target) < 0.2 for output, target in zip(output_positions, target_positions)]) / len(output_positions))
 
-    # self.distances_histogram(output_positions, target_positions, plt.gca())
-    # if output_folder:
-    #   os.makedirs(output_folder, exist_ok=True)
-    #   plt.savefig(os.path.join(output_folder, 'distances_histogram.png'))
-    # self.show_if_should()
+    self.distances_histogram(output_positions, target_positions, plt.gca())
+    if output_folder:
+      os.makedirs(output_folder, exist_ok=True)
+      plt.savefig(os.path.join(output_folder, 'distances_histogram.png'))
+    self.show_if_should()
 
-    # self.plot_reconstruction_rate_by(output_positions, target_positions, events, lambda event: event.total_visible_four_momentum().p_t / 1000, 'X pT [GeV]', os.path.join(output_folder, 'reconstruction_rate_by_pt.png'), x_range=(100, 150))
-    # self.plot_reconstruction_rate_by(output_positions, target_positions, events, lambda event: event.total_visible_four_momentum().eta, 'X η', os.path.join(output_folder, 'reconstruction_rate_by_eta.png'))
-    # self.plot_reconstruction_rate_by(output_positions, target_positions, events, lambda event: event.total_visible_four_momentum().phi, 'X φ', os.path.join(output_folder, 'reconstruction_rate_by_phi.png'))
+    self.plot_reconstruction_rate_by(output_positions, target_positions, events, lambda event: event.total_visible_four_momentum().p_t / 1000, 'X pT [GeV]', os.path.join(output_folder, 'reconstruction_rate_by_pt.png'), x_range=(100, 150))
+    self.plot_reconstruction_rate_by(output_positions, target_positions, events, lambda event: event.total_visible_four_momentum().eta, 'X η', os.path.join(output_folder, 'reconstruction_rate_by_eta.png'))
+    self.plot_reconstruction_rate_by(output_positions, target_positions, events, lambda event: event.total_visible_four_momentum().phi, 'X φ', os.path.join(output_folder, 'reconstruction_rate_by_phi.png'))
     self.plot_reconstruction_rate_by(output_positions, target_positions, events, lambda event: event.total_visible_four_momentum().m / 1000, 'X mass [GeV]', os.path.join(output_folder, 'reconstruction_rate_by_m.png'), x_range=(0, 80))
 
-    # self.plot_reconstruction_rate_by(output_positions, target_positions, events, lambda event: event.average_interactions_per_crossing, 'average interactions per crossing', os.path.join(output_folder, 'reconstruction_rate_by_interactions.png'))
+    self.plot_reconstruction_rate_by(output_positions, target_positions, events, lambda event: event.average_interactions_per_crossing, 'average interactions per crossing', os.path.join(output_folder, 'reconstruction_rate_by_interactions.png'))
     events = [event for event in events if len(event.truths) >= 2]
-    # self.plot_reconstruction_rate_by(output_positions, target_positions, events, lambda event: event.angular_distance_between_taus(), 'ΔR', os.path.join(output_folder, 'reconstruction_rate_by_angular_distance.png'), x_range=(0, 1))
-    # self.plot_reconstruction_rate_by(output_positions, target_positions, events, lambda event: event.mass_by_channel_number(), 'Theoretical X mass [GeV]', os.path.join(output_folder, 'reconstruction_rate_by_mc_channel_number.png'))
+    self.plot_reconstruction_rate_by(output_positions, target_positions, events, lambda event: event.angular_distance_between_taus(), 'ΔR', os.path.join(output_folder, 'reconstruction_rate_by_angular_distance.png'), x_range=(0, 1))
+    self.plot_reconstruction_rate_by(output_positions, target_positions, events, lambda event: event.mass_by_channel_number(), 'Theoretical X mass [GeV]', os.path.join(output_folder, 'reconstruction_rate_by_mc_channel_number.png'))
   
   def show_losses(self, losses, output_file):
     plt.plot([loss[0] for loss in losses], label='Train Loss')

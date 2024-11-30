@@ -50,7 +50,6 @@ def generate_graphs (dataset, module, params):
 
   if params.get('skip', '') != 'dataset':
     print('1. Generating dataset graphs')
-    print(dataset.get_event(0).mc_channel_number)
     dataset.normalize_energy = False
     dataset_visualizer = DatasetVisualizer(dataset, show=False)
     dataset_visualizer.sample_random_events(events_count, events_folder)
