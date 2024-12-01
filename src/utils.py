@@ -78,6 +78,7 @@ def scatter_histogram (values, ax, bins, range=None, type='none'):
   density = type == 'density'
   normalize = type == 'percentage'
   
+  breakpoint()
   if range == None:
     range = (min(values), max(values))
   y, bin_edges = np.histogram(values, bins=bins, density=density, range=range)
