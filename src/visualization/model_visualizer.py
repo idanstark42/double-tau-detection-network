@@ -117,7 +117,7 @@ class ModelVisualizer:
 
   def distances_histogram (self, starts, ends, ax):
     distances = [start.distance(end) for start, end in zip(starts, ends)]
-    scatter_histogram(distances, ax, bins=HISTOGRAM_BINS, type='percentage')
+    scatter_histogram(distances, ax, bins=HISTOGRAM_BINS, type='percentage', range=(0, 1))
     ax.set_xlabel('Distance')
     ax.set_ylabel('Density')
 
