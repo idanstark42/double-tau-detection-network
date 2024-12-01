@@ -91,6 +91,8 @@ class DatasetVisualizer:
           continue
         datum = callback(event)
         for field in fields:
+          if datum[field] > 1000:
+            breakpoint()
           if field_configs[fields.index(field)].get('cross', False) == 'follower':
             hist[field].append(datum[field])
           else:
@@ -106,7 +108,6 @@ class DatasetVisualizer:
     self.draw_histogram(fields, field_configs, result, config, output_file)
 
   def draw_histogram (self, fields, field_configs, result, config, output_file):
-    breakpoint()
     if len(fields) == 1:
       fig, ax = plt.subplots()
       scatter_histogram(result[fields[0]], ax, HISTOGRAM_BINS, range=field_configs[0].get('xlim', None), type=field_configs[0].get('type', 'percentage'))
