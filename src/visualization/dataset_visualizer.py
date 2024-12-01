@@ -223,7 +223,7 @@ class DatasetVisualizer:
     'track_pt': {
       'callback': lambda event: { 'Track pT [GeV]': [track.pt / 1000 for track in event.tracks] },
       'fields': ['Track pT [GeV]'],
-      'config': { 'Track pT [GeV]': { 'y-log': True, 'xlim': [0, 1000] } }
+      'config': { 'Track pT [GeV]': { 'y-log': True, 'xlim': [0, 600] } }
     },
     'track_eta_phi': {
       'callback': lambda event: { 'Track η': [track.position().eta for track in event.tracks], 'Track φ': [track.position().phi for track in event.tracks] },

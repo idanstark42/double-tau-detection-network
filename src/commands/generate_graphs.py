@@ -52,12 +52,6 @@ def generate_graphs (dataset, module, params):
   if params.get('skip', '') != 'dataset':
     print('1. Generating dataset graphs')
     dataset.normalize_energy = False
-    events = [dataset.get_event(i) for i in range(len(dataset))]
-    tracks = [track for event in events for track in event.tracks]
-    tracks_pt = [track.pt / 1000 for track in tracks]
-    large_track_pt = [pt for pt in tracks_pt if pt > 1000]
-    print(len(large_track_pt))
-    breakpoint()
     dataset_visualizer = DatasetVisualizer(dataset, show=False)
     # dataset_visualizer.sample_random_events(events_count, events_folder)
     dataset_visualizer.multiple_histograms(DATASET_HISTOGRAMS, dataset_folder)
