@@ -184,13 +184,11 @@ class DatasetVisualizer:
     },
     'cluster_cal_e': {
       'callback': lambda event: { 'Cluster Energy [GeV]': [cluster.cal_e / 1000 for cluster in event.clusters] },
-      'fields': ['Cluster Energy [GeV]'],
-      'config': { 'Cluster Energy [GeV]': { 'y-log': True } }
+      'fields': ['Cluster Energy [GeV]']
     },
     'cluster_pt': {
       'callback': lambda event: { 'Cluster pT [GeV]': [cluster.momentum().p_t / 1000 for cluster in event.clusters] },
-      'fields': ['Cluster pT [GeV]'],
-      'config': { 'Cluster pT [GeV]': { 'y-log': True } }
+      'fields': ['Cluster pT [GeV]']
     },
     'cluster_eta_phi': {
       'callback': lambda event: { 'Cluster η': [cluster.position().eta for cluster in event.clusters], 'Cluster φ': [cluster.position().phi for cluster in event.clusters] },
@@ -222,8 +220,7 @@ class DatasetVisualizer:
     },
     'track_pt': {
       'callback': lambda event: { 'Track pT [GeV]': [track.pt / 1000 for track in event.tracks] },
-      'fields': ['Track pT [GeV]'],
-      'config': { 'Track pT [GeV]': { 'y-log': True } }
+      'fields': ['Track pT [GeV]']
     },
     'track_eta_phi': {
       'callback': lambda event: { 'Track η': [track.position().eta for track in event.tracks], 'Track φ': [track.position().phi for track in event.tracks] },
