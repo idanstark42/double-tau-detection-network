@@ -65,7 +65,8 @@ class DatasetVisualizer:
             continue
           datum = histograms_data['callbacks'][j](event)
           for field in histograms_data['fields'][j]:
-            breakpoint()
+            if len([x for x in datum[field] if x > 1000]) > 0:
+              breakpoint()
             if histograms_data['configs'][j][histograms_data['fields'][j].index(field)].get('cross', False) == 'follower':
               histograms_data['histograms'][j][field].append(datum[field])
             else:
