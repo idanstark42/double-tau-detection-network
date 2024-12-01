@@ -65,8 +65,6 @@ class DatasetVisualizer:
             continue
           datum = histograms_data['callbacks'][j](event)
           for field in histograms_data['fields'][j]:
-            if len([x for x in datum[field] if x > 1000]) > 0:
-              breakpoint()
             if histograms_data['configs'][j][histograms_data['fields'][j].index(field)].get('cross', False) == 'follower':
               histograms_data['histograms'][j][field].append(datum[field])
             else:
@@ -225,7 +223,7 @@ class DatasetVisualizer:
     'track_pt': {
       'callback': lambda event: { 'Track pT [GeV]': [track.pt / 1000 for track in event.tracks] },
       'fields': ['Track pT [GeV]'],
-      'config': { 'Track pT [GeV]': { 'y-log': True } }
+      'config': { 'Track pT [GeV]': { 'y-log': True, 'xlim': [0, 1000] } }
     },
     'track_eta_phi': {
       'callback': lambda event: { 'Track η': [track.position().eta for track in event.tracks], 'Track φ': [track.position().phi for track in event.tracks] },
