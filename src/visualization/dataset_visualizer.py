@@ -91,8 +91,7 @@ class DatasetVisualizer:
           continue
         datum = callback(event)
         for field in fields:
-          if datum[field] > 1000:
-            breakpoint()
+          breakpoint()
           if field_configs[fields.index(field)].get('cross', False) == 'follower':
             hist[field].append(datum[field])
           else:
