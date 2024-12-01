@@ -37,6 +37,7 @@ def generate_graphs (dataset, module, params):
   # disable plt.show() to avoid blocking the execution.
   # plt.show = lambda: None
 
+
   events_count = int(params.get('sample-events', 4))
 
   origin_folder = os.path.dirname(__file__).replace('src/commands', '')
@@ -51,6 +52,7 @@ def generate_graphs (dataset, module, params):
   if params.get('skip', '') != 'dataset':
     print('1. Generating dataset graphs')
     dataset.normalize_energy = False
+    breakpoint()
     dataset_visualizer = DatasetVisualizer(dataset, show=False)
     # dataset_visualizer.sample_random_events(events_count, events_folder)
     dataset_visualizer.multiple_histograms(DATASET_HISTOGRAMS, dataset_folder)
