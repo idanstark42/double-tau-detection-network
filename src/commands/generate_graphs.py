@@ -8,29 +8,29 @@ from visualization.dataset_visualizer import DatasetVisualizer
 from settings import GRAPHS_DIR, MODELS_DIR
 
 DATASET_HISTOGRAMS = [
-  'pileup',
+  # 'pileup',
 
-  'cluster_count',
-  'cluster_cal_e',
-  'cluster_pt',
-  'cluster_eta_phi',
-  'cluster_count_vs_cal_e',
-  'cluster_count_vs_pt',
-  'cluster_count_vs_pileup',
+  # 'cluster_count',
+  # 'cluster_cal_e',
+  # 'cluster_pt',
+  # 'cluster_eta_phi',
+  # 'cluster_count_vs_cal_e',
+  # 'cluster_count_vs_pt',
+  # 'cluster_count_vs_pileup',
 
-  'track_count',
+  # 'track_count',
   'track_pt',
-  'track_eta_phi',
-  'track_count_vs_pt',
-  'track_count_vs_pileup',
+  # 'track_eta_phi',
+  # 'track_count_vs_pt',
+  # 'track_count_vs_pileup',
 
-  'truth_count',
-  'x_m',
-  'x_pt',
-  'x_eta_phi',
-  'taus_delta_r',
-  'leading_tau_pt',
-  'subleading_tau_pt'
+  # 'truth_count',
+  # 'x_m',
+  # 'x_pt',
+  # 'x_eta_phi',
+  # 'taus_delta_r',
+  # 'leading_tau_pt',
+  # 'subleading_tau_pt'
 ]
 
 def generate_graphs (dataset, module, params):

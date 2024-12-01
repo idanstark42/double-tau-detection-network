@@ -30,7 +30,7 @@ class ModelVisualizer:
       plt.savefig(os.path.join(output_folder, 'distances_histogram.png'))
     self.show_if_should()
 
-    self.plot_reconstruction_rate_by(events, event_success, lambda event: event.total_visible_four_momentum().p_t / 1000, 'X pT [GeV]', os.path.join(output_folder, 'reconstruction_rate_by_pt.png'), x_range=(100, 150))
+    self.plot_reconstruction_rate_by(events, event_success, lambda event: event.total_visible_four_momentum().p_t / 1000, 'X pT [GeV]', os.path.join(output_folder, 'reconstruction_rate_by_pt.png'), x_range=(0, 200), bins=20)
     self.plot_reconstruction_rate_by(events, event_success, lambda event: event.total_visible_four_momentum().eta, 'X η', os.path.join(output_folder, 'reconstruction_rate_by_eta.png'))
     self.plot_reconstruction_rate_by(events, event_success, lambda event: event.total_visible_four_momentum().phi, 'X φ', os.path.join(output_folder, 'reconstruction_rate_by_phi.png'))
     self.plot_reconstruction_rate_by(events, event_success, lambda event: event.total_visible_four_momentum().m / 1000, 'X mass [GeV]', os.path.join(output_folder, 'reconstruction_rate_by_m.png'), x_range=(0, 30))

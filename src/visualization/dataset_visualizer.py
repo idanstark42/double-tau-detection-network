@@ -106,6 +106,7 @@ class DatasetVisualizer:
     self.draw_histogram(fields, field_configs, result, config, output_file)
 
   def draw_histogram (self, fields, field_configs, result, config, output_file):
+    breakpoint()
     if len(fields) == 1:
       fig, ax = plt.subplots()
       scatter_histogram(result[fields[0]], ax, HISTOGRAM_BINS, range=field_configs[0].get('xlim', None), type=field_configs[0].get('type', 'percentage'))
@@ -185,12 +186,12 @@ class DatasetVisualizer:
     'cluster_cal_e': {
       'callback': lambda event: { 'Cluster Energy [GeV]': [cluster.cal_e / 1000 for cluster in event.clusters] },
       'fields': ['Cluster Energy [GeV]'],
-      'config': { 'Cluster Energy [GeV]': { 'x-log': True } }
+      'config': { 'Cluster Energy [GeV]': { 'y-log': True } }
     },
     'cluster_pt': {
       'callback': lambda event: { 'Cluster pT [GeV]': [cluster.momentum().p_t / 1000 for cluster in event.clusters] },
       'fields': ['Cluster pT [GeV]'],
-      'config': { 'Cluster pT [GeV]': { 'x-log': True } }
+      'config': { 'Cluster pT [GeV]': { 'y-log': True } }
     },
     'cluster_eta_phi': {
       'callback': lambda event: { 'Cluster η': [cluster.position().eta for cluster in event.clusters], 'Cluster φ': [cluster.position().phi for cluster in event.clusters] },
@@ -223,7 +224,7 @@ class DatasetVisualizer:
     'track_pt': {
       'callback': lambda event: { 'Track pT [GeV]': [track.pt / 1000 for track in event.tracks] },
       'fields': ['Track pT [GeV]'],
-      'config': { 'Track pT [GeV]': { 'x-log': True } }
+      'config': { 'Track pT [GeV]': { 'y-log': True } }
     },
     'track_eta_phi': {
       'callback': lambda event: { 'Track η': [track.position().eta for track in event.tracks], 'Track φ': [track.position().phi for track in event.tracks] },
