@@ -54,13 +54,13 @@ def generate_graphs (dataset, module, params):
     dataset.normalize_energy = False
     dataset_visualizer = DatasetVisualizer(dataset, show=False)
     dataset_visualizer.sample_random_events(events_count, events_folder)
-    dataset_visualizer.multiple_histograms(DATASET_HISTOGRAMS, dataset_folder)
+    # dataset_visualizer.multiple_histograms(DATASET_HISTOGRAMS, dataset_folder)
 
-  if params.get('weights', '') == '' or params.get('skip', '') == 'model':
-    return
+  # if params.get('weights', '') == '' or params.get('skip', '') == 'model':
+  #   return
   
-  print('2. Generating model graphs')
-  dataset.normalize_energy = True
-  weights = params.get('weights', '')
-  weigts_file = os.path.join(MODELS_DIR, weights)
-  evaluate(dataset, module, weigts_file, model_folder, params)
+  # print('2. Generating model graphs')
+  # dataset.normalize_energy = True
+  # weights = params.get('weights', '')
+  # weigts_file = os.path.join(MODELS_DIR, weights)
+  # # evaluate(dataset, module, weigts_filze, model_folder, params)
